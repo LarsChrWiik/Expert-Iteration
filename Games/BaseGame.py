@@ -7,8 +7,13 @@ class BaseGame:
     Every subclass of Game should be a perfect information game.
     """
 
+    win_reward = 1
+    lose_reward = -1
+    draw_reward = 0
+
     board = None
-    player_count = None
+    num_players = None
+    num_actions = None
 
     # Indicates the winner of the game. (Index of the winning player). (-1 = draw)
     winner = None
@@ -16,10 +21,17 @@ class BaseGame:
     # 0 = player1, 1 = player2. (Index of the winning player).
     turn = None
 
-    def has_game_ended(self):
+    def has_finished(self):
         return self.winner is not None
 
-    def is_game_draw(self):
+    def get_reward(self, player_index):
+        if player_index == self.winner:
+            return self.win_reward
+        elif self.is_draw():
+            return self.draw_reward
+        return self.lose_reward
+
+    def is_draw(self):
         raise NotImplementedError("Please Implement this method")
 
     def next_turn(self):
@@ -31,7 +43,7 @@ class BaseGame:
     def get_legal_moves(self, player_index):
         raise NotImplementedError("Please Implement this method")
 
-    def advance(self, player_index, action_index):
+    def advance(self, action_index):
         raise NotImplementedError("Please Implement this method")
 
     def update_game_state(self):
