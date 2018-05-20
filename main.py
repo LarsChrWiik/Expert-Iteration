@@ -2,33 +2,21 @@
 from Games.TicTacToe import TicTacToe
 from Games.GameHandler import GameHandler
 from Players.RandomPlayer import RandomPlayer
-
+from ExIt.PolicyImprovers.MiniMax.MiniMax import MiniMax
+from ExIt.PolicyValuePredictors.MLP import MLP
 
 def main():
+    #game_handler = GameHandler(game=TicTacToe(), players=[RandomPlayer(), RandomPlayer()])
+    #game_handler.start_game()
 
-    handler = GameHandler(
-        game=TicTacToe(),
-        players=[RandomPlayer(), RandomPlayer()]
-    )
+    game = TicTacToe()
+    game.advance(1)
+    game.display()
 
-    handler.start_game()
-
-
-    """
-    ttt1 = TicTacToe()
-    ttt1.advance(player_index=1, action_index=4)
-    ttt = ttt1.get_state_copy()
-    ttt.advance(player_index=2, action_index=1)
-    ttt.advance(player_index=1, action_index=0)
-    ttt.advance(player_index=2, action_index=8)
-    ttt.advance(player_index=1, action_index=3)
-    ttt.advance(player_index=2, action_index=5)
-    ttt.advance(player_index=1, action_index=6)
-    ttt.display()
-    print(ttt.winner)
-    """
-
-
+    nn = MLP()
+    minimax = MiniMax(depth=9)
+    action_index = minimax.search_and_store(game=game, predictor=nn)
+    print(action_index)
 
 if __name__ == "__main__":
     main()
