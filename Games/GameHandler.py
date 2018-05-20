@@ -27,6 +27,6 @@ class GameHandler:
         """
         Starts the game and let the player play until the game has finished.
         """
-        while not self.game.has_game_ended():
+        while not self.game.has_finished():
             self.players[self.game.turn].make_move(self.game)
             self.game.display()
