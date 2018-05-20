@@ -9,7 +9,8 @@ class TicTacToe(BaseGame):
     The game of TicTacToe.
     """
 
-    player_count = 2
+    num_players = 2
+    num_actions = 9
 
     @staticmethod
     def __rep_value_to_p_index(rep_value):
@@ -39,10 +40,12 @@ class TicTacToe(BaseGame):
         :param player_index: Not used in this game.
         :return: list of possible move indexes.
         """
+        if self.has_finished():
+            return []
         return np.where(self.board == 0, 1, 0).nonzero()[0]
 
-    def advance(self, player_index, action_index):
-        rep_value = self.__p_index_to_rep_value(player_index=player_index)
+    def advance(self, action_index):
+        rep_value = self.__p_index_to_rep_value(player_index=self.turn)
         self.board[action_index] = rep_value
         self.update_game_state()
 
@@ -73,10 +76,10 @@ class TicTacToe(BaseGame):
         self.next_turn()
 
         # Is the game a draw.
-        if self.winner is None and self.is_game_draw():
+        if self.winner is None and self.is_draw():
             self.winner = -1
 
-    def is_game_draw(self):
+    def is_draw(self):
         return len(np.where(self.board == 0, 1, 0).nonzero()[0]) == 0 and \
                (self.winner is None or self.winner == -1)
 
@@ -88,7 +91,7 @@ class TicTacToe(BaseGame):
         Next turn is always the other player in this game.
         """
         self.turn += 1
-        if self.turn >= self.player_count:
+        if self.turn >= self.num_players:
             self.turn = 0
 
     def display(self):
