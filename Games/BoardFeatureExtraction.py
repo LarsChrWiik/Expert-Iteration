@@ -12,7 +12,8 @@ def bitboard(board, player_index):
     :param player_index: int.
     :return: 1D np.array.
     """
-    opponent_index = 2 if player_index == 1 else 1
-    player = np.where(board == player_index, 1, 0)
-    opponent = np.where(board == opponent_index, 1, 0)
+    player_representation = player_index + 1
+    opponent_representation = 2 if player_representation == 1 else 1
+    player = np.where(board == player_representation, 1, 0)
+    opponent = np.where(board == opponent_representation, 1, 0)
     return np.concatenate((player, opponent))

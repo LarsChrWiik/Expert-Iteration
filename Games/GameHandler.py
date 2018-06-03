@@ -1,6 +1,6 @@
 
 from Games.BaseGame import BaseGame
-from Players.BasePlayer import BasePlayer
+from Players.BasePlayers.BasePlayer import BasePlayer
 
 
 class GameHandler:
@@ -28,5 +28,5 @@ class GameHandler:
         Starts the game and let the player play until the game has finished.
         """
         while not self.game.has_finished():
-            self.players[self.game.turn].make_move(self.game)
+            self.players[self.game.turn].make_expert_move(self.game)
             self.game.display()

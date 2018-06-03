@@ -14,6 +14,8 @@ class BaseGame:
     board = None
     num_players = None
     num_actions = None
+    num_rotations = None
+    fv_size = None
 
     # Indicates the winner of the game. (Index of the winning player). (-1 = draw)
     winner = None
@@ -40,6 +42,9 @@ class BaseGame:
     def get_state_copy(self):
         raise NotImplementedError("Please Implement this method")
 
+    def init_new_game(self):
+        raise NotImplementedError("Please Implement this method")
+
     def get_legal_moves(self, player_index):
         raise NotImplementedError("Please Implement this method")
 
@@ -53,6 +58,12 @@ class BaseGame:
         raise NotImplementedError("Please Implement this method")
 
     def display(self):
+        raise NotImplementedError("Please Implement this method")
+
+    def rotate_fv(self, fv):
+        raise NotImplementedError("Please Implement this method")
+
+    def rotate_pi(self, pi):
         raise NotImplementedError("Please Implement this method")
 
     @staticmethod

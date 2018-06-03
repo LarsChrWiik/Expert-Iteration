@@ -10,7 +10,7 @@ class BasePlayer:
 
     player_index = None
 
-    def make_move(self, game: BaseGame):
+    def make_expert_move(self, game: BaseGame):
         """
         Makes the player calculate the next move.
 

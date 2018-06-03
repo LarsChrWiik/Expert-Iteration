@@ -11,6 +11,8 @@ class TicTacToe(BaseGame):
 
     num_players = 2
     num_actions = 9
+    num_rotations = 4
+    fv_size = 18
 
     @staticmethod
     def __rep_value_to_p_index(rep_value):
@@ -27,6 +29,17 @@ class TicTacToe(BaseGame):
     def __init__(self, turn=0):
         self.turn = turn
         self.board = np.zeros((9,), dtype=int)
+
+        # TODO: Used for testing.
+        """
+        self.advance(1)
+        self.advance(4)
+        self.advance(3)
+        self.advance(5)
+        """
+
+    def init_new_game(self):
+        return TicTacToe()
 
     def get_state_copy(self):
         board_copy = TicTacToe()
@@ -45,6 +58,10 @@ class TicTacToe(BaseGame):
         return np.where(self.board == 0, 1, 0).nonzero()[0]
 
     def advance(self, action_index):
+        if action_index is None:
+            raise TypeError("action_index can not be None")
+        if self.board[action_index] != 0:
+            raise TypeError("Cannot place a piece on top of a piece")
         rep_value = self.__p_index_to_rep_value(player_index=self.turn)
         self.board[action_index] = rep_value
         self.update_game_state()
@@ -93,6 +110,36 @@ class TicTacToe(BaseGame):
         self.turn += 1
         if self.turn >= self.num_players:
             self.turn = 0
+
+    def rotate_fv(self, fv: np.array):
+        fv_new = np.zeros(fv.size)
+        fv_new[6] = fv[0];  fv_new[3] = fv[1];  fv_new[0] = fv[2]
+        fv_new[7] = fv[3];  fv_new[4] = fv[4];  fv_new[1] = fv[5]
+        fv_new[8] = fv[6];  fv_new[5] = fv[7];  fv_new[2] = fv[8]
+
+        fv_new[6+9] = fv[0+9]
+        fv_new[3+9] = fv[1+9]
+        fv_new[0+9] = fv[2+9]
+        fv_new[7+9] = fv[3+9]
+        fv_new[4+9] = fv[4+9]
+        fv_new[1+9] = fv[5+9]
+        fv_new[8+9] = fv[6+9]
+        fv_new[5+9] = fv[7+9]
+        fv_new[2+9] = fv[8+9]
+        return fv_new
+
+    def rotate_pi(self, pi):
+        pi_new = np.zeros(pi.size)
+        pi_new[6] = pi[0]
+        pi_new[3] = pi[1]
+        pi_new[0] = pi[2]
+        pi_new[7] = pi[3]
+        pi_new[4] = pi[4]
+        pi_new[1] = pi[5]
+        pi_new[8] = pi[6]
+        pi_new[5] = pi[7]
+        pi_new[2] = pi[8]
+        return pi_new
 
     def display(self):
         char_board = ""
