@@ -18,7 +18,7 @@ class BaseExItPlayer(BasePlayer):
     """ Base player that is able to improve its strategy using Expert Iteration """
 
     def __init__(self, ex_it_algorithm: ExpertIteration):
-        super(BasePlayer, self).__init__()
+        super().__init__()
         self.__ex_it_algorithm = ex_it_algorithm
 
     def start_ex_it(self, game_class, num_iteration, randomness: bool):
