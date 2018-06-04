@@ -5,40 +5,29 @@ from ExIt.ExpertIteration import ExpertIteration
 
 
 class BaseExItPlayer(BasePlayer):
-    """
-    Player that is able to improve its strategy using Expert Iteration.
-    """
+    """ Base player that is able to improve its strategy using Expert Iteration """
 
-    __exIt_algorithm = None
+    def __init__(self, ex_it_algorithm: ExpertIteration):
+        self.__ex_it_algorithm = ex_it_algorithm
 
-    def __init__(self, exIt_algorithm: ExpertIteration):
-        self.__exIt_algorithm = exIt_algorithm
-
-    def start_exIt(self, game_class, num_iteration, randomness: bool):
-        """
-        Starts Expert Iteration to master the given game.
-        This process might take some time.
-        """
-        self.__exIt_algorithm.start_exIt(game_class=game_class, num_iteration=num_iteration,
-                                         randomness=randomness)
+    def start_ex_it(self, game_class, num_iteration, randomness: bool):
+        """ Starts Expert Iteration. NB: Time consuming process """
+        self.__ex_it_algorithm.start_ex_it(game_class=game_class, num_iteration=num_iteration,
+                                           randomness=randomness)
 
     def make_expert_move(self, state: BaseGame):
-        """
-        This is used after the Expert Iteration has completed.
+        """ Calculate the best move """
+        action_index, evaluation, pi_update = self.__ex_it_algorithm.calculate_best_action(state)
 
-        :param state: BaseGame object.
-        """
-
+        # TODO: Remove later (Used for testing). 
         print("fv = ", state.get_feature_vector(state.turn))
-        print("evaluation = ", self.__exIt_algorithm.apprentice.pred_eval(
+        print("evaluation = ", self.__ex_it_algorithm.apprentice.pred_eval(
             X=state.get_feature_vector(state.turn)))
-
-        print("action prob = ", self.__exIt_algorithm.apprentice.pred_prob(
+        print("action prob = ", self.__ex_it_algorithm.apprentice.pred_prob(
             X=state.get_feature_vector(state.turn)))
         print("turn = " + str(state.turn))
-
-        action_index, eval, pi_update = self.__exIt_algorithm.calculate_best_action(state)
         print("action_index = " + str(action_index))
-        print("policy improver eval = " + str(eval))
+        print("policy improver eval = " + str(evaluation))
         print("updated pi_update = " + str(pi_update))
+
         state.advance(action_index=action_index)
