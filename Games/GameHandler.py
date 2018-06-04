@@ -19,5 +19,5 @@ class GameHandler:
         while not self.game.has_finished():
             self.players[self.game.turn].make_expert_move(self.game)
 
-            # TODO: Remove later. 
+            # TODO: Remove later.
             self.game.display()
