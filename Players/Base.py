@@ -24,7 +24,7 @@ class BaseExItPlayer(BasePlayer):
     def start_ex_it(self, game_class, num_iteration, randomness: bool):
         """ Starts Expert Iteration. NB: Time consuming process """
         self.__ex_it_algorithm.start_ex_it(game_class=game_class, num_iteration=num_iteration,
-                                           randomness=randomness)
+                                           add_randomness=randomness)
 
     def move(self, state: BaseGame):
         """ Calculate the best move """
