@@ -18,10 +18,9 @@ class ExpertIteration:
         return self.expert.start(state=state, predictor=self.apprentice)
 
     def start_ex_it(self, game_class, num_iteration, add_randomness: bool):
-        """
-        Start Expert Iteration to master the given game.
-        This process is time consuming.
-        """
+        """ Start Expert Iteration to master the given game.
+            This process is time consuming """
+
         self.apprentice.init_model(input_fv_size=game_class().fv_size,
                                    pi_size=game_class().num_actions)
 
