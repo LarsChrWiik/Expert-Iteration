@@ -12,11 +12,6 @@ class DataSet:
         """ Add information to sample arrays. Array indexes refer to the same sample. """
         turn, fv, pi = state.turn, state.get_feature_vector(state.turn), pi_update
         self.__add_sample(fv=fv, pi=pi, r=r, turn=turn)
-        # Add additional data if game support rotations.
-        for _ in range(state.num_rotations - 1):
-            fv = state.rotate_fv(fv)
-            pi = state.rotate_pi(pi)
-            self.__add_sample(fv=fv, pi=pi, r=r, turn=turn)
 
     def extract_data(self):
         """ Function that extract the data and clear the history """

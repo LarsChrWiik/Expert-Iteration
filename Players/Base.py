@@ -2,6 +2,7 @@
 
 from ExIt.ExpertIteration import ExpertIteration
 from Games.BaseGame import BaseGame
+import numpy as np
 
 
 class BasePlayer:
@@ -28,7 +29,7 @@ class BaseExItPlayer(BasePlayer):
 
     def move(self, state: BaseGame):
         """ Calculate the best move """
-        action_index, evaluation, pi_update = self.__ex_it_algorithm.calculate_best_action(state)
+        action_index, evaluation = self.__ex_it_algorithm.calculate_best_action(state)
 
         # TODO: Remove later (Used for testing).
         print("fv = ", state.get_feature_vector(state.turn))
@@ -39,6 +40,8 @@ class BaseExItPlayer(BasePlayer):
         print("turn = " + str(state.turn))
         print("action_index = " + str(action_index))
         print("policy improver eval = " + str(evaluation))
+        pi_update = np.zeros(state.num_actions, dtype=float)
+        pi_update[action_index] = 1
         print("updated pi_update = " + str(pi_update))
 
         state.advance(action_index=action_index)

@@ -1,4 +1,5 @@
 
+import cProfile
 from Games.TicTacToe import TicTacToe
 from Players.MinimaxMlpPlayer import MinimaxMlpPlayer
 from Games.GameHandler import GameHandler

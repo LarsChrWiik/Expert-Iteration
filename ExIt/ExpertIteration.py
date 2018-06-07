@@ -5,6 +5,7 @@ from Games.BaseGame import BaseGame
 from ExIt.DataSet import DataSet
 from random import uniform
 from random import choice as rnd_choice
+import numpy as np
 
 
 class ExpertIteration:
@@ -24,32 +25,22 @@ class ExpertIteration:
         self.apprentice.init_model(input_fv_size=game_class().fv_size,
                                    pi_size=game_class().num_actions)
 
+        #changes = [y * 0.1 for y in range(1, 11)]
+        #lr_change = [int(num_iteration) * x for x in changes]
         for i in range(num_iteration):
+            print("lr = ", float(self.apprentice.get_lr()))
             # TODO: Move to NN maybe?
-            if i == int(num_iteration/4):
-                self.apprentice.set_lr(new_lr=0.1)
-            elif i == int(num_iteration/2):
-                self.apprentice.set_lr(new_lr=0.05)
-            elif i == int(num_iteration/(4/3)):
-                self.apprentice.set_lr(new_lr=0.01)
+            #if i in lr_change:
+                #self.apprentice.set_lr(new_lr=self.apprentice.get_lr()*0.9)
 
             state = game_class()
 
-            # TODO: Ask Spyros.
-            x = (1 - (i / num_iteration))
-            #rnd_prob = 0 if not randomness else x
-            rnd_prob = 0 if not add_randomness else 0.1
-            # rnd_prob = 0.0 if not randomness else 1.0 / state.num_actions
-            #rnd_prob = 0 if not randomness else log(1+x)
-            #rnd_prob = 0 if not randomness else 4**(-2*(i / num_iteration))
+            max_rnd = 1.0
+            rnd_prob = 0 if not add_randomness else (1 - (i / num_iteration)) * max_rnd
 
             X = state.get_feature_vector(state.turn)
             while not state.has_finished():
-                # TODO: Maybe remove return.
-                did_random = self.ex_it_state(state=state, rnd_prob=rnd_prob)
-                # TODO: Maybe remove.
-                #if i > 500 and did_random:
-                 #   rnd_prob = rnd_prob / 2
+                self.ex_it_state(state=state, rnd_prob=rnd_prob)
             print("*** Iteration = " + str(i) + " ***")
             print("randomness = " + str(rnd_prob))
             print("    r = ", self.data_set.r_array)
@@ -69,39 +60,15 @@ class ExpertIteration:
             print("")
 
     def ex_it_state(self, state: BaseGame, rnd_prob: float):
+        """ Expert Iteration for a given state """
+        action_index, r = self.expert.start(state=state, predictor=self.apprentice)
+        if uniform(0, 1) < rnd_prob:
+            action_index = rnd_choice(state.get_legal_moves(state.turn))
 
-        # Ask expert for the best move.
-        action_index, r, pi_update = self.expert.start(state=state, predictor=self.apprentice)
-        # Add sample.
+        # Create action probability.
+        pi_update = np.zeros(state.num_actions, dtype=float)
+        pi_update[action_index] = 1
+
         self.data_set.add_sample(state=state, pi_update=pi_update, r=r)
 
-        did_random = False
-        if uniform(0, 1) < rnd_prob:
-            did_random = True
-            a = state.get_legal_moves(state.turn)
-            action_index = rnd_choice(a)
-
-            # TODO: Fix later.
-            """
-            if uniform(0, 1) > randomness:
-                # Random move based on action probabilities.
-                X = state.get_feature_vector(state.turn)
-
-                p = self.apprentice.pred_prob(X)
-                p = [x for i, x in enumerate(p) if i in a]
-                p = NodeMiniMax.normalize(array=p, lower=0.25, upper=0.75)
-                s = sum(p)
-                p = np.array([x / s for x in p])
-
-                action_index = random.choice(a=a, size=1, p=p)[0]
-            else:
-                if 0.3 > randomness:
-                    self.data_set.clear()
-                # Completely random move.
-                action_index = rnd_choice(a)
-            """
-
         state.advance(action_index=action_index)
-
-        # TODO: Maybe remove.
-        return did_random
