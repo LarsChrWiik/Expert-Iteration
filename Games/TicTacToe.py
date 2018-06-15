@@ -41,19 +41,19 @@ class TicTacToe(BaseGame):
     def init_new_game(self):
         return TicTacToe()
 
-    def get_state_copy(self):
+    def copy(self):
         board_copy = TicTacToe()
         board_copy.board = self.board.copy()
         board_copy.winner = self.winner
         board_copy.turn = self.turn
         return board_copy
 
-    def get_legal_moves(self, player_index):
+    def get_possible_actions(self):
         """
         :param player_index: Not used in this game.
         :return: list of possible move indexes.
         """
-        if self.has_finished():
+        if self.is_game_over():
             return []
         return np.where(self.board == 0, 1, 0).nonzero()[0]
 
