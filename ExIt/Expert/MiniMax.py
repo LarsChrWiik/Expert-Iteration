@@ -2,100 +2,134 @@
 from ExIt.Expert.BaseExpert import BaseExpert
 from ExIt.Apprentice import BaseApprentice
 from Games.BaseGame import BaseGame
-import random
-import numpy as np
+from Support.Timer import Timer
+from random import choice as rnd_choice
 
 
-def minimax(node: "NodeMiniMax", should_max, predictor: BaseApprentice):
+def minimax(node: "NodeMiniMax", should_max):
     if node.is_leaf():
-        node.evaluate_leaf_node(predictor=predictor)
+        return
     elif should_max:
-        best_value = -99999.9
+        best_value = float('-inf')
         for child in node.children:
-            minimax(node=child, should_max=False, predictor=predictor)
-            best_value = max(best_value, child.evaluation)
+            if child.evaluation is not None:
+                minimax(node=child, should_max=False)
+                best_value = max(best_value, child.evaluation)
         node.evaluation = best_value
     else:
-        best_value = 99999.9
+        best_value = float('inf')
         for child in node.children:
-            minimax(node=child, should_max=True, predictor=predictor)
-            best_value = min(best_value, child.evaluation)
+            if child.evaluation is not None:
+                minimax(node=child, should_max=True)
+                best_value = min(best_value, child.evaluation)
         node.evaluation = best_value
 
 
 class MiniMax(BaseExpert):
 
-    def __init__(self, depth):
-        self.depth = depth
+    def __init__(self):
+        self.timer = Timer()
 
-    def start(self, state: BaseGame, predictor: BaseApprentice):
-        root_node = NodeMiniMax(state=state, action_index=None,
-                                original_turn=state.turn, depth=self.depth)
-        root_node.expand_tree()
-        minimax(node=root_node, should_max=True, predictor=predictor)
-        # Find the best action index.
-        action_index = root_node.get_best_action_index(predictor=predictor)
+    def search(self, state: BaseGame, predictor: BaseApprentice, search_time: float):
+        self.timer.start(search_time=search_time)
+        root_node = NodeMiniMax(state=state, action_index=None, original_turn=state.turn,
+                                depth=0, root_node=None, predictor=predictor)
 
+        depth = 1
+        tmp = False
+        while self.timer.have_time_left():
+            did_progress = self.iteration(root_node=root_node, to_depth=depth)
+            if not did_progress:
+                if tmp:
+                    break
+                # All nodes in this depth has been evaluated.
+                depth += 1
+                tmp = True
+            else:
+                tmp = False
+
+        minimax(node=root_node, should_max=True)
+        action_index = root_node.get_best_action_index()
         return action_index, root_node.evaluation
+
+    @staticmethod
+    def iteration(root_node: 'NodeMiniMax', to_depth: int):
+        """ One iteration of Minimax """
+        node = root_node.tree_policy(to_depth=to_depth)
+        did_progress = node is not None
+        if did_progress:
+            node.default_policy()
+        return did_progress
 
 
 class NodeMiniMax:
 
-    def __init__(self, state: BaseGame, action_index, original_turn, depth):
+    def __init__(self, state: BaseGame, action_index, original_turn, depth, root_node, predictor):
         self.state = state
         self.action_index = action_index
         self.original_turn = original_turn
         self.depth = depth
+        self.root_node = root_node if root_node is not None else self
+        self.predictor = predictor
         self.children = None
         self.evaluation = None
 
     def is_leaf(self):
-        return self.depth == 0 or self.children is None or len(self.children) == 0
+        return self.children is None or len(self.children) == 0
 
-    def expand_tree(self):
-        possible_actions = self.state.get_legal_moves(self.state.turn)
-        if self.depth > 0:
-            self.children = []
-            for index, action_index in enumerate(possible_actions):
-                # Advance to new state.
-                state_next = self.state.get_state_copy()
-                state_next.advance(action_index=action_index)
-                self.children.append(NodeMiniMax(
-                    state=state_next,
-                    action_index=action_index,
-                    original_turn=self.original_turn,
-                    depth=self.depth-1
-                ))
-            [c.expand_tree() for c in self.children]
+    def __expand(self):
+        """ Expand the tree by adding this new node """
+        self.children = []
+        possible_actions = self.state.get_possible_actions()
+        for action_index in possible_actions:
+            state_next = self.state.copy()
+            state_next.advance(action_index=action_index)
+            self.children.append(NodeMiniMax(
+                state=state_next,
+                action_index=action_index,
+                original_turn=self.original_turn,
+                depth=self.depth + 1,
+                root_node=self.root_node,
+                predictor=self.predictor
+            ))
 
-    def evaluate_leaf_node(self, predictor: BaseApprentice):
-        if self.state.has_finished():
+    def tree_policy(self, to_depth: int):
+        """ Find the next unexplored node """
+        if self.depth < to_depth:
+            if self.children is None:
+                self.__expand()
+            if len(self.children) == 0:
+                return None
+            for child in self.children:
+                node = child.tree_policy(to_depth=to_depth)
+                if node is not None:
+                    return node
+        elif self.depth == to_depth:
+            if self.evaluation is None:
+                return self
+        return None
+
+    def default_policy(self):
+        """ Evaluate Node """
+        if self.state.is_game_over():
             self.evaluation = self.state.get_reward(self.original_turn)
         else:
-            self.evaluation = predictor.pred_eval(
-                X=self.state.get_feature_vector(self.original_turn))
+            self.evaluation = self.predictor.pred_eval(
+                X=self.state.get_feature_vector(self.original_turn)
+            )
 
-    def get_best_action_index(self, predictor: BaseApprentice):
-        best_values = []
-        action_indexes = []
-        if self.is_leaf():
-            # This is the root node. (return the most probable action).
-            # TODO: Should be moved.
-            X = self.state.get_feature_vector(self.state.turn)
-            legal_moves = self.state.get_legal_moves(self.state.turn)
-            action_prob = predictor.pred_prob(X=X)
-            for i, v in enumerate(action_prob):
-                if i not in legal_moves:
-                    action_prob[i] = -1
-            return np.argmax(action_prob)
+    def get_best_action_index(self):
+        best_values, action_indexes = [], []
         for c in self.children:
-            if len(best_values) == 0:
-                best_values.append(c.evaluation)
-                action_indexes.append(c.action_index)
-            elif c.evaluation == best_values[0]:
+            # Ensure that the child has been evaluated.
+            if c.evaluation is None:
+                continue
+            if len(best_values) == 0 or c.evaluation == best_values[0]:
                 best_values.append(c.evaluation)
                 action_indexes.append(c.action_index)
             elif c.evaluation > best_values[0]:
-                best_values = [c.evaluation]
-                action_indexes = [c.action_index]
-        return random.choice(action_indexes)
+                best_values, action_indexes = [c.evaluation], [c.action_index]
+        # Ensure that there are moves to be made.
+        if len(action_indexes) == 0:
+            action_indexes = self.state.get_possible_actions()
+        return rnd_choice(action_indexes)
