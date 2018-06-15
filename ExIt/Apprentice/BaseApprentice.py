@@ -1,9 +1,7 @@
 
 
 class BaseApprentice:
-    """
-    Base class used for policy and evaluation predictors.
-    """
+    """ Base class used for policy and evaluation predictors """
 
     predictor = None
 
