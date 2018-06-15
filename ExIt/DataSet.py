@@ -1,5 +1,6 @@
 
 from Games.BaseGame import BaseGame
+import numpy as np
 
 
 class DataSet:
@@ -8,8 +9,10 @@ class DataSet:
     def __init__(self):
         self.__clear()
 
-    def add_sample(self, state: BaseGame, pi_update, r):
+    def add_sample(self, state: BaseGame, action_index, r):
         """ Add information to sample arrays. Array indexes refer to the same sample. """
+        pi_update = np.zeros(state.num_actions, dtype=float)
+        pi_update[action_index] = 1
         turn, fv, pi = state.turn, state.get_feature_vector(state.turn), pi_update
         self.__add_sample(fv=fv, pi=pi, r=r, turn=turn)
 
@@ -19,6 +22,7 @@ class DataSet:
         self.__clear()
         return data_tuple
 
+    # TODO: Not used. (Remove later).
     def update_reward_soft(self, final_state: BaseGame):
         """ Add relative reward to the improvement data when the game has finished """
         play_len = len(self.turn_array)
