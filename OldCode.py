@@ -9,10 +9,22 @@
 # rnd_prob = 0.0 if not add_randomness else 1.0 / state.num_actions
 #rnd_prob = 0 if not add_randomness else log(1+x)
 #rnd_prob = 0 if not add_randomness else 4**(-2*(i / num_iteration))
-
+# rnd_prob = math.e ** (-5 * x) + min_rnd
 
 """
 
+
+"""
+if self.is_leaf():
+    X = self.state.get_feature_vector(self.state.turn)
+    legal_moves = self.state.get_legal_moves(self.state.turn)
+    action_prob = predictor.pred_prob(X=X)
+    for i, v in enumerate(action_prob):
+        if i not in legal_moves:
+            action_prob[i] = -1
+    return np.argmax(action_prob)
+
+"""
 
 
 
