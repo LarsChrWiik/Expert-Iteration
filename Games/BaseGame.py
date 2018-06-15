@@ -23,7 +23,7 @@ class BaseGame:
     # 0 = player1, 1 = player2. (Index of the winning player).
     turn = None
 
-    def has_finished(self):
+    def is_game_over(self):
         return self.winner is not None
 
     def get_reward(self, player_index):
@@ -39,13 +39,13 @@ class BaseGame:
     def next_turn(self):
         raise NotImplementedError("Please Implement this method")
 
-    def get_state_copy(self):
+    def copy(self):
         raise NotImplementedError("Please Implement this method")
 
     def init_new_game(self):
         raise NotImplementedError("Please Implement this method")
 
-    def get_legal_moves(self, player_index):
+    def get_possible_actions(self):
         raise NotImplementedError("Please Implement this method")
 
     def advance(self, action_index):
