@@ -4,16 +4,10 @@ from Games.BaseGame import BaseGame
 
 
 class BaseExpert:
-    """
-    Class for policy improvement logic.
-    """
+    """ Class for policy improvement logic """
 
-    def start(self, state: BaseGame, predictor: BaseApprentice):
-        """
-        Do policy improvement for a given state.
-
-        :return: action_index
-        """
-        # TODO: Might want to have some randomness???
+    def search(self, state: BaseGame, predictor: BaseApprentice, search_time: float):
+        """ Do policy improvement for a given state.
+        :return: action_index """
         raise NotImplementedError("Please Implement this method")
 
