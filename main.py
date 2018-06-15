@@ -1,17 +1,25 @@
 
-import cProfile
+
 from Games.TicTacToe import TicTacToe
-from Players.MinimaxMlpPlayer import MinimaxMlpPlayer
-from Games.GameHandler import GameHandler
-from Players.RandomPlayer import RandomPlayer
+from Players.Players import *
+import numpy as np
+np.set_printoptions(suppress=True)
+
+
+search_time = 0.05
+num_iteration = 1000
 
 
 def main():
     #game_handler = GameHandler(game=TicTacToe(), players=[RandomPlayer(), RandomPlayer()])
     #game_handler.start_game()
 
-    player = MinimaxMlpPlayer(minimax_depth=2)
-    player.start_ex_it(game_class=TicTacToe, num_iteration=1000, randomness=True)
+    #player = NnMinimaxPlayer()
+    player = NnMctsPlayer()
+    player.set_game(game_class=TicTacToe)
+    player.start_ex_it(num_iteration=num_iteration,
+                       randomness=True,
+                       search_time=search_time)
 
     debug_display(player)
 
