@@ -1,7 +1,7 @@
 
-from Games.BaseGame import BaseGame
+from Games.GameLogic import BaseGame
 import numpy as np
-from Games.BoardFeatureExtraction import bitboard
+from Games.GameLogic import bitboard
 
 
 class TicTacToe(BaseGame):
