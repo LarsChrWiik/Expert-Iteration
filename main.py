@@ -3,7 +3,6 @@
 from Games.TicTacToe import TicTacToe
 from Players.Players import *
 from Support.Debugger import TicTacToeDebugger
-import matplotlib.pyplot as plt
 import numpy as np
 np.set_printoptions(suppress=True)
 
@@ -17,6 +16,7 @@ debugger = TicTacToeDebugger()
 
 
 def main():
+    # Run Comparison with several iteration of self-play.
     """
     m = Matchmaking(game_class=TicTacToe,
                     players=[NnMinimaxPlayer(), RandomPlayer()])
@@ -28,6 +28,8 @@ def main():
                     file_name="NnMinimaxPlayer_vs_RandomPlayer")
     """
 
+
+    # Run One iteration of self.play
     player = NnMinimaxPlayer()
     #player = NnMctsPlayer()
     player.set_game(game_class=TicTacToe)
@@ -35,39 +37,9 @@ def main():
                        randomness=True,
                        search_time=search_time)
 
-    # Display the agents calculations.
+
+    # Display the agents calculations in predefined scenarios.
     debugger.debug_display_win_moves(player)
-
-
-# TODO: Fix metafile.
-import csv
-def plot_test(metafile=None, file=None):
-
-    with open('./Statistics/2018-06-18___02-20-59/0.csv') as csvfile:
-        reader = csv.DictReader(csvfile)
-        data = [[float(row["win"]), float(row["loss"]), float(row["draw"])] for row in reader]
-
-        print(data)
-        iterations = 1000
-        wins, loses, draws = get_statistics(data=data, iterations=iterations)
-        plt.plot(wins, label="Wins")
-        plt.plot(loses, label="Loses")
-        plt.plot(draws, label="Draws")
-        plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=3,
-                   ncol=3, mode="expand", borderaxespad=0.)
-        plt.axis(ymin=0, ymax=1.0)
-        plt.show()
-
-
-def get_statistics(data, iterations):
-    wins = []
-    loses = []
-    draws = []
-    for v in data:
-        wins.append(v[0] / iterations)
-        loses.append(v[1] / iterations)
-        draws.append(v[2] / iterations)
-    return wins, loses, draws
 
 
 if __name__ == "__main__":
