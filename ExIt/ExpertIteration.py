@@ -57,14 +57,14 @@ class ExpertIteration:
             while not state.is_game_over():
                 self.ex_it_state(state=state, rnd_prob=rnd_prob, search_time=search_time)
             self.games_played += 1
-            #self.data_set.update_reward_hard(state)
-            s_array, pi_array, r_array = self.data_set.extract_data()
-            self.apprentice.train(X=s_array, Y_pi=pi_array, Y_r=r_array)
-
             # TODO: Delete later.
             print("*** Iteration = " + str(self.games_played) + " ***")
             print("randomness = " + str(rnd_prob))
             print("r_array = ", self.data_set.r_array)
+            s_array, pi_array, r_array = self.data_set.extract_data()
+            self.apprentice.train(X=s_array, Y_pi=pi_array, Y_r=r_array)
+
+
             print("     pi = ", self.apprentice.pred_prob(X=X))
             print(" pi_new = ", pi_array[0])
             print("r_start = ", self.apprentice.pred_eval(X=X))
