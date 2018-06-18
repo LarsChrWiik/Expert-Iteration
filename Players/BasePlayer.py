@@ -1,17 +1,38 @@
 
-from Games.BaseGame import BaseGame
+from Games.GameLogic import BaseGame
 from ExIt.ExpertIteration import ExpertIteration
+from random import choice as rnd_choice
 import numpy as np
+
+
+def assign_game_index(players):
+    # Assign the players a unique index within the game.
+    for index, p in enumerate(players):
+        p.game_index = index
 
 
 class BasePlayer:
     """ Base player that is able to move """
 
     def __init__(self):
-        self.player_index = None
+        # Unique index of a player.
+        self.index = None
+        # Unique index within each game. This can change between games.
+        self.game_index = None
+        # Name of the class of the game.
+        self.game_class = None
+
+    def set_game(self, game_class):
+        self.game_class = game_class
 
     def move(self, state: BaseGame):
         raise NotImplementedError("Please Implement this method")
+
+    @staticmethod
+    def move_random(game: BaseGame):
+        legal_moves = game.get_possible_actions()
+        action_index = rnd_choice(legal_moves)
+        game.advance(action_index=action_index)
 
 
 class BaseExItPlayer(BasePlayer):
@@ -20,7 +41,6 @@ class BaseExItPlayer(BasePlayer):
     def __init__(self, ex_it_algorithm: ExpertIteration):
         super().__init__()
         self.__ex_it_algorithm = ex_it_algorithm
-        self.game_class = None
 
     def set_game(self, game_class):
         self.game_class = game_class
@@ -37,7 +57,7 @@ class BaseExItPlayer(BasePlayer):
     def move(self, state: BaseGame):
         """ Calculate the best move """
         action_index, evaluation = self.__ex_it_algorithm.apprentice_output(state)
-        self.print_info(state=state, action_index=action_index)
+        # self.print_info(state=state, action_index=action_index)
         state.advance(action_index=action_index)
 
     # TODO: Remove later (Used for testing).
