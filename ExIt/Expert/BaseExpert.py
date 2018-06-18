@@ -1,6 +1,6 @@
 
 from ExIt.Apprentice import BaseApprentice
-from Games.BaseGame import BaseGame
+from Games.GameLogic import BaseGame
 
 
 class BaseExpert:
