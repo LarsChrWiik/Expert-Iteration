@@ -1,7 +1,7 @@
 
 from ExIt.Expert.BaseExpert import BaseExpert
 from ExIt.Apprentice import BaseApprentice
-from Games.BaseGame import BaseGame
+from Games.GameLogic import BaseGame
 from Support.Timer import Timer
 from random import choice as rnd_choice
 
@@ -31,7 +31,7 @@ class MiniMax(BaseExpert):
         self.timer = Timer()
 
     def search(self, state: BaseGame, predictor: BaseApprentice, search_time: float):
-        self.timer.start(search_time=search_time)
+        self.timer.start_search_timer(search_time=search_time)
         root_node = NodeMiniMax(state=state, action_index=None, original_turn=state.turn,
                                 depth=0, root_node=None, predictor=predictor)
 
@@ -47,7 +47,6 @@ class MiniMax(BaseExpert):
                 tmp = True
             else:
                 tmp = False
-
         minimax(node=root_node, should_max=True)
         action_index = root_node.get_best_action_index()
         return action_index, root_node.evaluation
@@ -77,22 +76,6 @@ class NodeMiniMax:
     def is_leaf(self):
         return self.children is None or len(self.children) == 0
 
-    def __expand(self):
-        """ Expand the tree by adding this new node """
-        self.children = []
-        possible_actions = self.state.get_possible_actions()
-        for action_index in possible_actions:
-            state_next = self.state.copy()
-            state_next.advance(action_index=action_index)
-            self.children.append(NodeMiniMax(
-                state=state_next,
-                action_index=action_index,
-                original_turn=self.original_turn,
-                depth=self.depth + 1,
-                root_node=self.root_node,
-                predictor=self.predictor
-            ))
-
     def tree_policy(self, to_depth: int):
         """ Find the next unexplored node """
         if self.depth < to_depth:
@@ -108,6 +91,22 @@ class NodeMiniMax:
             if self.evaluation is None:
                 return self
         return None
+
+    def __expand(self):
+        """ Expand the tree by adding this new node """
+        self.children = []
+        possible_actions = self.state.get_possible_actions()
+        for action_index in possible_actions:
+            state_next = self.state.copy()
+            state_next.advance(action_index=action_index)
+            self.children.append(NodeMiniMax(
+                state=state_next,
+                action_index=action_index,
+                original_turn=self.original_turn,
+                depth=self.depth + 1,
+                root_node=self.root_node,
+                predictor=self.predictor
+            ))
 
     def default_policy(self):
         """ Evaluate Node """
