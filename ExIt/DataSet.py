@@ -1,5 +1,5 @@
 
-from Games.BaseGame import BaseGame
+from Games.GameLogic import BaseGame
 import numpy as np
 
 
