@@ -2,8 +2,7 @@
 
 from Games.TicTacToe import TicTacToe
 from Players.Players import *
-from Matchmaking.Matchmaking import Matchmaking
-from Debugging.Debugger import TicTacToeDebugger
+from Support.Debugger import TicTacToeDebugger
 import matplotlib.pyplot as plt
 import numpy as np
 np.set_printoptions(suppress=True)
