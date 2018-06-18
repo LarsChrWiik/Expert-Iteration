@@ -1,6 +1,6 @@
 
 from ExIt.Expert.BaseExpert import BaseExpert
-from Games.BaseGame import BaseGame
+from Games.GameLogic import BaseGame
 from ExIt.Apprentice import BaseApprentice
 from random import choice as rnd_choice
 from math import sqrt
@@ -15,7 +15,7 @@ class Mcts(BaseExpert):
         self.c = c
 
     def search(self, state: BaseGame, predictor: BaseApprentice, search_time: float):
-        self.timer.start(search_time=search_time)
+        self.timer.start_search_timer(search_time=search_time)
         root_node = NodeMcts(state=state, action_index=None, original_turn=state.turn,
                              parent=None, root_node=None, c=self.c)
         while self.timer.have_time_left():
@@ -51,6 +51,7 @@ class NodeMcts:
         # Exploration parameter.
         self.c = c
         self.no_search_space = False
+        # TODO: V value = t / n
 
     def __expand(self):
         """ Expand the tree by adding this new node """
