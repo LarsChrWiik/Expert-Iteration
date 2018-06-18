@@ -1,10 +1,9 @@
 
-from Games.BaseGame import BaseGame
+from Games.GameLogic import BaseGame
 from ExIt.Expert.Mcts import Mcts
 from ExIt.Apprentice.Nn import Nn
 from ExIt.Expert.MiniMax import MiniMax
 from ExIt.ExpertIteration import ExpertIteration
-from random import choice as rnd_choice
 from Players.BasePlayer import BasePlayer, BaseExItPlayer
 from math import sqrt
 
@@ -13,9 +12,7 @@ class RandomPlayer(BasePlayer):
     """ Player that plays random moves """
 
     def move(self, game: BaseGame):
-        legal_moves = game.get_possible_actions()
-        action_index = rnd_choice(legal_moves)
-        game.advance(action_index=action_index)
+        self.move_random(game=game)
 
 
 class NnMctsPlayer(BaseExItPlayer):
