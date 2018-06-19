@@ -4,7 +4,7 @@ from ExIt.Expert.Mcts import Mcts
 from ExIt.Apprentice.Nn import Nn
 from ExIt.Expert.MiniMax import MiniMax
 from ExIt.ExpertIteration import ExpertIteration
-from Players.BasePlayer import BasePlayer, BaseExItPlayer
+from Players.BasePlayers import BasePlayer, BaseExItPlayer
 from math import sqrt
 
 
