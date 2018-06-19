@@ -67,12 +67,11 @@ class BaseExItPlayer(BasePlayer):
             self.print_info(state=state, action_index=action_index)
         state.advance(action_index=action_index)
 
-    def start_ex_it(self, num_iteration, randomness: bool, search_time: float):
+    def start_ex_it(self, num_iteration, search_time: float):
         """ Starts Expert Iteration. NB: Time consuming process """
         self.__ex_it_algorithm.start_ex_it(
             game_class=self.game_class,
             num_iteration=num_iteration,
-            randomness=randomness,
             search_time=search_time
         )
 

@@ -26,7 +26,6 @@ def normal_test():
     player.set_game(game_class=TicTacToe)
     player.start_ex_it(
         num_iteration=1000,
-        randomness=True,
         search_time=search_time
     )
 

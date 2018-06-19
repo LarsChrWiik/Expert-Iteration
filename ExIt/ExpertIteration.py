@@ -5,6 +5,8 @@ from Games.GameLogic import BaseGame
 from ExIt.DataSet import DataSet
 from Support.Timer import Timer
 import numpy as np
+from random import uniform as rnd_float
+import random
 
 
 timer = Timer()
@@ -18,7 +20,7 @@ class ExpertIteration:
         self.data_set = DataSet()
         self.games_played = 0
 
-    def start_ex_it(self, game_class, num_iteration, randomness: bool, search_time: float):
+    def start_ex_it(self, game_class, num_iteration, search_time: float):
         """ Start Expert Iteration to master the given game.
             This process is time consuming. """
 
@@ -28,7 +30,7 @@ class ExpertIteration:
             X = state.get_feature_vector(state.turn)
 
             while not state.is_game_over():
-                self.ex_it_state(state=state, randomness=randomness, search_time=search_time)
+                self.ex_it_state(state=state, search_time=search_time)
             self.games_played += 1
 
             # TODO: Delete later.
@@ -45,26 +47,26 @@ class ExpertIteration:
             print("")
             print("")
 
-    def ex_it_state(self, state: BaseGame, randomness: float, search_time: float):
+    def ex_it_state(self, state: BaseGame, search_time: float):
         """ Expert Iteration for a given state """
         v_values, action_indexes, v = self.expert.search(
             state=state,
             predictor=self.apprentice,
             search_time=search_time
         )
-        pi = self.softmax(v_values=v_values, lower_bound=-1, upper_bound=1)
+        #pi = self.softmax(v_values=v_values, lower_bound=-1, upper_bound=1)
 
-        if not randomness:
-            action_index = self.get_action_index_exploit(pi=pi)
-        else:
-            # Random move based on move probabilities.
-            action_index = self.get_action_index_explore(
-                pi=pi,
-                action_indexes=action_indexes
-            )
+        action_index = self.e_greedy(v_values=v_values, action_indexes=action_indexes)
 
         self.data_set.add_sample(state=state, action_index=action_index, v=v)
         state.advance(action_index=action_index)
+
+    def e_greedy(self, v_values, action_indexes):
+        e = 0.1
+        if rnd_float(0, 1) < e:
+            return random.choice(action_indexes)
+        return action_indexes[np.argmax(v_values)]
+
 
     @staticmethod
     def softmax(v_values, upper_bound, lower_bound):
