@@ -33,12 +33,11 @@ class ExpertIteration:
 
             # TODO: Delete later.
             print("*** Iteration = " + str(self.games_played) + " ***")
-            print("v_array = ", self.data_set.v_array)
-            print("s_array = ", self.data_set.s_array)
 
-            s_array, pi_array, r_array = self.data_set.extract_data()
-            self.apprentice.train(X=s_array, Y_pi=pi_array, Y_r=r_array)
+            s_array, pi_array, v_array = self.data_set.extract_data()
+            self.apprentice.train(X=s_array, Y_pi=pi_array, Y_v=v_array)
 
+            print("v_array = ", v_array)
             print("     pi = ", self.apprentice.pred_prob(X=X))
             print(" pi_new = ", pi_array[0])
             print("v_start = ", self.apprentice.pred_eval(X=X))
