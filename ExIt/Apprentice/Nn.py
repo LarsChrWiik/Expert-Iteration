@@ -52,7 +52,7 @@ class Nn(BaseApprentice):
         model = Model(inputs=[x], outputs=[pi, v])
         model.summary()
 
-        optimizer = Adam(lr=0.005)
+        optimizer = Adam()
         model.compile(
             optimizer=optimizer,
             loss={
@@ -64,8 +64,8 @@ class Nn(BaseApprentice):
         self.optimizer = optimizer
         self.model = model
 
-    def train(self, X, Y_pi, Y_r):
-        self.model.fit(x=np.array(X), y=[np.array(Y_pi), np.array(Y_r)])
+    def train(self, X, Y_pi, Y_v):
+        self.model.fit(x=np.array(X), y=[np.array(Y_pi), np.array(Y_v)])
 
     def pred_eval(self, X):
         """ Return float representing state evaluation """
