@@ -17,7 +17,7 @@ def entropy(y):
     return -K.sum(y * K.log(y))
 
 
-def custom_loss(y_true, y_pred, beta=0.1):
+def custom_loss(y_true, y_pred, beta=0.001):
     return categorical_crossentropy(y_true, y_pred) - beta * entropy(y_pred)
 
 
@@ -29,43 +29,36 @@ class Nn(BaseApprentice):
         self.optimizer = None
 
     def init_model(self, input_fv_size, pi_size):
-        # TODO: Implement Batch normalization?.
         # Input layer.
         x = Input(shape=(input_fv_size,))
 
-        # Hidden layers.
-        h1 = Dense(32, kernel_regularizer=l2())(x)
+        # Hidden layer 1.
+        h1 = Dense(256, kernel_regularizer=l2())(x)
         h1 = Activation("elu")(h1)
+        #h1 = BatchNormalization()(h1)
         h1 = Dropout(rate=0.2)(h1)
-        h2 = Dense(32, kernel_regularizer=l2())(h1)
+
+        # Hidden layer 2
+        h2 = Dense(256, kernel_regularizer=l2())(h1)
         h2 = Activation("elu")(h2)
+        #h2 = BatchNormalization()(h2)
         h2 = Dropout(rate=0.2)(h2)
 
-        # Output layers.
+        # Output layer pi = Action probability.
         pi = Dense(pi_size, activation='softmax', name='pi_output', kernel_regularizer=l2())(h2)
-        v = Dense(1, activation='linear', name='r_output', kernel_regularizer=l2())(h2)
+        # Output layer v = state evaluation
+        v = Dense(1, activation='linear', name='v_output', kernel_regularizer=l2())(h2)
 
         model = Model(inputs=[x], outputs=[pi, v])
         model.summary()
 
-        # TODO: Maybe remove.
-        """
-        loss_weights_pi = pi_size/(pi_size+1)
-        loss_weights_r = 1/(pi_size+1)
-        loss_weights = {
-            'pi_output': loss_weights_pi,
-            'r_output': loss_weights_r
-        }
-        """
-
-        optimizer = Adam()
+        optimizer = Adam(lr=0.005)
         model.compile(
             optimizer=optimizer,
             loss={
-                'pi_output': custom_loss,
-                'r_output': mean_squared_error
-            },
-            loss_weights=None
+                'pi_output': categorical_crossentropy,
+                'v_output': mean_squared_error
+            }
         )
 
         self.optimizer = optimizer
