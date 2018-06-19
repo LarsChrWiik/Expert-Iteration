@@ -3,8 +3,6 @@ from ExIt.Apprentice import BaseApprentice
 from ExIt.Expert import BaseExpert
 from Games.GameLogic import BaseGame
 from ExIt.DataSet import DataSet
-from random import uniform
-from random import choice as rnd_choice
 from Support.Timer import Timer
 import numpy as np
 
@@ -14,78 +12,83 @@ timer = Timer()
 
 class ExpertIteration:
 
-    @staticmethod
-    def get_rnd_prob(iteration, num_iteration):
-        return 0.1
-        #return 1 - (iteration / num_iteration)
-
     def __init__(self, apprentice: BaseApprentice, expert: BaseExpert):
         self.apprentice = apprentice
         self.expert = expert
         self.data_set = DataSet()
         self.games_played = 0
 
-    def apprentice_output(self, state: BaseGame):
-        """ Evaluate state and calculates the best action index
-            using only the apprentice """
-        fv = state.get_feature_vector(state.turn)
-        action_indexes = self.apprentice.pred_prob(fv)
-        # Remove illegal moves.
-        legal_moves = state.get_possible_actions()
-        for i, v in enumerate(action_indexes):
-            if i not in legal_moves:
-                action_indexes[i] = 0
-        # Choose best action.
-        action_index = np.argmax(action_indexes)
-        evaluation = self.apprentice.pred_eval(fv)
-        return action_index, evaluation
-
-    def start_ex_it(self, game_class, num_iteration, add_randomness: bool, search_time: float):
+    def start_ex_it(self, game_class, num_iteration, randomness: bool, search_time: float):
         """ Start Expert Iteration to master the given game.
             This process is time consuming. """
 
-        rnd_prob = 0.0
         for i in range(num_iteration):
 
             state = game_class()
             X = state.get_feature_vector(state.turn)
 
-            # TODO: Change later.
-            if add_randomness:
-                rnd_prob = ExpertIteration.get_rnd_prob(iteration=i, num_iteration=num_iteration)
-
             while not state.is_game_over():
-                self.ex_it_state(state=state, rnd_prob=rnd_prob, search_time=search_time)
+                self.ex_it_state(state=state, randomness=randomness, search_time=search_time)
             self.games_played += 1
+
             # TODO: Delete later.
             print("*** Iteration = " + str(self.games_played) + " ***")
-            print("randomness = " + str(rnd_prob))
-            print("r_array = ", self.data_set.r_array)
+            print("v_array = ", self.data_set.v_array)
+            print("s_array = ", self.data_set.s_array)
+
             s_array, pi_array, r_array = self.data_set.extract_data()
             self.apprentice.train(X=s_array, Y_pi=pi_array, Y_r=r_array)
 
-
             print("     pi = ", self.apprentice.pred_prob(X=X))
             print(" pi_new = ", pi_array[0])
-            print("r_start = ", self.apprentice.pred_eval(X=X))
+            print("v_start = ", self.apprentice.pred_eval(X=X))
             print("")
             print("")
             print("")
 
-    def ex_it_state(self, state: BaseGame, rnd_prob: float, search_time: float):
+    def ex_it_state(self, state: BaseGame, randomness: float, search_time: float):
         """ Expert Iteration for a given state """
-        action_index, r = self.expert.search(state=state,
-                                             predictor=self.apprentice,
-                                             search_time=search_time)
-        if uniform(0, 1) < rnd_prob:
-            # Random move.
-            action_index = rnd_choice(state.get_possible_actions())
-            r = self.get_reward_for_action(state=state, action_index=action_index)
-        self.data_set.add_sample(state=state, action_index=action_index, r=r)
+        v_values, action_indexes, v = self.expert.search(
+            state=state,
+            predictor=self.apprentice,
+            search_time=search_time
+        )
+        pi = self.softmax(v_values=v_values, lower_bound=-1, upper_bound=1)
+
+        if not randomness:
+            action_index = self.get_action_index_exploit(pi=pi)
+        else:
+            # Random move based on move probabilities.
+            action_index = self.get_action_index_explore(
+                pi=pi,
+                action_indexes=action_indexes
+            )
+
+        self.data_set.add_sample(state=state, action_index=action_index, v=v)
         state.advance(action_index=action_index)
 
-    def get_reward_for_action(self, state: BaseGame, action_index: int):
-        """ Calculates the reward for the given action index """
-        c = state.copy()
-        c.advance(action_index)
-        return self.apprentice.pred_eval(X=c.get_feature_vector(state.turn))
+    @staticmethod
+    def softmax(v_values, upper_bound, lower_bound):
+        """ Softmax function within a certain bound """
+        # Restrict to bounds.
+        for i, v in enumerate(v_values):
+            if v < lower_bound:
+                v_values[i] = lower_bound
+            elif v > upper_bound:
+                v_values[i] = upper_bound
+
+        v_values = [v + abs(lower_bound) for v in v_values]
+        sum_ = sum(v_values)
+        if sum_ != 0:
+            return [v / sum_ for v in v_values]
+        return [1.0 / len(v_values) for _ in range(len(v_values))]
+
+    @staticmethod
+    def get_action_index_exploit(pi):
+        return np.argmax(pi)
+
+    @staticmethod
+    def get_action_index_explore(pi, action_indexes):
+        """ Choose random action index with respect to action probability.
+            Pi must be values between 0 and 1. """
+        return np.random.choice(a=action_indexes, size=1, p=pi)[0]
