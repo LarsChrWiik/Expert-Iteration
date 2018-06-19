@@ -48,8 +48,8 @@ class MiniMax(BaseExpert):
             else:
                 tmp = False
         minimax(node=root_node, should_max=True)
-        action_index = root_node.get_best_action_index()
-        return action_index, root_node.evaluation
+        v_values, action_indexes = root_node.get_v_actions_and_index()
+        return v_values, action_indexes, root_node.evaluation
 
     @staticmethod
     def iteration(root_node: 'NodeMiniMax', to_depth: int):
@@ -75,6 +75,15 @@ class NodeMiniMax:
 
     def is_leaf(self):
         return self.children is None or len(self.children) == 0
+
+    def get_v_actions_and_index(self):
+        """ Return the evaluations for each action index from this state """
+        v_values, action_indexes = [], []
+        for node in self.children:
+            if node.evaluation is not None:
+                v_values.append(node.evaluation)
+                action_indexes.append(node.action_index)
+        return v_values, action_indexes
 
     def tree_policy(self, to_depth: int):
         """ Find the next unexplored node """
@@ -111,24 +120,8 @@ class NodeMiniMax:
     def default_policy(self):
         """ Evaluate Node """
         if self.state.is_game_over():
-            self.evaluation = self.state.get_reward(self.original_turn)
+            self.evaluation = self.state.get_result(self.original_turn).value
         else:
             self.evaluation = self.predictor.pred_eval(
                 X=self.state.get_feature_vector(self.original_turn)
             )
-
-    def get_best_action_index(self):
-        best_values, action_indexes = [], []
-        for c in self.children:
-            # Ensure that the child has been evaluated.
-            if c.evaluation is None:
-                continue
-            if len(best_values) == 0 or c.evaluation == best_values[0]:
-                best_values.append(c.evaluation)
-                action_indexes.append(c.action_index)
-            elif c.evaluation > best_values[0]:
-                best_values, action_indexes = [c.evaluation], [c.action_index]
-        # Ensure that there are moves to be made.
-        if len(action_indexes) == 0:
-            action_indexes = self.state.get_possible_actions()
-        return rnd_choice(action_indexes)
