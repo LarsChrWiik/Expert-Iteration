@@ -5,38 +5,30 @@ from Games.GameLogic import bitboard
 
 
 class TicTacToe(BaseGame):
-    """
-    The game of TicTacToe.
-    """
 
-    num_players = 2
-    num_actions = 9
-    num_rotations = 4
-    fv_size = 18
+    def __init__(self, turn=0):
+        super().__init__()
+        self.num_players = 2
+        self.num_actions = 9
+        self.fv_size = 18
+        self.turn = turn
+        self.board = np.zeros((9,), dtype=int)
 
     @staticmethod
     def __rep_value_to_p_index(rep_value):
-        if rep_value == 1: return 0
-        if rep_value == 2: return 1
+        if rep_value == 1:
+            return 0
+        if rep_value == 2:
+            return 1
         return -1
 
     @staticmethod
     def __p_index_to_rep_value(player_index):
-        if player_index == 0: return 1
-        if player_index == 1: return 2
+        if player_index == 0:
+            return 1
+        if player_index == 1:
+            return 2
         return 0
-
-    def __init__(self, turn=0):
-        self.turn = turn
-        self.board = np.zeros((9,), dtype=int)
-
-        # TODO: Used for testing.
-        """
-        self.advance(1)
-        self.advance(4)
-        self.advance(3)
-        self.advance(5)
-        """
 
     def init_new_game(self):
         return TicTacToe()
@@ -49,10 +41,7 @@ class TicTacToe(BaseGame):
         return board_copy
 
     def get_possible_actions(self):
-        """
-        :param player_index: Not used in this game.
-        :return: list of possible move indexes.
-        """
+        """ Return a list of the possible action indexes """
         if self.is_game_over():
             return []
         return np.where(self.board == 0, 1, 0).nonzero()[0]
