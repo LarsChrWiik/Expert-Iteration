@@ -1,4 +1,8 @@
 
+from Games.GameLogic import BaseGame
+from random import uniform as rnd_float
+import numpy as np
+
 
 class BaseApprentice:
     """ Base class used for policy and evaluation predictors """
