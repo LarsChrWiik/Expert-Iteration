@@ -19,31 +19,21 @@ class BaseGame:
         with Expert Iteration algorithms (ExItAlgorithm).
         Every subclass of Game should be a perfect information game. """
 
-    win_reward = 1
-    lose_reward = -1
-    draw_reward = 0
+    def __init__(self):
+        self.board = None
+        self.num_players = None
+        self.num_actions = None
+        self.num_rotations = None
+        self.fv_size = None
 
-    board = None
-    num_players = None
-    num_actions = None
-    num_rotations = None
-    fv_size = None
+        # Indicates the winner of the game. (Index of the winning player). (-1 = draw)
+        self.winner = None
 
-    # Indicates the winner of the game. (Index of the winning player). (-1 = draw)
-    winner = None
-
-    # 0 = player1, 1 = player2. (Index of the winning player).
-    turn = None
+        # 0 = player1, 1 = player2. (Index of the winning player).
+        self.turn = None
 
     def is_game_over(self):
         return self.winner is not None
-
-    def get_reward(self, player_index):
-        if player_index == self.winner:
-            return self.win_reward
-        elif self.is_draw():
-            return self.draw_reward
-        return self.lose_reward
 
     def get_result(self, player_index):
         if player_index == self.winner:
