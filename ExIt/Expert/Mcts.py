@@ -22,8 +22,9 @@ class Mcts(BaseExpert):
             self.iteration(root_node=root_node)
             if root_node.no_search_space:
                 break
-        action_index = root_node.get_best_action_index()
-        return action_index, None
+        # TODO: fix.
+        v_values, action_indexes = root_node.get_v_actions_and_index()
+        return v_values, action_indexes, root_node.get_evaluation()
 
     @staticmethod
     def iteration(root_node: 'NodeMcts'):
@@ -53,6 +54,13 @@ class NodeMcts:
         self.no_search_space = False
         # TODO: V value = t / n
 
+    def get_evaluation(self):
+        return self.t / self.n
+
+    def get_v_actions_and_index(self):
+        """ Return the evaluations for each action index from this state """
+        return [node.get_evaluation() for node in self.children]
+
     def __expand(self):
         """ Expand the tree by adding this new node """
         self.children = []
@@ -60,15 +68,16 @@ class NodeMcts:
         for action_index in possible_actions:
             state_next = self.state.copy()
             state_next.advance(action_index=action_index)
-            self.children.append(NodeMcts(
-                state=state_next,
-                action_index=action_index,
-                original_turn=self.original_turn,
-                parent=self,
-                root_node=self.root_node,
-                c=self.c
+            self.children.append(
+                NodeMcts(
+                    state=state_next,
+                    action_index=action_index,
+                    original_turn=self.original_turn,
+                    parent=self,
+                    root_node=self.root_node,
+                    c=self.c
+                )
             )
-        )
 
     def tree_policy(self):
         """ Find the next unexplored node """
@@ -121,16 +130,3 @@ class NodeMcts:
         w = t / n
         N = self.root_node.n
         return (w / n) + self.c * sqrt(ln(N) / n)
-
-    def get_best_action_index(self):
-        max_t, action_indexes = [], []
-        for c in self.children:
-            if len(max_t) == 0 or c.t == max_t:
-                max_t.append(c.t)
-                action_indexes.append(c.action_index)
-            elif c.t > max_t[0]:
-                max_t, action_indexes = [c.t], [c.action_index]
-        # Ensure that there are moves to be made.
-        if len(action_indexes) == 0:
-            action_indexes = self.state.get_possible_actions()
-        return rnd_choice(action_indexes)
