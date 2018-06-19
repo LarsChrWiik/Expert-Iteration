@@ -78,11 +78,12 @@ class TicTacToe(BaseGame):
         if self.board[2] == self.board[4] == self.board[6] != 0:
             self.winner = self.__rep_value_to_p_index(self.board[2])
 
-        # Next turn.
-        self.next_turn()
+        if not self.is_game_over():
+            # Next turn.
+            self.next_turn()
 
         # Is the game a draw.
-        if self.winner is None and self.is_draw():
+        if self.is_draw():
             self.winner = -1
 
     def is_draw(self):
