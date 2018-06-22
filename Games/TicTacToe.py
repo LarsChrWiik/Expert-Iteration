@@ -10,9 +10,9 @@ class TicTacToe(BaseGame):
         super().__init__()
         self.num_players = 2
         self.num_actions = 9
-        self.fv_size = 18
         self.turn = turn
         self.board = np.zeros((9,), dtype=int)
+        self.fv_size = len(self.get_feature_vector(turn=0))
 
     @staticmethod
     def __rep_value_to_p_index(rep_value):
@@ -40,7 +40,7 @@ class TicTacToe(BaseGame):
         board_copy.turn = self.turn
         return board_copy
 
-    def get_possible_actions(self):
+    def get_legal_moves(self):
         """ Return a list of the possible action indexes """
         if self.is_game_over():
             return []
@@ -90,8 +90,8 @@ class TicTacToe(BaseGame):
         return len(np.where(self.board == 0, 1, 0).nonzero()[0]) == 0 and \
                (self.winner is None or self.winner == -1)
 
-    def get_feature_vector(self, player_index):
-        return bitboard(board=self.board, player_index=player_index)
+    def get_feature_vector(self, turn):
+        return bitboard(board=self.board)
 
     def next_turn(self):
         """
@@ -100,36 +100,6 @@ class TicTacToe(BaseGame):
         self.turn += 1
         if self.turn >= self.num_players:
             self.turn = 0
-
-    def rotate_fv(self, fv: np.array):
-        fv_new = np.zeros(fv.size)
-        fv_new[6] = fv[0];  fv_new[3] = fv[1];  fv_new[0] = fv[2]
-        fv_new[7] = fv[3];  fv_new[4] = fv[4];  fv_new[1] = fv[5]
-        fv_new[8] = fv[6];  fv_new[5] = fv[7];  fv_new[2] = fv[8]
-
-        fv_new[6+9] = fv[0+9]
-        fv_new[3+9] = fv[1+9]
-        fv_new[0+9] = fv[2+9]
-        fv_new[7+9] = fv[3+9]
-        fv_new[4+9] = fv[4+9]
-        fv_new[1+9] = fv[5+9]
-        fv_new[8+9] = fv[6+9]
-        fv_new[5+9] = fv[7+9]
-        fv_new[2+9] = fv[8+9]
-        return fv_new
-
-    def rotate_pi(self, pi):
-        pi_new = np.zeros(pi.size)
-        pi_new[6] = pi[0]
-        pi_new[3] = pi[1]
-        pi_new[0] = pi[2]
-        pi_new[7] = pi[3]
-        pi_new[4] = pi[4]
-        pi_new[1] = pi[5]
-        pi_new[8] = pi[6]
-        pi_new[5] = pi[7]
-        pi_new[2] = pi[8]
-        return pi_new
 
     def display(self):
         char_board = ""
