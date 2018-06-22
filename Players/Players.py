@@ -11,7 +11,7 @@ from math import sqrt
 class RandomPlayer(BasePlayer):
     """ Player that plays random moves """
 
-    def move(self, game: BaseGame):
+    def move(self, game: BaseGame, randomness=False):
         self.move_random(game=game)
 
 
