@@ -3,9 +3,30 @@ from Games.GameLogic import BaseGame
 from Players.Players import BasePlayer, BaseExItPlayer
 from Games.GameLogic import GameResult
 from operator import add
-from random import uniform
 from Players.BasePlayers import assign_game_index
 from Matchmaking.Statistics import Statistics
+
+
+def match(game_class, players, randomness):
+    """ Starts a new game match between players and returns the result.
+        Return a list of GameResult for each player according to Game Index. """
+    game = game_class()
+    game_handler = GameHandler(game=game, players=players)
+    game_handler.start_game(randomness=randomness)
+    game_index_result = game_handler.get_game_index_result()
+    result = get_index_result(
+        game_index_result=game_index_result,
+        players=players
+    )
+    return result
+
+
+def get_index_result(game_index_result, players):
+    """ Convert rewards position from 'game player index' to 'player index' """
+    result = [GameResult(None) for _ in range(len(game_index_result))]
+    for p in players:
+        result[p.index] = game_index_result[p.game_index]
+    return result
 
 
 class GameHandler:
@@ -34,28 +55,6 @@ class GameHandler:
 class Matchmaking:
     """ Logic for matching players """
 
-    @staticmethod
-    def match(game_class, players, randomness):
-        """ Starts a new game match between players and returns the result.
-            Return a list of GameResult for each player according to Game Index. """
-        game = game_class()
-        game_handler = GameHandler(game=game, players=players)
-        game_handler.start_game(randomness=randomness)
-        game_index_result = game_handler.get_game_index_result()
-        result = Matchmaking.get_index_result(
-            game_index_result=game_index_result,
-            players=players
-        )
-        return result
-
-    @staticmethod
-    def get_index_result(game_index_result, players):
-        """ Convert rewards position from game player index to player index """
-        result = [GameResult(None) for _ in range(len(game_index_result))]
-        for p in players:
-            result[p.index] = game_index_result[p.game_index]
-        return result
-
     def __init__(self, game_class, players: [BasePlayer]):
         self.game_class = game_class
         self.players = players
@@ -66,13 +65,12 @@ class Matchmaking:
             p.index = index
 
     def compare_ex_it(self, num_train_epoch, search_time,
-                      num_matches, file_name, num_iteration, randomness):
+                      num_matches, num_iteration, randomness):
         """ Compare players through several iterations.
             Self play is enabled for ExIt players between iterations.
             NB: This process never ends if num_iteration = None. """
 
         self.statistics = Statistics(
-            file_name=file_name,
             num_train_epoch=num_train_epoch,
             search_time=search_time,
             num_matches=num_matches,
@@ -90,7 +88,7 @@ class Matchmaking:
         i = 0
         while True:
             results = self.__compare(num_matches=num_matches, randomness=randomness)
-            self.statistics.save(results=results, i=i)
+            self.statistics.save(results=results)
             if num_iteration is not None and i >= num_iteration:
                 break
             self.__train(num_train_epoch=num_train_epoch, search_time=search_time)
@@ -103,7 +101,6 @@ class Matchmaking:
             if isinstance(player, BaseExItPlayer):
                 player.start_ex_it(
                     num_iteration=num_train_epoch,
-                    move_prob_rnd=True,
                     search_time=search_time
                 )
 
@@ -114,7 +111,7 @@ class Matchmaking:
 
         for _ in range(num_matches):
             # Play game between players.
-            game_result = Matchmaking.match(
+            game_result = match(
                 game_class=self.game_class,
                 players=self.players,
                 randomness=randomness
