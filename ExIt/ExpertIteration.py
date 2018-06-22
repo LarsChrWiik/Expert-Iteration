@@ -4,9 +4,8 @@ from ExIt.Expert import BaseExpert
 from Games.GameLogic import BaseGame
 from ExIt.DataSet import DataSet
 from Support.Timer import Timer
-import numpy as np
-from random import uniform as rnd_float
-import random
+from ExIt.Evaluator import get_reward_for_action
+from ExIt.ActionPolicy import e_greedy
 
 
 timer = Timer()
@@ -30,6 +29,10 @@ class ExpertIteration:
             X = state.get_feature_vector(state.turn)
 
             while not state.is_game_over():
+                # TODO: test Spyros theory.
+                #Qs = [get_reward_for_action(state, a, self.apprentice) for a in state.get_legal_moves()]
+                #print("Qs = ", Qs)
+
                 self.ex_it_state(state=state, search_time=search_time)
             self.games_played += 1
 
@@ -54,42 +57,8 @@ class ExpertIteration:
             predictor=self.apprentice,
             search_time=search_time
         )
-        #pi = self.softmax(v_values=v_values, lower_bound=-1, upper_bound=1)
 
-        action_index = self.e_greedy(v_values=v_values, action_indexes=action_indexes)
+        action_index = e_greedy(pi=v_values, legal_moves=action_indexes)
 
         self.data_set.add_sample(state=state, action_index=action_index, v=v)
         state.advance(action_index=action_index)
-
-    def e_greedy(self, v_values, action_indexes):
-        e = 0.1
-        if rnd_float(0, 1) < e:
-            return random.choice(action_indexes)
-        return action_indexes[np.argmax(v_values)]
-
-
-    @staticmethod
-    def softmax(v_values, upper_bound, lower_bound):
-        """ Softmax function within a certain bound """
-        # Restrict to bounds.
-        for i, v in enumerate(v_values):
-            if v < lower_bound:
-                v_values[i] = lower_bound
-            elif v > upper_bound:
-                v_values[i] = upper_bound
-
-        v_values = [v + abs(lower_bound) for v in v_values]
-        sum_ = sum(v_values)
-        if sum_ != 0:
-            return [v / sum_ for v in v_values]
-        return [1.0 / len(v_values) for _ in range(len(v_values))]
-
-    @staticmethod
-    def get_action_index_exploit(pi):
-        return np.argmax(pi)
-
-    @staticmethod
-    def get_action_index_explore(pi, action_indexes):
-        """ Choose random action index with respect to action probability.
-            Pi must be values between 0 and 1. """
-        return np.random.choice(a=action_indexes, size=1, p=pi)[0]
