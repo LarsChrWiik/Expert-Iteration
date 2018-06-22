@@ -3,15 +3,15 @@ from enum import Enum
 import numpy as np
 
 
-def bitboard(board, player_index):
+def bitboard(board):
     """ Generate the board feature vector from an np.array.
         This function assumes that the game contains exactly
         one type of piece and exactly two players. """
-    player_representation = player_index + 1
-    opponent_representation = 2 if player_representation == 1 else 1
-    player = np.where(board == player_representation, 1, 0)
-    opponent = np.where(board == opponent_representation, 1, 0)
-    return np.concatenate((player, opponent))
+    player = 1
+    opponent = 2
+    player_board = np.where(board == player, 1, 0)
+    opponent_board = np.where(board == opponent, 1, 0)
+    return np.concatenate((player_board, opponent_board))
 
 
 class BaseGame:
@@ -23,7 +23,6 @@ class BaseGame:
         self.board = None
         self.num_players = None
         self.num_actions = None
-        self.num_rotations = None
         self.fv_size = None
 
         # Indicates the winner of the game. (Index of the winning player). (-1 = draw)
@@ -54,7 +53,7 @@ class BaseGame:
     def init_new_game(self):
         raise NotImplementedError("Please Implement this method")
 
-    def get_possible_actions(self):
+    def get_legal_moves(self):
         raise NotImplementedError("Please Implement this method")
 
     def advance(self, action_index):
@@ -69,15 +68,14 @@ class BaseGame:
     def display(self):
         raise NotImplementedError("Please Implement this method")
 
-    def rotate_fv(self, fv):
-        raise NotImplementedError("Please Implement this method")
-
-    def rotate_pi(self, pi):
+    @staticmethod
+    def __rep_value_to_p_index(rep_value):
+        """ Convert Representation Value to player index """
         raise NotImplementedError("Please Implement this method")
 
     @staticmethod
-    def __rep_value_to_p_index(rep_value):
-        """ Convert Representation Value to player index. """
+    def __p_index_to_rep_value(player_index):
+        """ Convert player index to representation value """
         raise NotImplementedError("Please Implement this method")
 
 
