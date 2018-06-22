@@ -36,13 +36,13 @@ class Nn(BaseApprentice):
         h1 = Dense(256, kernel_regularizer=l2())(x)
         h1 = Activation("elu")(h1)
         #h1 = BatchNormalization()(h1)
-        h1 = Dropout(rate=0.2)(h1)
+        #h1 = Dropout(rate=0.2)(h1)
 
         # Hidden layer 2
         h2 = Dense(256, kernel_regularizer=l2())(h1)
         h2 = Activation("elu")(h2)
         #h2 = BatchNormalization()(h2)
-        h2 = Dropout(rate=0.2)(h2)
+        #h2 = Dropout(rate=0.2)(h2)
 
         # Output layer pi = Action probability.
         pi = Dense(pi_size, activation='softmax', name='pi_output', kernel_regularizer=l2())(h2)
