@@ -9,9 +9,8 @@ class Statistics:
     metadata = "metadata"
     folder = "./Statistics/"
 
-    def __init__(self, file_name: str, num_train_epoch, search_time,
+    def __init__(self, num_train_epoch, search_time,
                  num_matches, num_iteration, players):
-        self.file_name = file_name
         folder_name = self.make_new_folder()
         self.base_path = Statistics.folder + folder_name + "/"
 
@@ -30,7 +29,7 @@ class Statistics:
             with open(self.__get_path(file_name=str(p.index)), 'w') as file:
                 file.write("win,loss,draw" + "\n")
 
-    def save(self, results, i):
+    def save(self, results):
         """ Save statistic about the game """
         print(results)
         for i, result in enumerate(results):
