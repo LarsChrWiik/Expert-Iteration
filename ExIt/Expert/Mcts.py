@@ -2,13 +2,14 @@
 from ExIt.Expert.BaseExpert import BaseExpert
 from Games.GameLogic import BaseGame
 from ExIt.Apprentice import BaseApprentice
-from random import choice as rnd_choice
 from math import sqrt
-from math import log as ln
 from Support.Timer import Timer
+from ExIt.Evaluator import zero_sum_2v2_evaluation
 
 
 class Mcts(BaseExpert):
+    """ This MCTS implementation is limited to Zero-sum,
+        two-player deterministic markov games """
 
     def __init__(self, c):
         self.timer = Timer()
@@ -16,117 +17,102 @@ class Mcts(BaseExpert):
 
     def search(self, state: BaseGame, predictor: BaseApprentice, search_time: float):
         self.timer.start_search_timer(search_time=search_time)
-        root_node = NodeMcts(state=state, action_index=None, original_turn=state.turn,
-                             parent=None, root_node=None, c=self.c)
+        root_node = NodeMcts(
+            state=state,
+            a=None,
+            original_turn=state.turn,
+            predictor=predictor,
+            parent=None,
+            root_node=None,
+            c=self.c
+        )
         while self.timer.have_time_left():
-            self.iteration(root_node=root_node)
-            if root_node.no_search_space:
-                break
-        # TODO: fix.
-        v_values, action_indexes = root_node.get_v_actions_and_index()
-        return v_values, action_indexes, root_node.get_evaluation()
+            root_node.tree_policy()
 
-    @staticmethod
-    def iteration(root_node: 'NodeMcts'):
-        """ One iteration of MCTS """
-        node = root_node.tree_policy()
-        if root_node.no_search_space:
-            return
-        r = node.default_policy()
-        node.backpropagate(r)
+        v_values = [node.q for node in root_node.children]
+        action_indexes = [node.a for node in root_node.children]
+        return v_values, action_indexes, root_node.q
 
 
 class NodeMcts:
+    """ MCTS node that includes an evaluation function, which assumes
+        Zero-sum, two-player deterministic markov games """
 
-    def __init__(self, state, action_index, original_turn, parent, root_node, c):
+    def __init__(self, state, a, original_turn, predictor, parent, root_node, c):
         self.state = state
-        self.action_index = action_index
+        # action_index that lead to this state.
+        self.a = a
         self.original_turn = original_turn
+        self.predictor = predictor
         self.parent = parent
         self.root_node = root_node if root_node is not None else self
         self.children = None
-        # Visits.
+        # Q value for this state.
+        self.q = 0
+        self.v = zero_sum_2v2_evaluation(
+            state=self.state,
+            original_turn=self.original_turn,
+            predictor=self.predictor
+        )
+        # Pi from this state.
+        self.p = self.predictor.pred_prob(X=self.state.get_feature_vector())
+        # State action visit count.
         self.n = 0
-        # Total score.
-        self.t = 0
         # Exploration parameter.
         self.c = c
-        self.no_search_space = False
-        # TODO: V value = t / n
-
-    def get_evaluation(self):
-        return self.t / self.n
-
-    def get_v_actions_and_index(self):
-        """ Return the evaluations for each action index from this state """
-        return [node.get_evaluation() for node in self.children]
-
-    def __expand(self):
-        """ Expand the tree by adding this new node """
-        self.children = []
-        possible_actions = self.state.get_possible_actions()
-        for action_index in possible_actions:
-            state_next = self.state.copy()
-            state_next.advance(action_index=action_index)
-            self.children.append(
-                NodeMcts(
-                    state=state_next,
-                    action_index=action_index,
-                    original_turn=self.original_turn,
-                    parent=self,
-                    root_node=self.root_node,
-                    c=self.c
-                )
-            )
 
     def tree_policy(self):
-        """ Find the next unexplored node """
         if self.children is None:
-            if self.n == 0:
-                return self
             self.__expand()
+            self.backpropagate(self.v)
 
-        # TODO: This might be stopping too early.
-        # Check if there is no more search space.
+        # TODO: Ask Spyros.
         if len(self.children) == 0:
-            self.root_node.no_search_space = True
-            return None
+            self.backpropagate(self.v)
+        else:
+            self.get_ucb_child().tree_policy()
 
-        child = self.get_ucb1_child()
-        return child.tree_policy()
-
-    def default_policy(self):
-        """ Simulate this expansion with random moved until the game is over """
-        state_copy = self.state.copy()
-        while not state_copy.is_game_over():
-            if state_copy.is_game_over():
-                break
-            # Make random advance.
-            state_copy.advance(rnd_choice(state_copy.get_possible_actions()))
-        return state_copy.get_reward(player_index=self.original_turn)
-
-    def backpropagate(self, r):
-        """ Update the estimation for all nodes from the node to the root node """
-        self.t += r
-        self.n += 1
-        if self.parent is not None:
-            self.parent.backpropagate(r)
-
-    def get_ucb1_child(self):
+    def get_ucb_child(self):
+        """ Finds the child this the highest UCB value """
         max_score = float("-inf")
         best_node = None
         for child in self.children:
-            value = child.ucb1()
+            value = child.ucb()
             if value > max_score:
                 max_score = value
                 best_node = child
         return best_node
 
-    def ucb1(self):
-        n = self.n
-        if n <= 0:
-            return float("inf")
-        t = self.t
-        w = t / n
-        N = self.root_node.n
-        return (w / n) + self.c * sqrt(ln(N) / n)
+    def ucb(self):
+        """ Calculates Upper Confident Bound for this child """
+        nsb = [c.n for c in self.parent.children]
+        return self.q + self.c * self.parent.p[self.a] * sqrt(sum(nsb)) / (1 + self.n)
+
+    def backpropagate(self, v):
+        """ Update the estimation for all nodes from the node to the root node """
+        self.n += 1
+        #print("q was: ", self.q)
+        self.q = (self.n * self.q + v) / (self.n + 1)
+        #print("new q: ", self.q)
+        #print("")
+        if self.parent is not None:
+            self.parent.backpropagate(v)
+
+    def __expand(self):
+        """ Expand the tree by adding this new node """
+        self.children = []
+        possible_actions = self.state.get_legal_moves()
+        for a in possible_actions:
+            state_next = self.state.copy()
+            state_next.advance(action_index=a)
+            self.children.append(
+                NodeMcts(
+                    state=state_next,
+                    a=a,
+                    original_turn=self.original_turn,
+                    predictor=self.predictor,
+                    parent=self,
+                    root_node=self.root_node,
+                    c=self.c
+                )
+            )
