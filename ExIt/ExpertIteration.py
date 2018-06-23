@@ -26,13 +26,12 @@ class ExpertIteration:
         for i in range(num_iteration):
 
             state = game_class()
-            X = state.get_feature_vector(state.turn)
+            X = state.get_feature_vector()
 
             while not state.is_game_over():
                 # TODO: test Spyros theory.
                 #Qs = [get_reward_for_action(state, a, self.apprentice) for a in state.get_legal_moves()]
                 #print("Qs = ", Qs)
-
                 self.ex_it_state(state=state, search_time=search_time)
             self.games_played += 1
 
@@ -52,11 +51,7 @@ class ExpertIteration:
 
     def ex_it_state(self, state: BaseGame, search_time: float):
         """ Expert Iteration for a given state """
-        v_values, action_indexes, v = self.expert.search(
-            state=state,
-            predictor=self.apprentice,
-            search_time=search_time
-        )
+        v_values, action_indexes, v = self.expert.search(state=state, predictor=self.apprentice, search_time=search_time)
 
         action_index = e_greedy(pi=v_values, legal_moves=action_indexes)
 
