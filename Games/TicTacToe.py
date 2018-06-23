@@ -6,13 +6,13 @@ from Games.GameLogic import bitboard
 
 class TicTacToe(BaseGame):
 
-    def __init__(self, turn=0):
+    def __init__(self):
         super().__init__()
         self.num_players = 2
         self.num_actions = 9
-        self.turn = turn
+        self.turn = 0
         self.board = np.zeros((9,), dtype=int)
-        self.fv_size = len(self.get_feature_vector(turn=0))
+        self.fv_size = len(self.get_feature_vector())
 
     @staticmethod
     def __rep_value_to_p_index(rep_value):
@@ -90,7 +90,7 @@ class TicTacToe(BaseGame):
         return len(np.where(self.board == 0, 1, 0).nonzero()[0]) == 0 and \
                (self.winner is None or self.winner == -1)
 
-    def get_feature_vector(self, turn):
+    def get_feature_vector(self):
         return bitboard(board=self.board)
 
     def next_turn(self):
