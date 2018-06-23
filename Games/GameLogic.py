@@ -62,7 +62,7 @@ class BaseGame:
     def update_game_state(self):
         raise NotImplementedError("Please Implement this method")
 
-    def get_feature_vector(self, player_index):
+    def get_feature_vector(self):
         raise NotImplementedError("Please Implement this method")
 
     def display(self):
