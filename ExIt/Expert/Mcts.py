@@ -66,7 +66,6 @@ class NodeMcts:
             self.__expand()
             self.backpropagate(self.v)
 
-        # TODO: Ask Spyros.
         if len(self.children) == 0:
             self.backpropagate(self.v)
         else:
@@ -91,10 +90,7 @@ class NodeMcts:
     def backpropagate(self, v):
         """ Update the estimation for all nodes from the node to the root node """
         self.n += 1
-        #print("q was: ", self.q)
         self.q = (self.n * self.q + v) / (self.n + 1)
-        #print("new q: ", self.q)
-        #print("")
         if self.parent is not None:
             self.parent.backpropagate(v)
 
