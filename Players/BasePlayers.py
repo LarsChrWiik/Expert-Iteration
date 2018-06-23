@@ -54,7 +54,7 @@ class BaseExItPlayer(BasePlayer):
 
     def move(self, state: BaseGame, randomness=True, print_info=False):
         """ Move according to the apprentice (No expert) """
-        fv = state.get_feature_vector(state.turn)
+        fv = state.get_feature_vector()
         pi = self.__ex_it_algorithm.apprentice.pred_prob(fv)
         legal_moves = state.get_legal_moves()
 
@@ -97,11 +97,11 @@ class BaseExItPlayer(BasePlayer):
 
     # TODO: Remove later (Used for testing).
     def print_info(self, state, action_index):
-        print("fv = ", state.get_feature_vector(state.turn))
+        print("fv = ", state.get_feature_vector())
         print("evaluation = ", self.__ex_it_algorithm.apprentice.pred_eval(
-            X=state.get_feature_vector(state.turn)))
+            X=state.get_feature_vector()))
         print("action prob = ", self.__ex_it_algorithm.apprentice.pred_prob(
-            X=state.get_feature_vector(state.turn)))
+            X=state.get_feature_vector()))
         print("action_index = " + str(action_index))
         pi_update = np.zeros(state.num_actions, dtype=float)
         pi_update[action_index] = 1
