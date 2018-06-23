@@ -13,7 +13,7 @@ class DataSet:
         """ Add information to sample arrays. Array indexes refer to the same sample """
         pi_update = np.zeros(state.num_actions, dtype=float)
         pi_update[action_index] = 1
-        turn, fv, pi = state.turn, state.get_feature_vector(state.turn), pi_update
+        turn, fv, pi = state.turn, state.get_feature_vector(), pi_update
         self.s_array.append(fv)
         self.pi_array.append(pi)
         self.v_array.append(v)
