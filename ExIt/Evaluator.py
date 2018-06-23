@@ -8,7 +8,7 @@ def zero_sum_2v2_evaluation(state: BaseGame, original_turn: int, predictor: Base
         return state.get_result(original_turn).value
     else:
         return predictor.pred_eval(
-            X=state.get_feature_vector(state.turn)
+            X=state.get_feature_vector()
         ) * (1 if state.turn == original_turn else -1)
 
 
