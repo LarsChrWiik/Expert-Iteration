@@ -67,6 +67,7 @@ class NodeMcts:
             self.backpropagate(self.v)
 
         if len(self.children) == 0:
+            # This node is a leaf node.
             self.backpropagate(self.v)
         else:
             self.get_ucb_child().tree_policy()
