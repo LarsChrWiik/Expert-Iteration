@@ -56,7 +56,7 @@ class BaseGame:
     def get_legal_moves(self):
         raise NotImplementedError("Please Implement this method")
 
-    def advance(self, action_index):
+    def advance(self, a):
         raise NotImplementedError("Please Implement this method")
 
     def update_game_state(self):
@@ -69,12 +69,12 @@ class BaseGame:
         raise NotImplementedError("Please Implement this method")
 
     @staticmethod
-    def __rep_value_to_p_index(rep_value):
+    def __board_value_to_player_index(rep_value):
         """ Convert Representation Value to player index """
         raise NotImplementedError("Please Implement this method")
 
     @staticmethod
-    def __p_index_to_rep_value(player_index):
+    def __player_index_to_board_value(player_index):
         """ Convert player index to representation value """
         raise NotImplementedError("Please Implement this method")
 
