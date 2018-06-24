@@ -34,7 +34,7 @@ class BasePlayer:
     def move_random(game: BaseGame):
         legal_moves = game.get_legal_moves()
         action_index = rnd_choice(legal_moves)
-        game.advance(action_index=action_index)
+        game.advance(a=action_index)
 
 
 class BaseExItPlayer(BasePlayer):
@@ -69,7 +69,7 @@ class BaseExItPlayer(BasePlayer):
             self.print_info(state=state, action_index=action_index)
             #self.spyros_function(state=state, pi=pi, legal_moves=legal_moves)
 
-        state.advance(action_index=action_index)
+        state.advance(a=action_index)
 
     def spyros_function(self, state, pi, legal_moves):
         """ ---------- SPYROS ---------- START"""

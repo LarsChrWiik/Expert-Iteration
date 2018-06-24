@@ -131,7 +131,7 @@ class NodeMiniMax:
         possible_actions = self.state.get_legal_moves()
         for action_index in possible_actions:
             state_next = self.state.copy()
-            state_next.advance(action_index=action_index)
+            state_next.advance(a=action_index)
             self.children.append(
                 NodeMiniMax(
                     state=state_next,

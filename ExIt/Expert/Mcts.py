@@ -101,7 +101,7 @@ class NodeMcts:
         possible_actions = self.state.get_legal_moves()
         for a in possible_actions:
             state_next = self.state.copy()
-            state_next.advance(action_index=a)
+            state_next.advance(a=a)
             self.children.append(
                 NodeMcts(
                     state=state_next,

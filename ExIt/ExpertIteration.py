@@ -56,4 +56,4 @@ class ExpertIteration:
         action_index = e_greedy(pi=v_values, legal_moves=action_indexes)
 
         self.data_set.add_sample(state=state, action_index=action_index, v=v)
-        state.advance(action_index=action_index)
+        state.advance(a=action_index)
