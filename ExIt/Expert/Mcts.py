@@ -16,7 +16,6 @@ class Mcts(BaseExpert):
         self.c = c
 
     def search(self, state: BaseGame, predictor: BaseApprentice, search_time: float):
-        self.timer.start_search_timer(search_time=search_time)
         root_node = NodeMcts(
             state=state,
             a=None,
@@ -26,6 +25,7 @@ class Mcts(BaseExpert):
             root_node=None,
             c=self.c
         )
+        self.timer.start_search_timer(search_time=search_time)
         while self.timer.have_time_left():
             root_node.tree_policy()
 

@@ -38,7 +38,6 @@ class MiniMax(BaseExpert):
         self.timer = Timer()
 
     def search(self, state: BaseGame, predictor: BaseApprentice, search_time: float):
-        self.timer.start_search_timer(search_time=search_time)
         root_node = NodeMiniMax(
             state=state,
             action_index=None,
@@ -47,7 +46,7 @@ class MiniMax(BaseExpert):
             root_node=None,
             predictor=predictor
         )
-
+        self.timer.start_search_timer(search_time=search_time)
         depth = 1
         tmp = False
         while self.timer.have_time_left():
