@@ -62,14 +62,15 @@ class BaseExItPlayer(BasePlayer):
         pi_new = [x for i, x in enumerate(pi) if i in legal_moves]
         pi = pi_new
 
-        action_index = e_greedy(pi=pi, legal_moves=legal_moves) if randomness \
-            else get_action_index_exploit(pi=pi, action_indexes=legal_moves)
+        best_action, action_index = e_greedy(pi=pi, legal_moves=legal_moves)
 
         if print_info:
             self.print_info(state=state, action_index=action_index)
-            #self.spyros_function(state=state, pi=pi, legal_moves=legal_moves)
 
-        state.advance(a=action_index)
+        if randomness:
+            state.advance(a=action_index)
+        else:
+            state.advance(a=best_action)
 
     def spyros_function(self, state, pi, legal_moves):
         """ ---------- SPYROS ---------- START"""

@@ -4,7 +4,7 @@ import random
 
 
 # 1.0 = always explore. 0.0 = always exploit.
-exploration_degree = 0.1
+exploration_degree = 1.0
 
 
 def get_action_index_exploit(pi, action_indexes):
@@ -24,6 +24,7 @@ def get_action_index_explore(pi, action_indexes):
 def e_greedy(pi, legal_moves):
     """ Assumes that PI has removed moves that are not legal.
         Also assumes that the index of pi and action_indexes corresponds. """
+    best_action = get_action_index_exploit(pi=pi, action_indexes=legal_moves)
     if random.uniform(0, 1) < exploration_degree:
-        return random.choice(legal_moves)
-    return get_action_index_exploit(pi=pi, action_indexes=legal_moves)
+        return best_action, random.choice(legal_moves)
+    return best_action, best_action
