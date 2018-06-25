@@ -9,7 +9,7 @@ import numpy as np
 np.set_printoptions(suppress=True)
 
 
-search_time = 0.05
+search_time = 0.1
 num_iteration = 100
 num_train_epoch = 128
 num_matches = 1000
