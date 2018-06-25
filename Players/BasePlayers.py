@@ -7,6 +7,9 @@ from ExIt.ActionPolicy import e_greedy, get_action_index_exploit
 import numpy as np
 
 
+exploration_degree = 0.1
+
+
 def assign_game_index(players):
     # Assign the players a unique index within the game.
     for index, p in enumerate(players):
@@ -62,7 +65,11 @@ class BaseExItPlayer(BasePlayer):
         pi_new = [x for i, x in enumerate(pi) if i in legal_moves]
         pi = pi_new
 
-        best_action, action_index = e_greedy(pi=pi, legal_moves=legal_moves)
+        best_action, action_index = e_greedy(
+            pi=pi,
+            legal_moves=legal_moves,
+            e=exploration_degree
+        )
 
         if print_info:
             self.print_info(state=state, action_index=action_index)

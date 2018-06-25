@@ -9,6 +9,8 @@ from ExIt.ActionPolicy import e_greedy
 
 
 timer = Timer()
+# 1.0 = always explore. 0.0 = always exploit.
+exploration_degree = 1.0
 
 
 class ExpertIteration:
@@ -50,7 +52,11 @@ class ExpertIteration:
         """ Expert Iteration for a given state """
         v_values, action_indexes, v = self.expert.search(state=state, predictor=self.apprentice, search_time=search_time)
 
-        best_action, action_index = e_greedy(pi=v_values, legal_moves=action_indexes)
+        best_action, action_index = e_greedy(
+            pi=v_values,
+            legal_moves=action_indexes,
+            e=exploration_degree
+        )
 
         self.data_set.add_sample(state=state, action_index=best_action, v=v)
         state.advance(a=action_index)
