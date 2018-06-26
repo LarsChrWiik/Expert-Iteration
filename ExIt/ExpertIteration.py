@@ -34,7 +34,6 @@ class ExpertIteration:
             while not state.is_game_over():
                 self.ex_it_state(state=state, search_time=search_time)
                 num_states += 1
-
             self.games_played += 1
 
             self.data_set.set_game_outcome_v_values(final_state=state)
@@ -51,7 +50,7 @@ class ExpertIteration:
             print("")
 
         self.data_set.save_samples_in_memory()
-        s_array, pi_array, v_array = self.data_set.get_sample_batch() 
+        s_array, pi_array, v_array = self.data_set.get_sample_batch()
         self.apprentice.train(X=s_array, Y_pi=pi_array, Y_v=v_array)
 
     def ex_it_state(self, state: BaseGame, search_time: float):
