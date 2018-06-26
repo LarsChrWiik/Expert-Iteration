@@ -37,7 +37,7 @@ def comparison():
     # Run Comparison with several iteration of self-play.
     Matchmaking(
         game_class=TicTacToe,
-        players=[NnMctsPlayer(), RandomPlayer()]
+        players=[NnMinimaxPlayer(), RandomPlayer()]
     ).compare_ex_it(
         num_train_epoch=num_train_epoch,
         search_time=search_time,

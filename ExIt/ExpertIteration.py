@@ -10,7 +10,7 @@ from ExIt.ActionPolicy import e_greedy
 
 timer = Timer()
 # 1.0 = always explore. 0.0 = always exploit.
-exploration_degree = 1.0
+exploration_degree = 0.1
 
 
 class ExpertIteration:
@@ -51,7 +51,7 @@ class ExpertIteration:
             print("")
 
         self.data_set.save_samples_in_memory()
-        s_array, pi_array, v_array = self.data_set.get_sample_batch()
+        s_array, pi_array, v_array = self.data_set.get_sample_batch() 
         self.apprentice.train(X=s_array, Y_pi=pi_array, Y_v=v_array)
 
     def ex_it_state(self, state: BaseGame, search_time: float):

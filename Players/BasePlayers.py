@@ -7,9 +7,6 @@ from ExIt.ActionPolicy import e_greedy, get_action_index_exploit
 import numpy as np
 
 
-exploration_degree = 0.1
-
-
 def assign_game_index(players):
     # Assign the players a unique index within the game.
     for index, p in enumerate(players):
@@ -43,6 +40,8 @@ class BasePlayer:
 class BaseExItPlayer(BasePlayer):
     """ Base player that is able to improve its strategy using Expert Iteration """
 
+    exploration_degree = 0.1
+
     def __init__(self, ex_it_algorithm: ExpertIteration):
         super().__init__()
         self.__ex_it_algorithm = ex_it_algorithm
@@ -68,7 +67,7 @@ class BaseExItPlayer(BasePlayer):
         best_action, action_index = e_greedy(
             pi=pi,
             legal_moves=legal_moves,
-            e=exploration_degree
+            e=BaseExItPlayer.exploration_degree
         )
 
         if print_info:
