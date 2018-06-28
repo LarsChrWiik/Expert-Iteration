@@ -15,10 +15,6 @@ class TicTacToe(BaseGame):
         self.board = np.zeros((TicTacToe.num_squares,), dtype=int)
         self.fv_size = TicTacToe.num_squares * 2
         self.num_actions = TicTacToe.num_squares
-        self.advance(0)
-        self.advance(2)
-        self.advance(5)
-        self.advance(3)
 
     @staticmethod
     def __board_value_to_player_index(rep_value):
