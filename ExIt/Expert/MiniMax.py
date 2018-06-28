@@ -34,8 +34,9 @@ class MiniMax(BaseExpert):
     """ This implementation is limited to Zero-sum,
         two-player deterministic markov games """
 
-    def __init__(self):
+    def __init__(self, max_depth=None):
         self.timer = Timer()
+        self.max_depth = max_depth
 
     def search(self, state: BaseGame, predictor: BaseApprentice, search_time: float):
         root_node = NodeMiniMax(
@@ -46,33 +47,26 @@ class MiniMax(BaseExpert):
             root_node=None,
             predictor=predictor
         )
+
         self.timer.start_search_timer(search_time=search_time)
         depth = 1
-        tmp = False
-        while self.timer.have_time_left():
-            did_progress = self.iteration(root_node=root_node, to_depth=depth)
-            # TODO: Check if this is needed.
-            if not did_progress:
-                if tmp:
-                    break
-                # All nodes in this depth has been evaluated.
+        # If max_depth is not None, the timer is disregarded.
+        while self.should_search(depth):
+            node = root_node.tree_policy(max_depth=depth)
+            if node is None:
                 depth += 1
-                tmp = True
             else:
-                tmp = False
+                node.default_policy()
+
         minimax(node=root_node, original_turn=root_node.original_turn)
 
         v_values, action_indexes = root_node.get_v_actions_and_index()
         return v_values, action_indexes, root_node.evaluation
 
-    @staticmethod
-    def iteration(root_node: 'NodeMiniMax', to_depth: int):
-        """ One iteration of Minimax """
-        node = root_node.tree_policy(to_depth=to_depth)
-        did_progress = node is not None
-        if did_progress:
-            node.default_policy()
-        return did_progress
+    def should_search(self, depth):
+        if self.max_depth is None:
+            return self.timer.have_time_left()
+        return depth <= self.max_depth
 
 
 class NodeMiniMax:
@@ -101,18 +95,18 @@ class NodeMiniMax:
                 action_indexes.append(node.action_index)
         return v_values, action_indexes
 
-    def tree_policy(self, to_depth: int):
+    def tree_policy(self, max_depth):
         """ Find the next unexplored node """
-        if self.depth < to_depth:
+        if self.depth < max_depth:
             if self.children is None:
                 self.__expand()
             if len(self.children) == 0:
                 return None
             for child in self.children:
-                node = child.tree_policy(to_depth=to_depth)
+                node = child.tree_policy(max_depth)
                 if node is not None:
                     return node
-        elif self.depth == to_depth:
+        elif self.depth == max_depth:
             if self.evaluation is None:
                 return self
         return None
