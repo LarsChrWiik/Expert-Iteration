@@ -37,3 +37,15 @@ class NnMinimaxPlayer(BaseExItPlayer):
                 expert=MiniMax()
             )
         )
+
+
+class NnMinimaxOneDepthPlayer(BaseExItPlayer):
+    """ Player that uses Minimax as expert and NN as apprentice """
+
+    def __init__(self):
+        super().__init__(
+            ex_it_algorithm=ExpertIteration(
+                apprentice=Nn(),
+                expert=MiniMax(max_depth=1)
+            )
+        )
