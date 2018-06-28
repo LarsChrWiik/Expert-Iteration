@@ -3,15 +3,15 @@ from Games.GameLogic import BaseGame
 import numpy as np
 
 
-batch_size = 128
-max_experience_replay_memory_size = 5000
+batch_size = 256
+max_memory_size = 10000
 
 
 class DataSet:
     """ Class that contains the data set logic for improving the Apprentice """
 
     def __init__(self):
-        self.__clear()
+        self.clear()
         self.memory = None
 
     def add_sample(self, state: BaseGame, action_index, v):
@@ -38,19 +38,20 @@ class DataSet:
         else:
             for i in range(len(self.memory)):
                 self.memory[i].extend(new_data_tuple[i])
-            self.memory = [t[-max_experience_replay_memory_size:] for t in self.memory]
-        self.__clear()
+            self.memory = [t[-max_memory_size:] for t in self.memory]
+        self.clear()
 
     def get_sample_batch(self):
         """ Chooses a random batch from the samples stored in memory """
         sample_size = len(self.memory[0])
+        size = min(batch_size, sample_size)
         mini_batch_indices = np.random.choice(
             sample_size,
-            size=min(batch_size, sample_size),
+            size=size,
             replace=False
         )
         return list([np.array(k)[mini_batch_indices] for k in self.memory])
 
-    def __clear(self):
+    def clear(self):
         """ Clears the history from previous game """
         self.s_array, self.pi_array, self.v_array, self.turn_array = [[] for _ in range(4)]
