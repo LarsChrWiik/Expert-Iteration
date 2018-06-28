@@ -3,7 +3,7 @@ from Games.GameLogic import BaseGame
 import numpy as np
 
 
-batch_size = 256
+batch_size = 1024
 max_memory_size = 10000
 
 
