@@ -6,6 +6,7 @@ from ExIt.DataSet import DataSet
 from Support.Timer import Timer
 from ExIt.Evaluator import get_reward_for_action
 from ExIt.ActionPolicy import e_greedy
+from tqdm import tqdm, trange
 
 
 timer = Timer()
@@ -25,33 +26,24 @@ class ExpertIteration:
         """ Start Expert Iteration to master the given game.
             This process is time consuming. """
 
-        for i in range(num_iteration):
+        with trange(num_iteration) as t:
+            for _ in t:
 
-            state = game_class()
-            X = state.get_feature_vector()
+                state = game_class()
+                num_states = 0
+                while not state.is_game_over():
+                    self.ex_it_state(state=state, search_time=search_time)
+                    num_states += 1
+                self.games_played += 1
 
-            num_states = 0
-            while not state.is_game_over():
-                self.ex_it_state(state=state, search_time=search_time)
-                num_states += 1
-            self.games_played += 1
+                self.data_set.set_game_outcome_v_values(final_state=state)
 
-            self.data_set.set_game_outcome_v_values(final_state=state)
-
-            # TODO: Delete later.
-            print("*** Iteration = " + str(self.games_played) + " ***")
-
-            print("v_array = ", self.data_set.v_array[-num_states:])
-            print("     pi = ", self.apprentice.pred_prob(X=X))
-            print(" pi_new = ", self.data_set.pi_array[-num_states])
-            print("v_start = ", self.apprentice.pred_eval(X=X))
-            print("")
-            print("")
-            print("")
-
-        self.data_set.save_samples_in_memory()
-        s_array, pi_array, v_array = self.data_set.get_sample_batch()
-        self.apprentice.train(X=s_array, Y_pi=pi_array, Y_v=v_array)
+                # Store game history samples and train the Apprentice.
+                self.data_set.save_samples_in_memory()
+                # Train on mini-batches.
+                s_array, pi_array, v_array = self.data_set.get_sample_batch()
+                p, v = self.apprentice.train(X=s_array, Y_pi=pi_array, Y_v=v_array)
+                t.set_postfix(pl='%01.2f' % p, vl='%01.2f' % v)
 
     def ex_it_state(self, state: BaseGame, search_time: float):
         """ Expert Iteration for a given state """
