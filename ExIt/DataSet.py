@@ -13,9 +13,9 @@ class DataSet:
     def __init__(self):
         self.memory = None
 
-    def save_samples_in_memory(self, s_array, pi_array, v_array):
+    def save_samples_in_memory(self, s_array, p_array, v_array):
         """ Stores samples from the previous game and clears the history """
-        new_data_tuple = [s_array, pi_array, v_array]
+        new_data_tuple = [s_array, p_array, v_array]
         if self.memory is None:
             self.memory = new_data_tuple
         else:
