@@ -73,10 +73,10 @@ class Nn(BaseApprentice):
         self.policy_network = Model(inputs=[input], outputs=[p])
         self.value_network = Model(inputs=[input], outputs=[v])
 
-    def train(self, X, Y_pi, Y_v):
+    def train(self, X_s, Y_p, Y_v):
         _, policy_loss, value_loss = self.model.train_on_batch(
-            x=np.array(X),
-            y=[np.array(Y_pi), np.array(Y_v)]
+            x=np.array(X_s),
+            y=[np.array(Y_p), np.array(Y_v)]
         )
         return policy_loss, value_loss
 
