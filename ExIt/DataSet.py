@@ -1,6 +1,7 @@
 
 from Games.GameLogic import BaseGame
 import numpy as np
+import random
 
 
 batch_size = 1024
@@ -11,33 +12,28 @@ class DataSet:
     """ Class that contains the data set logic for improving the Apprentice """
 
     def __init__(self):
-        self.memory = None
+        self.memory = {}
 
     def save_samples_in_memory(self, s_array, p_array, v_array):
         """ Stores samples from the previous game and clears the history """
-        new_data_tuple = [s_array, p_array, v_array]
-        if self.memory is None:
-            self.memory = new_data_tuple
-        else:
-            for i in range(len(self.memory)):
-                self.memory[i].extend(new_data_tuple[i])
-            self.memory = [t[-max_memory_size:] for t in self.memory]
+        for i, s in enumerate(s_array):
+            self.memory[tuple(s)] = tuple(p_array[i]), v_array[i]
+        while len(self.memory) > max_memory_size:
+            self.memory.pop(random.choice(self.memory.keys()))
 
     def get_sample_batch(self):
         """ Chooses a random batch from the samples stored in memory """
-        sample_size = len(self.memory[0])
-        size = min(batch_size, sample_size)
+        states = list(self.memory.keys())
+        all_examples_indices = len(states)
         mini_batch_indices = np.random.choice(
-            sample_size,
-            size=size,
+            all_examples_indices,
+            size=min(batch_size, all_examples_indices),
             replace=False
         )
-        return list([np.array(k)[mini_batch_indices] for k in self.memory])
 
-    @staticmethod
-    def __blend(a, b):
-        blend = []
-        for x, y in zip(a, b):
-            blend.append((x + y) / 2)
-        s = sum(blend)
-        return [x / s for x in blend]
+        # Extract samples and generate inputs and targets.
+        X_s = np.array(states)[mini_batch_indices]
+        Y_p = [list(self.memory[tuple(key)][0]) for key in X_s]
+        Y_v = [self.memory[tuple(key)][1] for key in X_s]
+
+        return X_s, Y_p, Y_v
