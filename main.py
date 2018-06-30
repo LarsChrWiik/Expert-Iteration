@@ -10,9 +10,10 @@ np.set_printoptions(suppress=True)
 
 
 search_time = 0.1
-num_iteration = 20
-num_train_epoch = 1000
 num_matches = 1000
+
+num_iteration = 100
+num_train_epoch = 500
 
 from numpy.random import dirichlet
 
