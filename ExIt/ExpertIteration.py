@@ -13,7 +13,8 @@ import random
 
 
 timer = Timer()
-# 1.0 = always explore. 0.0 = always exploit.
+
+# 1.0 = explore. 0.0 = exploit.
 exploration_degree = 0.5
 
 
@@ -64,18 +65,18 @@ class ExpertIteration:
             for _ in t:
 
                 state = game_class()
-                s_array, pi_array, v_array = self.ex_it_game(state)
+                s_array, p_array, v_array = self.ex_it_game(state)
 
                 # Store game history samples.
                 self.data_set.save_samples_in_memory(
                     s_array=s_array,
-                    p_array=pi_array,
+                    p_array=p_array,
                     v_array=v_array
                 )
 
                 # Train on mini-batches.
-                s_array, pi_array, v_array = self.data_set.get_sample_batch()
-                p, v = self.apprentice.train(X=s_array, Y_pi=pi_array, Y_v=v_array)
+                X_s, Y_p, Y_v = self.data_set.get_sample_batch()
+                p, v = self.apprentice.train(X_s=X_s, Y_p=Y_p, Y_v=Y_v)
                 t.set_postfix(pl='%01.2f' % p, vl='%01.2f' % v)
 
     def ex_it_game(self, state):
