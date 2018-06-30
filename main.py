@@ -13,7 +13,7 @@ search_time = 0.1
 num_matches = 1000
 
 num_iteration = 100
-num_train_epoch = 500
+num_train_epoch = 100
 
 from numpy.random import dirichlet
 
