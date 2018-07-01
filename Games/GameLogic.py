@@ -25,6 +25,8 @@ class BaseGame:
         self.num_actions = None
         self.fv_size = None
 
+        self.max_game_depth = float('inf')
+
         # Indicates the winner of the game. (Index of the winning player). (-1 = draw)
         self.winner = None
 
