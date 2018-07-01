@@ -34,9 +34,9 @@ class MiniMax(BaseExpert):
     """ This implementation is limited to Zero-sum,
         two-player deterministic markov games """
 
-    def __init__(self, max_depth=None):
+    def __init__(self, fixed_depth=None):
         self.timer = Timer()
-        self.max_depth = max_depth
+        self.fixed_depth = fixed_depth
 
     def search(self, state: BaseGame, predictor: BaseApprentice, search_time: float):
         root_node = NodeMiniMax(
@@ -64,9 +64,9 @@ class MiniMax(BaseExpert):
         return v_values, action_indexes, root_node.evaluation
 
     def should_search(self, depth):
-        if self.max_depth is None:
+        if self.fixed_depth is None:
             return self.timer.have_time_left()
-        return depth <= self.max_depth
+        return depth <= self.fixed_depth
 
 
 class NodeMiniMax:
