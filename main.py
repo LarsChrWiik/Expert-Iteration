@@ -9,11 +9,11 @@ import numpy as np
 np.set_printoptions(suppress=True)
 
 
-search_time = 0.1
+search_time = 0.01
 num_matches = 1000
 
-num_iteration = 10
-num_train_epoch = 10
+num_iteration = 100
+num_train_epoch = 100
 
 from numpy.random import dirichlet
 
