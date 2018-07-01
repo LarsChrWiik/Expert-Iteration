@@ -31,23 +31,11 @@ class NnMctsPlayer(BaseExItPlayer):
 class NnMinimaxPlayer(BaseExItPlayer):
     """ Player that uses Minimax as expert and NN as apprentice """
 
-    def __init__(self):
+    def __init__(self, fixed_depth=None):
         super().__init__(
             ex_it_algorithm=ExpertIteration(
                 apprentice=Nn(),
-                expert=MiniMax()
-            )
-        )
-
-
-class NnMinimaxOneDepthPlayer(BaseExItPlayer):
-    """ Player that uses Minimax as expert and NN as apprentice """
-
-    def __init__(self):
-        super().__init__(
-            ex_it_algorithm=ExpertIteration(
-                apprentice=Nn(),
-                expert=MiniMax(max_depth=1)
+                expert=MiniMax(fixed_depth=fixed_depth)
             )
         )
 
@@ -55,10 +43,10 @@ class NnMinimaxOneDepthPlayer(BaseExItPlayer):
 class NnAlphaBetaPlayer(BaseExItPlayer):
     """ Player that uses Minimax as expert and NN as apprentice """
 
-    def __init__(self):
+    def __init__(self, fixed_depth=None):
         super().__init__(
             ex_it_algorithm=ExpertIteration(
                 apprentice=Nn(),
-                expert=AlphaBeta()
+                expert=AlphaBeta(fixed_depth=fixed_depth)
             )
         )
