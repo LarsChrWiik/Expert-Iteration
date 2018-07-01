@@ -6,9 +6,9 @@ from Support.Timer import Timer
 from ExIt.Evaluator import zero_sum_2v2_evaluation
 
 
-def alpha_beta_search(state, alpha, beta, depth, predictor, original_turn, timer, is_root):
+def alpha_beta_search(state, alpha, beta, depth, predictor, original_turn, is_root, timer=None):
 
-    def max_value(state, alpha, beta, depth, is_root):
+    def max_value(state, alpha, beta, depth):
         val = float('-inf')
         action_indexes = state.get_legal_moves()
         v_values = [0 for _ in action_indexes]
@@ -17,7 +17,7 @@ def alpha_beta_search(state, alpha, beta, depth, predictor, original_turn, timer
             c.advance(a)
             val = max(
                 val,
-                alpha_beta_search(c, alpha, beta, depth - 1, predictor, original_turn, timer, False)
+                alpha_beta_search(c, alpha, beta, depth - 1, predictor, original_turn, False, timer)
             )
             v_values[i] = val
             if val >= beta:
@@ -27,7 +27,7 @@ def alpha_beta_search(state, alpha, beta, depth, predictor, original_turn, timer
             return v_values, action_indexes, val
         return val
 
-    def min_value(state, alpha, beta, depth, is_root):
+    def min_value(state, alpha, beta, depth):
         val = float('inf')
         action_indexes = state.get_legal_moves()
         v_values = [0 for _ in action_indexes]
@@ -36,7 +36,7 @@ def alpha_beta_search(state, alpha, beta, depth, predictor, original_turn, timer
             c.advance(a)
             val = min(
                 val,
-                alpha_beta_search(c, alpha, beta, depth - 1, predictor, original_turn, timer, False)
+                alpha_beta_search(c, alpha, beta, depth - 1, predictor, original_turn, False, timer)
             )
             v_values[i] = val
             if val <= alpha:
@@ -46,40 +46,46 @@ def alpha_beta_search(state, alpha, beta, depth, predictor, original_turn, timer
             return v_values, action_indexes, val
         return val
 
-    # TODO: fix     or not timer.have_time_left()
-    # TODO: Make optinal fixed deapth.
-    # TODO: Maybe train more?
-    if state.is_game_over() or depth <= 0:
-        return zero_sum_2v2_evaluation(
-            state=state,
-            original_turn=original_turn,
-            predictor=predictor
-        )
+    if state.is_game_over() or depth <= 0 or \
+            (not is_root and timer is not None and not timer.have_time_left()):
+        return zero_sum_2v2_evaluation(state, original_turn, predictor)
 
     if state.turn == original_turn:
-        return max_value(state, alpha, beta, depth, is_root)
+        return max_value(state, alpha, beta, depth)
     else:
-        return min_value(state, alpha, beta, depth, is_root)
+        return min_value(state, alpha, beta, depth)
 
 
 class AlphaBeta(BaseExpert):
-    """ This implementation is limited to Zero-sum,
+    """ This implementation is designed fpr Zero-sum,
         two-player deterministic markov games """
 
-    def __init__(self):
-        self.timer = Timer()
+    def __init__(self, fixed_depth=None):
+        self.fixed_depth = fixed_depth
 
     def search(self, state: BaseGame, predictor: BaseApprentice, search_time: float):
 
+        # Fixed depth AB-search.
+        if self.fixed_depth is not None:
+            v_values, action_indexes, val = alpha_beta_search(
+                state=state,
+                alpha=float('-inf'),
+                beta=float('inf'),
+                depth=self.fixed_depth,
+                predictor=predictor,
+                original_turn=state.turn,
+                is_root=True
+            )
+            return v_values, action_indexes, val
+
+        # Iterative deepening AB-search.
         timer = Timer()
         timer.start_search_timer(search_time=search_time)
-
+        v_values, action_indexes, val = None, None, None
         depth = 1
-        v_values_last, action_indexes_last, val_last = [], [], float('-inf')
-        v_values, action_indexes, val = [], [], float('-inf')
-        while timer.have_time_left():
-            v_values, action_indexes, val = v_values_last, action_indexes_last, val_last
-            v_values_last, action_indexes_last, val_last = alpha_beta_search(
+        while True:
+
+            v_values_new, action_indexes_new, val_new = alpha_beta_search(
                 state=state,
                 alpha=float('-inf'),
                 beta=float('inf'),
@@ -89,7 +95,19 @@ class AlphaBeta(BaseExpert):
                 timer=timer,
                 is_root=True
             )
+
+            if v_values is None:
+                # This ensures that at least one iteration is stored.
+                v_values, action_indexes, val = v_values_new, action_indexes_new, val_new
+
+            if not timer.have_time_left():
+                # This ensures that the final results are calculated using full AB search.
+                break
+
+            v_values, action_indexes, val = v_values_new, action_indexes_new, val_new
+
             depth += 1
+            if depth >= state.max_game_depth:
+                break
 
         return v_values, action_indexes, val
-
