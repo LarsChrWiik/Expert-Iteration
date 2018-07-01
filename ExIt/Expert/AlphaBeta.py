@@ -6,19 +6,16 @@ from Support.Timer import Timer
 from ExIt.Evaluator import zero_sum_2v2_evaluation
 
 
-def alpha_beta_search(state, alpha, beta, depth, predictor, original_turn, timer):
+def alpha_beta_search(state, alpha, beta, depth, predictor, original_turn, timer, is_root):
 
     def max_value(state, alpha, beta, depth):
         val = float('-inf')
-        action_indexes = state.get_legal_moves()
-        values = [0 for _ in action_indexes]
-        for i, a in enumerate(action_indexes):
+        for a in state.get_legal_moves():
             c = state.copy()
             c.advance(a)
-
-            vs, ass, evals = max(
+            val = max(
                 val,
-                alpha_beta_search(c, alpha, beta, depth - 1, predictor, original_turn, timer)
+                alpha_beta_search(c, alpha, beta, depth - 1, predictor, original_turn, timer, False)
             )
             if val >= beta:
                 return val
@@ -32,7 +29,7 @@ def alpha_beta_search(state, alpha, beta, depth, predictor, original_turn, timer
             c.advance(a)
             val = min(
                 val,
-                alpha_beta_search(c, alpha, beta, depth - 1, predictor, original_turn, timer)
+                alpha_beta_search(c, alpha, beta, depth - 1, predictor, original_turn, timer, False)
             )
             if val <= alpha:
                 return val
@@ -47,9 +44,9 @@ def alpha_beta_search(state, alpha, beta, depth, predictor, original_turn, timer
         )
 
     if state.turn == original_turn:
-        return max_value(state, alpha, beta, depth)
+        return max_value(state, alpha, beta, depth, is_root)
     else:
-        return min_value(state, alpha, beta, depth)
+        return min_value(state, alpha, beta, depth, is_root)
 
 
 class AlphaBeta(BaseExpert):
@@ -77,13 +74,14 @@ class AlphaBeta(BaseExpert):
                 depth=depth,
                 predictor=predictor,
                 original_turn=state.turn,
-                timer=timer
+                timer=timer,
+                is_root=True
             )
             depth += 1
             print("val = ", val)
 
         print("final val = ", val_last)
 
-        v_values, action_indexes = root_node.get_v_actions_and_index()
+        v_values, action_indexes = ...
         return v_values, action_indexes, root_node.evaluation
 
