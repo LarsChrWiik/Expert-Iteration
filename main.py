@@ -9,7 +9,7 @@ import numpy as np
 np.set_printoptions(suppress=True)
 
 
-search_time = 0.01
+search_time = 0.05
 num_matches = 1000
 
 num_iteration = 100
@@ -40,13 +40,13 @@ def comparison():
     # Run Comparison with several iteration of self-play.
     Matchmaking(
         game_class=TicTacToe,
-        players=[NnAlphaBetaPlayer(), RandomPlayer()]
+        players=[NnMinimaxPlayer(), RandomPlayer()]
     ).compare_ex_it(
         num_train_epoch=num_train_epoch,
         search_time=search_time,
         num_matches=num_matches,
         num_iteration=num_iteration,
-        randomness=False
+        randomness=True
     )
 
 

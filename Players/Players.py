@@ -2,7 +2,7 @@
 from Games.GameLogic import BaseGame
 from ExIt.Expert.Mcts import Mcts
 from ExIt.Apprentice.Nn import Nn
-from ExIt.Expert.MiniMax import MiniMax
+from ExIt.Expert.Minimax import Minimax
 from ExIt.Expert.AlphaBeta import AlphaBeta
 from ExIt.ExpertIteration import ExpertIteration
 from Players.BasePlayers import BasePlayer, BaseExItPlayer
@@ -35,7 +35,7 @@ class NnMinimaxPlayer(BaseExItPlayer):
         super().__init__(
             ex_it_algorithm=ExpertIteration(
                 apprentice=Nn(),
-                expert=MiniMax(fixed_depth=fixed_depth)
+                expert=Minimax(fixed_depth=fixed_depth)
             )
         )
 
