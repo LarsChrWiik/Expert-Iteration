@@ -48,6 +48,8 @@ def alpha_beta_search(state, alpha, beta, depth, predictor, original_turn, is_ro
 
     if state.is_game_over() or depth <= 0 or \
             (not is_root and timer is not None and not timer.have_time_left()):
+        """ The root will never enter this if-statement.
+            This assumes that the root is never a state that is game over. """
         return zero_sum_2v2_evaluation(state, original_turn, predictor)
 
     if state.turn == original_turn:
@@ -65,8 +67,8 @@ class AlphaBeta(BaseExpert):
 
     def search(self, state: BaseGame, predictor: BaseApprentice, search_time: float):
 
-        # Fixed depth AB-search.
         if self.fixed_depth is not None:
+            # Fixed depth AB-search.
             v_values, action_indexes, val = alpha_beta_search(
                 state=state,
                 alpha=float('-inf'),
@@ -77,37 +79,41 @@ class AlphaBeta(BaseExpert):
                 is_root=True
             )
             return v_values, action_indexes, val
+        else:
+            # Iterative deepening AB-search.
+            timer = Timer()
+            timer.start_search_timer(search_time=search_time)
+            v_values, action_indexes, val = None, None, None
+            depth = 1
+            while True:
 
-        # Iterative deepening AB-search.
-        timer = Timer()
-        timer.start_search_timer(search_time=search_time)
-        v_values, action_indexes, val = None, None, None
-        depth = 1
-        while True:
+                v_values_new, action_indexes_new, val_new = alpha_beta_search(
+                    state=state,
+                    alpha=float('-inf'),
+                    beta=float('inf'),
+                    depth=depth,
+                    predictor=predictor,
+                    original_turn=state.turn,
+                    timer=timer,
+                    is_root=True
+                )
 
-            v_values_new, action_indexes_new, val_new = alpha_beta_search(
-                state=state,
-                alpha=float('-inf'),
-                beta=float('inf'),
-                depth=depth,
-                predictor=predictor,
-                original_turn=state.turn,
-                timer=timer,
-                is_root=True
-            )
+                if v_values is None:
+                    # This ensures that at least one iteration is stored.
+                    v_values, action_indexes, val = v_values_new, action_indexes_new, val_new
 
-            if v_values is None:
-                # This ensures that at least one iteration is stored.
+                if not timer.have_time_left():
+                    # This prevents unfinished evaluation updates, which
+                    # ensures that the final evaluations are calculated using full AB search.
+                    break
+
+                # Update evaluations.
                 v_values, action_indexes, val = v_values_new, action_indexes_new, val_new
 
-            if not timer.have_time_left():
-                # This ensures that the final results are calculated using full AB search.
-                break
+                # Allow early search stop if it is not needed.
+                if depth >= state.max_game_depth:
+                    break
 
-            v_values, action_indexes, val = v_values_new, action_indexes_new, val_new
+                depth += 1
 
-            depth += 1
-            if depth >= state.max_game_depth:
-                break
-
-        return v_values, action_indexes, val
+            return v_values, action_indexes, val
