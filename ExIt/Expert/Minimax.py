@@ -6,9 +6,10 @@ from Support.Timer import Timer
 from ExIt.Evaluator import zero_sum_2v2_evaluation
 
 
-def minimax(state, depth, predictor, original_turn, is_root, timer=None):
+def alpha_beta_search(state, alpha, beta, depth, predictor, original_turn, is_root, timer=None):
+    """ If alpha and beta is None, then this is a Minimax search """
 
-    def max_value(state, depth):
+    def max_value(state, alpha, beta, depth):
         val = float('-inf')
         action_indexes = state.get_legal_moves()
         v_values = [0 for _ in action_indexes]
@@ -17,14 +18,18 @@ def minimax(state, depth, predictor, original_turn, is_root, timer=None):
             c.advance(a)
             val = max(
                 val,
-                minimax(c, depth - 1, predictor, original_turn, False, timer)
+                alpha_beta_search(c, alpha, beta, depth - 1, predictor, original_turn, False, timer)
             )
             v_values[i] = val
+            if (alpha, beta) != (None, None):
+                if val >= beta:
+                    return val
+                alpha = max(alpha, val)
         if is_root:
             return v_values, action_indexes, val
         return val
 
-    def min_value(state, depth):
+    def min_value(state, alpha, beta, depth):
         val = float('inf')
         action_indexes = state.get_legal_moves()
         v_values = [0 for _ in action_indexes]
@@ -33,9 +38,13 @@ def minimax(state, depth, predictor, original_turn, is_root, timer=None):
             c.advance(a)
             val = min(
                 val,
-                minimax(c, depth - 1, predictor, original_turn, False, timer)
+                alpha_beta_search(c, alpha, beta, depth - 1, predictor, original_turn, False, timer)
             )
             v_values[i] = val
+            if (alpha, beta) != (None, None):
+                if val <= alpha:
+                    return val
+                beta = min(beta, val)
         if is_root:
             return v_values, action_indexes, val
         return val
@@ -47,24 +56,28 @@ def minimax(state, depth, predictor, original_turn, is_root, timer=None):
         return zero_sum_2v2_evaluation(state, original_turn, predictor)
 
     if state.turn == original_turn:
-        return max_value(state, depth)
+        return max_value(state, alpha, beta, depth)
     else:
-        return min_value(state, depth)
+        return min_value(state, alpha, beta, depth)
 
 
 class Minimax(BaseExpert):
-    """ This implementation is designed fpr Zero-sum,
+    """ This implementation is designed for Zero-sum,
         two-player deterministic markov games """
 
-    def __init__(self, fixed_depth=None):
+    def __init__(self, fixed_depth=None, use_alpha_beta=False):
         self.fixed_depth = fixed_depth
+        self.alpha = None if not use_alpha_beta else float('-inf')
+        self.beta = None if not use_alpha_beta else float('inf')
 
     def search(self, state: BaseGame, predictor: BaseApprentice, search_time: float):
 
         if self.fixed_depth is not None:
-            # Fixed depth Minimax-search.
-            v_values, action_indexes, val = minimax(
+            # Fixed depth.
+            v_values, action_indexes, val = alpha_beta_search(
                 state=state,
+                alpha=self.alpha,
+                beta=self.beta,
                 depth=self.fixed_depth,
                 predictor=predictor,
                 original_turn=state.turn,
@@ -72,15 +85,16 @@ class Minimax(BaseExpert):
             )
             return v_values, action_indexes, val
         else:
-            # Iterative deepening Minimax-search.
+            # Iterative deepening.
             timer = Timer()
             timer.start_search_timer(search_time=search_time)
             v_values, action_indexes, val = None, None, None
             depth = 1
             while True:
-
-                v_values_new, action_indexes_new, val_new = minimax(
+                v_values_new, action_indexes_new, val_new = alpha_beta_search(
                     state=state,
+                    alpha=self.alpha,
+                    beta=self.beta,
                     depth=depth,
                     predictor=predictor,
                     original_turn=state.turn,
