@@ -62,7 +62,10 @@ def alpha_beta_search(state, alpha, beta, depth, predictor, original_turn, is_ro
 
 
 class Minimax(BaseExpert):
-    """ This implementation is designed for Zero-sum,
+    """ Minimax and Alpha Beta implementation.
+        Set use_alpha_beta=True to use Alpha-Beta search instead of Minimax search.
+
+        This implementation is designed for Zero-sum,
         two-player deterministic markov games """
 
     def __init__(self, fixed_depth=None, use_alpha_beta=False):
