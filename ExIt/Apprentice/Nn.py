@@ -21,14 +21,13 @@ def custom_loss(y_true, y_pred, beta=0.001):
     return categorical_crossentropy(y_true, y_pred) - beta * entropy(y_pred)
 
 
-n_neurons = 256
-n_layers = 3
-dropout_rate = 0.1
-v_size = 1
-
-
 class Nn(BaseApprentice):
     """ Deep neural network implementation (Apprentice) """
+
+    n_neurons = 256
+    n_layers = 3
+    dropout_rate = None
+    v_size = 1
 
     def __init__(self):
         self.model = None
@@ -42,18 +41,19 @@ class Nn(BaseApprentice):
 
         # Hidden layers.
         x = input
-        for _ in range(n_layers):
-            x = Dense(n_neurons, kernel_regularizer=l2(0.001))(x)
+        for _ in range(Nn.n_layers):
+            x = Dense(Nn.n_neurons, kernel_regularizer=l2(0.001))(x)
             x = BatchNormalization()(x)
             x = Activation("elu")(x)
-            #x = Dropout(rate=dropout_rate)(x)
+            if Nn.dropout_rate is not None:
+                x = Dropout(rate=Nn.dropout_rate)(x)
 
         # Output layer pi = Action probability.
         p = Dense(pi_size, kernel_regularizer=l2(0.001))(x)
         p = BatchNormalization()(p)
         p = Activation("softmax", name='p_output')(p)
         # Output layer v = state evaluation
-        v = Dense(v_size, kernel_regularizer=l2(0.001))(x)
+        v = Dense(Nn.v_size, kernel_regularizer=l2(0.001))(x)
         v = BatchNormalization()(v)
         v = Activation("tanh", name='v_output')(v)
 
