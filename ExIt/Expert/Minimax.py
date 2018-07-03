@@ -72,6 +72,7 @@ class Minimax(BaseExpert):
         self.fixed_depth = fixed_depth
         self.alpha = None if not use_alpha_beta else float('-inf')
         self.beta = None if not use_alpha_beta else float('inf')
+        self.__name__ = "Minimax" if (self.alpha, self.beta) == (None, None) else "AlphaBeta"
 
     def search(self, state: BaseGame, predictor: BaseApprentice, search_time: float):
 
