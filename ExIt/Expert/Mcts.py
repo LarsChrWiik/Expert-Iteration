@@ -85,6 +85,8 @@ class NodeMcts:
 
     def ucb(self):
         """ Calculates Upper Confident Bound for this child """
+        if self.n == 0:
+            return float("inf")
         nsb = [c.n for c in self.parent.children]
         p_to_this_node = self.parent.p[self.a]
         return self.q + self.c * p_to_this_node * sqrt(sum(nsb)) / (1 + self.n)
