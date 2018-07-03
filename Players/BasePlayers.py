@@ -21,11 +21,6 @@ class BasePlayer:
         self.index = None
         # Unique index within each game. This can change between games.
         self.game_index = None
-        # Name of the class of the game.
-        self.game_class = None
-
-    def set_game(self, game_class):
-        self.game_class = game_class
 
     def move(self, state: BaseGame, randomness=False):
         raise NotImplementedError("Please Implement this method")
@@ -40,24 +35,24 @@ class BasePlayer:
 class BaseExItPlayer(BasePlayer):
     """ Base player that is able to improve its strategy using Expert Iteration """
 
+    """ Exploration degree that is used in move function.
+        This allows game states to differ during comparisons. """
     exploration_degree = 0.1
 
     def __init__(self, ex_it_algorithm: ExpertIteration):
         super().__init__()
-        self.__ex_it_algorithm = ex_it_algorithm
+        self.ex_it_algorithm = ex_it_algorithm
 
-    def get_apprentice_DO_NOT_USE(self):
-        return self.__ex_it_algorithm.apprentice
+    def __name__(self):
+        return self.ex_it_algorithm.__name__
 
     def set_game(self, game_class):
-        self.game_class = game_class
-        self.__ex_it_algorithm.apprentice.init_model(input_fv_size=game_class().fv_size,
-                                                     pi_size=game_class().num_actions)
+        self.ex_it_algorithm.set_game(game_class)
 
     def move(self, state: BaseGame, randomness=True, print_info=False):
         """ Move according to the apprentice (No expert) """
         fv = state.get_feature_vector()
-        pi = self.__ex_it_algorithm.apprentice.pred_prob(fv)
+        pi = self.ex_it_algorithm.apprentice.pred_prob(fv)
         legal_moves = state.get_legal_moves()
 
         # Remove PI values that are not legal moves.
@@ -78,12 +73,31 @@ class BaseExItPlayer(BasePlayer):
         else:
             state.advance(a=best_action)
 
-    def spyros_function(self, state, pi, legal_moves):
-        """ ---------- SPYROS ---------- START"""
-        Qs = [get_reward_for_action(state, a, self.__ex_it_algorithm.apprentice) for a in state.get_legal_moves()]
-        v_values, action_indexes, v = self.__ex_it_algorithm.expert.search(
+    def start_ex_it(self, epochs, search_time):
+        """ Starts Expert Iteration. NB: Time consuming process """
+        self.ex_it_algorithm.start_ex_it(
+            epochs=epochs,
+            search_time=search_time
+        )
+
+    # TODO: Remove later (Used for testing).
+    def print_info(self, state, action_index):
+        print("fv = ", state.get_feature_vector())
+        print("evaluation = ", self.ex_it_algorithm.apprentice.pred_eval(
+            X=state.get_feature_vector()))
+        print("action prob = ", self.ex_it_algorithm.apprentice.pred_prob(
+            X=state.get_feature_vector()))
+        print("action_index = " + str(action_index))
+        pi_update = np.zeros(state.num_actions, dtype=float)
+        pi_update[action_index] = 1
+        print("updated pi_update = " + str(pi_update))
+
+    # TODO: Remove later. (Used for testing).
+    def print_Q_info(self, state, pi, legal_moves):
+        Qs = [get_reward_for_action(state, a, self.ex_it_algorithm.apprentice) for a in state.get_legal_moves()]
+        v_values, action_indexes, v = self.ex_it_algorithm.expert.search(
             state=state,
-            predictor=self.__ex_it_algorithm.apprentice,
+            predictor=self.ex_it_algorithm.apprentice,
             search_time=10
         )
         print("pi = ", pi)
@@ -92,24 +106,3 @@ class BaseExItPlayer(BasePlayer):
         print("v_values = ", v_values)
         print("action_indexes = ", action_indexes)
         print("")
-        """ ---------- SPYROS ---------- END"""
-
-    def start_ex_it(self, num_iteration, search_time: float):
-        """ Starts Expert Iteration. NB: Time consuming process """
-        self.__ex_it_algorithm.start_ex_it(
-            game_class=self.game_class,
-            num_iteration=num_iteration,
-            search_time=search_time
-        )
-
-    # TODO: Remove later (Used for testing).
-    def print_info(self, state, action_index):
-        print("fv = ", state.get_feature_vector())
-        print("evaluation = ", self.__ex_it_algorithm.apprentice.pred_eval(
-            X=state.get_feature_vector()))
-        print("action prob = ", self.__ex_it_algorithm.apprentice.pred_prob(
-            X=state.get_feature_vector()))
-        print("action_index = " + str(action_index))
-        pi_update = np.zeros(state.num_actions, dtype=float)
-        pi_update[action_index] = 1
-        print("updated pi_update = " + str(pi_update))
