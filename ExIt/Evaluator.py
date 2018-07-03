@@ -12,7 +12,7 @@ def zero_sum_2v2_evaluation(state: BaseGame, original_turn: int, predictor: Base
         ) * (1 if state.turn == original_turn else -1)
 
 
-def get_reward_for_action(state: BaseGame, action_index: int, predictor: BaseApprentice):
+def get_reward_for_action(state: BaseGame, action_index, predictor: BaseApprentice):
     """ Calculates the reward for the given action index.
         This function assumes a zero sum 2v2 game. """
     c = state.copy()
