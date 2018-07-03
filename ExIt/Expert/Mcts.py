@@ -86,7 +86,7 @@ class NodeMcts:
     def ucb(self):
         """ Calculates Upper Confident Bound for this child """
         nsb = [c.n for c in self.parent.children]
-        p_to_this_node = 1 #self.parent.p[self.a]
+        p_to_this_node = self.parent.p[self.a]
         return self.q + self.c * p_to_this_node * sqrt(sum(nsb)) / (1 + self.n)
 
     def backpropagate(self, v):
