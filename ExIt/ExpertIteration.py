@@ -54,30 +54,51 @@ class ExpertIteration:
         self.expert = expert
         self.data_set = DataSet()
         self.search_time = None
+        self.game_class = None
+        # Set name.
+        try:
+            self.__name__ = str(type(self.apprentice).__name__) + "_" + str(self.expert.__name__)
+        except:
+            self.__name__ = str(type(self.apprentice).__name__) + "_" + str(type(self.expert).__name__)
 
-    def start_ex_it(self, game_class, num_iteration, search_time: float):
+    def set_game(self, game_class):
+        self.game_class = game_class
+        self.apprentice.init_model(
+            input_fv_size=game_class().fv_size,
+            pi_size=game_class().num_actions
+        )
+
+    def start_ex_it(self, epochs, search_time: float, verbose=True):
         """ Start Expert Iteration to master the given game.
             This process is time consuming. """
 
         self.search_time = search_time
 
-        with trange(num_iteration) as t:
-            for _ in t:
+        def self_play():
+            state = self.game_class()
+            s_array, p_array, v_array = self.ex_it_game(state)
 
-                state = game_class()
-                s_array, p_array, v_array = self.ex_it_game(state)
+            # Store game history samples.
+            self.data_set.save_samples_in_memory(
+                s_array=s_array,
+                p_array=p_array,
+                v_array=v_array
+            )
 
-                # Store game history samples.
-                self.data_set.save_samples_in_memory(
-                    s_array=s_array,
-                    p_array=p_array,
-                    v_array=v_array
-                )
+            # Train on mini-batches.
+            X_s, Y_p, Y_v = self.data_set.get_sample_batch()
+            p, v = self.apprentice.train(X_s=X_s, Y_p=Y_p, Y_v=Y_v)
+            if verbose:
+                return p, v
 
-                # Train on mini-batches.
-                X_s, Y_p, Y_v = self.data_set.get_sample_batch()
-                p, v = self.apprentice.train(X_s=X_s, Y_p=Y_p, Y_v=Y_v)
-                t.set_postfix(pl='%01.2f' % p, vl='%01.2f' % v)
+        if verbose:
+            with trange(epochs) as t:
+                for _ in t:
+                    p, v = self_play()
+                    t.set_postfix(pl='%01.2f' % p, vl='%01.2f' % v)
+        else:
+            for _ in range(epochs):
+                self_play()
 
     def ex_it_game(self, state):
         s_array, p_array, v_array, turn_array = [], [], [], []
