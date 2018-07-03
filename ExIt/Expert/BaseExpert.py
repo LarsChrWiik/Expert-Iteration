@@ -10,4 +10,3 @@ class BaseExpert:
         """ Do policy improvement for a given state.
         :return: action_index """
         raise NotImplementedError("Please Implement this method")
-
