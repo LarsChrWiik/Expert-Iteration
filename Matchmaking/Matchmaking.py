@@ -80,8 +80,9 @@ class Matchmaking:
 
         # Let the players know which game they are playing.
         for p in self.players:
-            if p.game_class is None:
-                p.set_game(self.game_class)
+            if isinstance(p, BaseExItPlayer):
+                if p.ex_it_algorithm.apprentice is None:
+                    p.set_game(self.game_class)
 
         """ Compare players through several iterations of self-play.
             This process accepts non-ExIt player as well such as RandomPlayer. """
@@ -100,7 +101,7 @@ class Matchmaking:
         for player in self.players:
             if isinstance(player, BaseExItPlayer):
                 player.start_ex_it(
-                    num_iteration=num_train_epoch,
+                    epochs=num_train_epoch,
                     search_time=search_time
                 )
 
@@ -128,35 +129,3 @@ class Matchmaking:
         """ Moves the first player to the last position """
         player = self.players.pop(0)
         self.players.append(player)
-
-
-
-### TODO: FIX ALL BELOW LATER.
-def elo_test():
-    rating1 = 1400
-    rating2 = 1450
-    expected1 = elo_expected_result(rating1, rating2)
-    expected2 = elo_expected_result(rating2, rating1)
-    print(new_elo(
-        rating=rating1,
-        result=1,
-        expected_result=expected1
-    ))
-    print(new_elo(
-        rating=rating2,
-        result=0,
-        expected_result=expected2
-    ))
-
-
-def elo_expected_result(rating1, rating2):
-    """ Calculates the expected probabilistic result between two players """
-    return 1 / (1 + 10**((rating1 - rating2)/400))
-
-
-def new_elo(rating, result, expected_result):
-    """ Lower K means less elo change.
-        Higher K means higher elo change.
-        Different organizations set a different value of K. """
-    K = 30
-    return rating + K * (result - expected_result)
