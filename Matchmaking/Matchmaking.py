@@ -81,7 +81,7 @@ class Matchmaking:
         # Let the players know which game they are playing.
         for p in self.players:
             if isinstance(p, BaseExItPlayer):
-                if p.ex_it_algorithm.apprentice is None:
+                if p.ex_it_algorithm.apprentice.model is None:
                     p.set_game(self.game_class)
 
         """ Compare players through several iterations of self-play.
