@@ -1,118 +1,84 @@
 
 from ExIt.Expert.BaseExpert import BaseExpert
-from Games.GameLogic import BaseGame
 from ExIt.Apprentice import BaseApprentice
-from math import sqrt
+from Games.GameLogic import BaseGame
 from Support.Timer import Timer
 from ExIt.Evaluator import zero_sum_2v2_evaluation
+from math import sqrt
 
 
 class Mcts(BaseExpert):
-    """ This MCTS implementation is limited to Zero-sum,
-        two-player deterministic markov games """
 
     def __init__(self, c):
         self.timer = Timer()
+        # Exploration parameter in UCB.
         self.c = c
 
     def search(self, state: BaseGame, predictor: BaseApprentice, search_time: float):
-        root_node = NodeMcts(
-            state=state,
-            a=None,
-            original_turn=state.turn,
-            predictor=predictor,
-            parent=None,
-            root_node=None,
-            c=self.c
-        )
-        self.timer.start_search_timer(search_time=search_time)
+        # Expected Q values from state s.       Q[s]   or   Q[s][a]
+        Q = {}
+        # Number of times state s was visited.  N[s]
+        N = {}
+        # Predicted P values from state s.      P[s]   or   P[s][a]
+        P = {}
+        # Predicted v value of state s.         V[s]
+        V = {}
+
+        original_turn = state.turn
+
+        def mcts_search(state, is_root=False):
+
+            fv = state.get_feature_vector()
+            legal_moves = state.get_legal_moves()
+            s = tuple(fv)
+
+            # When unexplored child - predict and store info from this state.
+            if s not in P:
+                P[s] = predictor.pred_prob(X=fv)
+                V[s] = zero_sum_2v2_evaluation(state, original_turn, predictor)
+                N[s] = [0 for _ in range(state.num_actions)]
+                Q[s] = [0 for _ in range(state.num_actions)]
+                return V[s]
+
+            # Return v value if state is game over.
+            if state.is_game_over():
+                return V[s]
+
+            # Find action that maximizes Upper Confidence Bound (UCB).
+            u_max = -float("inf")
+            a_best = -1
+            for i, a in enumerate(legal_moves):
+                if is_root and Q[s][a] == 0:
+                    u = float("inf")
+                else:
+                    u = Q[s][a] + self.c * P[s][a] * sqrt(sum(N[s])) / (1 + N[s][a])
+                if u > u_max:
+                    u_max = u
+                    a_best = a
+            # Action that maximizes UCB.
+            a = a_best
+
+            # Recursive call to find the v value to backpropagate.
+            next_state = state.copy()
+            next_state.advance(a)
+            v = mcts_search(next_state)
+
+            # Backpropagation step - update Q and N.
+            Q[s][a] = (N[s][a] * Q[s][a] + v) / (N[s][a] + 1)
+            N[s][a] += 1
+
+            return v
+
+        """ ***** SEARCH CODE ***** """
+
+        self.timer.start_search_timer(search_time)
         while self.timer.have_time_left():
-            root_node.tree_policy()
+            mcts_search(state, is_root=True)
 
-        v_values = [node.q for node in root_node.children]
-        action_indexes = [node.a for node in root_node.children]
-        return v_values, action_indexes, root_node.q
+        # Get V values and action indexes of legal moves.
+        legal_moves = state.get_legal_moves()
+        s = tuple(state.get_feature_vector())
+        v_values = [v for i, v in enumerate(Q[s]) if i in legal_moves]
+        v_root = None #sum(Q[s]) / len(Q[s])
 
-
-class NodeMcts:
-    """ MCTS node that includes an evaluation function, which assumes
-        Zero-sum, two-player deterministic markov games """
-
-    def __init__(self, state, a, original_turn, predictor, parent, root_node, c):
-        self.state = state
-        # action_index that lead to this state.
-        self.a = a
-        self.original_turn = original_turn
-        self.predictor = predictor
-        self.parent = parent
-        self.root_node = root_node if root_node is not None else self
-        self.children = None
-        # Q value for this state.
-        self.q = 0
-        self.v = zero_sum_2v2_evaluation(
-            state=self.state,
-            original_turn=self.original_turn,
-            predictor=self.predictor
-        )
-        # Pi from this state.
-        self.p = self.predictor.pred_prob(X=self.state.get_feature_vector())
-        # State action visit count.
-        self.n = 0
-        # Exploration parameter.
-        self.c = c
-
-    def tree_policy(self):
-        if self.children is None:
-            self.__expand()
-            self.backpropagate(self.v)
-
-        if len(self.children) == 0:
-            # This node is a leaf node.
-            self.backpropagate(self.v)
-        else:
-            self.get_ucb_child().tree_policy()
-
-    def get_ucb_child(self):
-        """ Finds the child this the highest UCB value """
-        max_score = float("-inf")
-        best_node = None
-        for child in self.children:
-            value = child.ucb()
-            if value > max_score:
-                max_score = value
-                best_node = child
-        return best_node
-
-    def ucb(self):
-        """ Calculates Upper Confident Bound for this child """
-        if self.n == 0:
-            return float("inf")
-        nsb = [c.n for c in self.parent.children]
-        p_to_this_node = self.parent.p[self.a]
-        return self.q + self.c * p_to_this_node * sqrt(sum(nsb)) / (1 + self.n)
-
-    def backpropagate(self, v):
-        """ Update the estimation for all nodes from the node to the root node """
-        self.n += 1
-        self.q = (self.n * self.q + v) / (self.n + 1)
-        if self.parent is not None:
-            self.parent.backpropagate(v)
-
-    def __expand(self):
-        """ Expand the tree by adding this new node """
-        self.children = []
-        possible_actions = self.state.get_legal_moves()
-        for a in possible_actions:
-            state_next = self.state.copy()
-            state_next.advance(a=a)
-            self.children.append(
-                NodeMcts(
-                    state=state_next,
-                    a=a,
-                    original_turn=self.original_turn,
-                    predictor=self.predictor,
-                    parent=self,
-                    root_node=self.root_node,
-                    c=self.c
-                )
-            )
+        return v_values, legal_moves, v_root
