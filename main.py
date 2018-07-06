@@ -13,12 +13,12 @@ np.set_printoptions(suppress=True)
 search_time = 0.05
 num_matches = 1000
 
-iterations = 10
-epochs = 10
+iterations = 100
+epochs = 50
 
 
 def main():
-    train()
+    comparison()
 
 
 def train():
@@ -33,12 +33,10 @@ def train():
 
 def normal_test():
     # Run One iteration of self.play
-    player = NnAlphaBetaPlayer()
-
-    #player = NnMctsPlayer()
+    player = NnMctsPlayer()
     player.set_game(game_class=TicTacToe)
     player.start_ex_it(
-        epochs=1,
+        epochs=50,
         search_time=search_time
     )
 
