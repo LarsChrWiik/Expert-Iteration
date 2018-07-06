@@ -31,6 +31,20 @@ def train():
     )
 
 
+def comparison():
+    # Run Comparison with several iteration of self-play.
+    Matchmaking(
+        game_class=TicTacToe,
+        players=[NnAlphaBetaPlayer(), RandomPlayer()]
+    ).compare_ex_it(
+        num_train_epoch=epochs,
+        search_time=search_time,
+        num_matches=num_matches,
+        num_iteration=iterations,
+        randomness=False
+    )
+
+
 def normal_test():
     # Run One iteration of self.play
     player = NnMctsPlayer()
@@ -42,20 +56,6 @@ def normal_test():
 
     # Display the agents calculations in predefined scenarios.
     debug_display_win_moves(player)
-
-
-def comparison():
-    # Run Comparison with several iteration of self-play.
-    Matchmaking(
-        game_class=TicTacToe,
-        players=[NnMctsPlayer(), RandomPlayer()]
-    ).compare_ex_it(
-        num_train_epoch=epochs,
-        search_time=search_time,
-        num_matches=num_matches,
-        num_iteration=iterations,
-        randomness=False
-    )
 
 
 def plot():
