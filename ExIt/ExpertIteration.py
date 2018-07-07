@@ -55,6 +55,7 @@ class ExpertIteration:
         self.data_set = DataSet()
         self.search_time = None
         self.game_class = None
+        self.games_generated = 0
         # Set name.
         try:
             self.__name__ = str(type(self.apprentice).__name__) + "_" + str(self.expert.__name__)
@@ -71,10 +72,10 @@ class ExpertIteration:
     def start_ex_it(self, epochs, search_time: float, verbose=True):
         """ Start Expert Iteration to master the given game.
             This process is time consuming. """
-
         self.search_time = search_time
 
         def self_play():
+            self.games_generated = 0
             state = self.game_class()
             s_array, p_array, v_array = self.ex_it_game(state)
 
@@ -86,16 +87,22 @@ class ExpertIteration:
             )
 
             # Train on mini-batches.
-            X_s, Y_p, Y_v = self.data_set.get_sample_batch()
-            p, v = self.apprentice.train(X_s=X_s, Y_p=Y_p, Y_v=Y_v)
-            if verbose:
-                return p, v
+            for _ in range(self.games_generated):
+                X_s, Y_p, Y_v = self.data_set.get_sample_batch()
+                p, v = self.apprentice.train(X_s=X_s, Y_p=Y_p, Y_v=Y_v)
+                if verbose:
+                    return p, v
 
         if verbose:
             with trange(epochs) as t:
                 for _ in t:
                     p, v = self_play()
-                    t.set_postfix(pl='%01.2f' % p, vl='%01.2f' % v)
+                    t.set_postfix(
+                        memory_size='%d' % len(self.data_set.memory),
+                        games_generated='%d' % self.games_generated,
+                        pl='%01.2f' % p,
+                        vl='%01.2f' % v
+                    )
         else:
             for _ in range(epochs):
                 self_play()
@@ -134,6 +141,8 @@ class ExpertIteration:
             s_array.extend(s_array2)
             p_array.extend(p_array2)
             v_array.extend(v_array2)
+
+        self.games_generated += 1
 
         return s_array, p_array, v_array
 
