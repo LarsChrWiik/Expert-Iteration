@@ -35,7 +35,7 @@ def train():
 def comparison():
     # Run Comparison with several iteration of self-play.
     Matchmaking(
-        game_class=ConnectFour,
+        game_class=TicTacToe,
         players=[NnAlphaBetaPlayer(), RandomPlayer()]
     ).compare_ex_it(
         num_train_epoch=epochs,
@@ -49,7 +49,7 @@ def comparison():
 def normal_test():
     # Run One iteration of self.play
     player = NnMctsPlayer()
-    player.set_game(game_class=ConnectFour)
+    player.set_game(game_class=TicTacToe)
     player.start_ex_it(
         epochs=10,
         search_time=search_time
