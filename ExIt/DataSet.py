@@ -5,7 +5,7 @@ import random
 
 
 batch_size = 1024
-max_memory_size = 10000
+max_memory_size = 50000
 
 
 class DataSet:
@@ -19,7 +19,8 @@ class DataSet:
         for i, s in enumerate(s_array):
             self.memory[tuple(s)] = tuple(p_array[i]), v_array[i]
         while len(self.memory) > max_memory_size:
-            self.memory.pop(random.choice(self.memory.keys()))
+            rnd_index = random.choice(list(self.memory.keys()))
+            self.memory.pop(rnd_index)
 
     def get_sample_batch(self):
         """ Chooses a random batch from the samples stored in memory """
