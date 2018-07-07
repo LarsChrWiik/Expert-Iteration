@@ -24,10 +24,11 @@ def custom_loss(y_true, y_pred, beta=0.001):
 class Nn(BaseApprentice):
     """ Deep neural network implementation (Apprentice) """
 
-    n_neurons = 256
+    n_neurons = 2**8
     n_layers = 3
     dropout_rate = None
     v_size = 1
+    regularisation_strength = 0.001
 
     def __init__(self):
         self.model = None
@@ -42,18 +43,18 @@ class Nn(BaseApprentice):
         # Hidden layers.
         x = input
         for _ in range(Nn.n_layers):
-            x = Dense(Nn.n_neurons, kernel_regularizer=l2(0.001))(x)
+            x = Dense(Nn.n_neurons, kernel_regularizer=l2(Nn.regularisation_strength))(x)
             x = BatchNormalization()(x)
             x = Activation("elu")(x)
-            if Nn.dropout_rate is not None:
+            if Nn.dropout_rate is not None and Nn.dropout_rate != 0.0:
                 x = Dropout(rate=Nn.dropout_rate)(x)
 
         # Output layer pi = Action probability.
-        p = Dense(pi_size, kernel_regularizer=l2(0.001))(x)
+        p = Dense(pi_size, kernel_regularizer=l2(Nn.regularisation_strength))(x)
         p = BatchNormalization()(p)
         p = Activation("softmax", name='p_output')(p)
         # Output layer v = state evaluation
-        v = Dense(Nn.v_size, kernel_regularizer=l2(0.001))(x)
+        v = Dense(Nn.v_size, kernel_regularizer=l2(Nn.regularisation_strength))(x)
         v = BatchNormalization()(v)
         v = Activation("tanh", name='v_output')(v)
 
