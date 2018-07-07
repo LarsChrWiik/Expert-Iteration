@@ -1,6 +1,7 @@
 
 
 from Games.TicTacToe import TicTacToe
+from Games.ConnectFour import ConnectFour
 from Players.Players import *
 from Support.Debugger import debug_display_win_moves
 from Matchmaking.Matchmaking import Matchmaking
@@ -14,7 +15,7 @@ search_time = 0.05
 num_matches = 1000
 
 iterations = 100
-epochs = 50
+epochs = 100
 
 
 def main():
@@ -34,7 +35,7 @@ def train():
 def comparison():
     # Run Comparison with several iteration of self-play.
     Matchmaking(
-        game_class=TicTacToe,
+        game_class=ConnectFour,
         players=[NnAlphaBetaPlayer(), RandomPlayer()]
     ).compare_ex_it(
         num_train_epoch=epochs,
@@ -48,14 +49,14 @@ def comparison():
 def normal_test():
     # Run One iteration of self.play
     player = NnMctsPlayer()
-    player.set_game(game_class=TicTacToe)
+    player.set_game(game_class=ConnectFour)
     player.start_ex_it(
-        epochs=50,
+        epochs=10,
         search_time=search_time
     )
 
     # Display the agents calculations in predefined scenarios.
-    debug_display_win_moves(player)
+    #debug_display_win_moves(player)
 
 
 def plot():
