@@ -28,7 +28,7 @@ class Nn(BaseApprentice):
     n_layers = 3
     dropout_rate = None
     v_size = 1
-    regularisation_strength = 0.001
+    regularisation_strength = 0.01
 
     def __init__(self):
         self.model = None
