@@ -15,7 +15,7 @@ import random
 timer = Timer()
 
 # 1.0 = explore. 0.0 = exploit.
-exploration_degree = 0.25
+exploration_degree = 0.1
 
 
 def e_greedy_condition():
