@@ -20,18 +20,17 @@ class BaseGame:
         Every subclass of Game should be a perfect information game. """
 
     def __init__(self):
+        # 0 = player1, 1 = player2. (Index of the winning player).
+        self.turn = 0
+        self.num_players = 2
+        self.max_game_depth = float('inf')
+
         self.board = None
-        self.num_players = None
         self.num_actions = None
         self.fv_size = None
 
-        self.max_game_depth = float('inf')
-
         # Indicates the winner of the game. (Index of the winning player). (-1 = draw)
         self.winner = None
-
-        # 0 = player1, 1 = player2. (Index of the winning player).
-        self.turn = None
 
     def is_game_over(self):
         return self.winner is not None
@@ -44,15 +43,12 @@ class BaseGame:
         return GameResult.LOSE
 
     def is_draw(self):
-        raise NotImplementedError("Please Implement this method")
+        return (self.winner == -1 or self.winner is None) and len(self.get_legal_moves()) == 0
 
     def next_turn(self):
         raise NotImplementedError("Please Implement this method")
 
     def copy(self):
-        raise NotImplementedError("Please Implement this method")
-
-    def init_new_game(self):
         raise NotImplementedError("Please Implement this method")
 
     def get_legal_moves(self):
@@ -70,15 +66,21 @@ class BaseGame:
     def display(self):
         raise NotImplementedError("Please Implement this method")
 
-    @staticmethod
-    def __board_value_to_player_index(rep_value):
+    def board_value_to_player_index(self, rep_value):
         """ Convert Representation Value to player index """
-        raise NotImplementedError("Please Implement this method")
+        if rep_value == 1:
+            return 0
+        if rep_value == 2:
+            return 1
+        return -1
 
-    @staticmethod
-    def __player_index_to_board_value(player_index):
+    def player_index_to_board_value(self, player_index):
         """ Convert player index to representation value """
-        raise NotImplementedError("Please Implement this method")
+        if player_index == 0:
+            return 1
+        if player_index == 1:
+            return 2
+        return 0
 
 
 class GameResult(Enum):
