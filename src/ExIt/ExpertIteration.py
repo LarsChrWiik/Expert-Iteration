@@ -4,9 +4,8 @@ from ExIt.Expert import BaseExpert
 from Games.GameLogic import BaseGame
 from ExIt.DataSet import DataSet
 from Support.Timer import Timer
-from ExIt.Evaluator import get_reward_for_action
 from ExIt.ActionPolicy import get_action_index_exploit
-from tqdm import tqdm, trange
+from tqdm import trange
 import numpy as np
 from random import choice as rnd_element
 import random
