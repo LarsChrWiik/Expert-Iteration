@@ -7,12 +7,6 @@ from ExIt.ActionPolicy import e_greedy, get_action_index_exploit
 import numpy as np
 
 
-def assign_game_index(players):
-    # Assign the players a unique index within the game.
-    for index, p in enumerate(players):
-        p.game_index = index
-
-
 class BasePlayer:
     """ Base player that is able to move """
 
