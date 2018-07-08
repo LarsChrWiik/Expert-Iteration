@@ -17,11 +17,7 @@ timer = Timer()
 exploration_degree = 0.1
 
 
-def e_greedy_condition():
-    return random.uniform(0, 1) < exploration_degree
-
-
-def set_game_outcome_v_values(final_state: BaseGame, turn_array, v_array):
+def update_v_values_to_game_outcome(final_state: BaseGame, turn_array, v_array):
     """ Set all v values to the outcome of the game for each player.
         This approach may lead to overfitting. """
     for i, t in enumerate(turn_array):
@@ -113,7 +109,7 @@ class ExpertIteration:
         while not state.is_game_over():
             s, p, v, t, best_action = self.ex_it_state(state)
 
-            if e_greedy_condition():
+            if random.uniform(0, 1) < exploration_degree:
                 # Make branch from the main line.
                 state_copies = add_different_advance(
                     state=state,
@@ -129,11 +125,7 @@ class ExpertIteration:
             turn_array.append(t)
 
         # Update the v targets according to the outcome of the game.
-        v_array = set_game_outcome_v_values(
-            final_state=state,
-            turn_array=turn_array,
-            v_array=v_array
-        )
+        v_array = update_v_values_to_game_outcome(state, turn_array, v_array)
 
         for s in state_copies:
             s_array2, p_array2, v_array2 = self.ex_it_game(state=s)
