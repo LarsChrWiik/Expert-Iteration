@@ -4,7 +4,7 @@ from Games.TicTacToe import TicTacToe
 from Games.ConnectFour import ConnectFour
 from Players.Players import *
 from Support.Debugger import debug_display_win_moves
-from Matchmaking.Matchmaking import Matchmaking
+from Matchmaking.Comparison1v1 import Comparison1v1
 from Support.Plotter import plot_result
 from Training import self_play_and_store_versions
 import numpy as np
@@ -34,7 +34,7 @@ def train():
 
 def comparison():
     # Run Comparison with several iteration of self-play.
-    Matchmaking(
+    Comparison1v1(
         game_class=TicTacToe,
         players=[NnAlphaBetaPlayer(), RandomPlayer()]
     ).compare_ex_it(
