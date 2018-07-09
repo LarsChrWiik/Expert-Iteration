@@ -96,7 +96,17 @@ class GameResult(Enum):
             return "0"
         if self == GameResult.DRAW:
             return "1/2"
-        Exception("NO_RESULT")
+        raise Exception("NO_RESULT")
+
+    @staticmethod
+    def get_string_results(results):
+        """ Appends the result values in a string separated by ',' """
+        string_results = ""
+        for i, v in enumerate(results):
+            string_results += str(v)
+            if i != len(results) - 1:
+                string_results += ","
+        return string_results
 
     @staticmethod
     def get_players_result_list_(result):
