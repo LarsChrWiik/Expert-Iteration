@@ -26,7 +26,7 @@ def elo_tournament():
         players=[NnAlphaBetaPlayer(), NnMinimaxPlayer(), NnMctsPlayer(), RandomPlayer()],
         game_class=TicTacToe,
         trained_iterations=10,
-        randomness=False
+        randomness=True
     )
 
 
