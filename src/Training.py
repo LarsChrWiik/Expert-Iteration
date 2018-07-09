@@ -4,7 +4,7 @@ from keras.models import load_model
 import os.path
 from pathlib import Path
 from datetime import datetime
-from tqdm import tqdm, trange
+from tqdm import trange
 
 
 model_folder = "Trained_Models"
@@ -52,8 +52,8 @@ def save(model, path, iteration):
 
 
 def load(game_name, algorithm_name, iteration):
-    path = get_model_folder_path() + "/" + game_name + "/" + algorithm_name \
-           + "/" + iteration + model_file_type
+    path = get_model_folder_path() + "/" + game_name + "/" \
+           + algorithm_name + "/" + iteration + model_file_type
     return load_model(path)
 
 
@@ -80,7 +80,7 @@ def init_self_play_folders(ex_it_algorithm, search_time, iterations, epochs, gam
 def save_meta_information(path, search_time, iterations, epochs, algorithm_name, ex_it_algorithm):
     with open(path + "/" + meta_file + txt_file_type, 'x') as file:
         file.write("algorithm_name = " + str(algorithm_name) + "\n")
-        file.write("time = " + str(datetime.now().strftime('%Y-%m-%d___%H:%M:%S')) + "\n")
+        file.write("date time = " + str(datetime.now().strftime('%Y-%m-%d___%H:%M:%S')) + "\n")
         file.write("search_time = " + str(search_time) + "\n")
         file.write("iterations = " + str(iterations) + "\n")
         file.write("epochs = " + str(epochs) + "\n")
