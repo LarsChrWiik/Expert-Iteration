@@ -3,7 +3,7 @@ from ExIt.Apprentice import BaseApprentice
 from ExIt.Expert import BaseExpert
 from Games.GameLogic import BaseGame
 from ExIt.DataSet import DataSet
-from Support.Timer import Timer
+from Misc.Timer import Timer
 from ExIt.ActionPolicy import get_action_index_exploit
 from tqdm import trange
 import numpy as np

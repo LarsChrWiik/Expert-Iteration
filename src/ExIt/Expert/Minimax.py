@@ -2,7 +2,7 @@
 from ExIt.Expert.BaseExpert import BaseExpert
 from ExIt.Apprentice import BaseApprentice
 from Games.GameLogic import BaseGame
-from Support.Timer import Timer
+from Misc.Timer import Timer
 from ExIt.Evaluator import zero_sum_2v2_evaluation
 
 
