@@ -34,7 +34,7 @@ class Mcts(BaseExpert):
 
             # When unexplored child - predict and store info from this state.
             if s not in P:
-                P[s] = predictor.pred_prob(X=fv)
+                P[s] = predictor.pred_p(X=fv)
                 V[s] = zero_sum_2v2_evaluation(state, original_turn, predictor)
                 N[s] = [0 for _ in range(state.num_actions)]
                 Q[s] = [0 for _ in range(state.num_actions)]
