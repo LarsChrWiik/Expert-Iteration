@@ -18,12 +18,12 @@ epochs = 100
 
 
 def main():
-    train_and_store()
+    elo_tournament()
 
 
 def elo_tournament():
     start_elo_tournament(
-        players=[NnAlphaBetaPlayer(), RandomPlayer()],
+        players=[NnAlphaBetaPlayer(), NnMinimaxPlayer(), NnMctsPlayer(), RandomPlayer()],
         game_class=TicTacToe,
         trained_iterations=10,
         randomness=False
@@ -32,7 +32,7 @@ def elo_tournament():
 
 def train_and_store():
     self_play_and_store_versions(
-        ex_it_algorithm=NnMctsPlayer().ex_it_algorithm,
+        ex_it_algorithm=NnMinimaxPlayer().ex_it_algorithm,
         search_time=search_time,
         iterations=iterations,
         epochs=epochs,
