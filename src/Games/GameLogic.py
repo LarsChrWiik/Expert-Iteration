@@ -89,6 +89,15 @@ class GameResult(Enum):
     DRAW = 0
     NO_RESULT = None
 
+    def pgn_score(self):
+        if self == GameResult.WIN:
+            return "1"
+        if self == GameResult.LOSE:
+            return "0"
+        if self == GameResult.DRAW:
+            return "1/2"
+        Exception("NO_RESULT")
+
     @staticmethod
     def get_players_result_list_(result):
         """ Return s the result list for each player """
