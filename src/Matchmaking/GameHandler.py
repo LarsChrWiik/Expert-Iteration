@@ -3,6 +3,14 @@ from Players.Players import BasePlayer
 from Games.GameLogic import GameResult, BaseGame
 
 
+def match(game_class, players, randomness):
+    """ Starts a new game match between players and returns the result.
+        Return a list of GameResult for each player according to Game Index. """
+    game_handler = GameHandler(game_class, players, randomness)
+    game_handler.play_game_until_finish()
+    return game_handler.get_result()
+
+
 class GameHandler:
     """ Class to organize a game between players """
 
