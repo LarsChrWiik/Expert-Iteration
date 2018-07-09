@@ -1,5 +1,6 @@
 
 from Players.Players import BasePlayer, BaseExItPlayer
+from Players.BasePlayers import set_indexes
 from Games.GameLogic import GameResult
 from Matchmaking.GameHandler import GameHandler
 from operator import add
@@ -22,10 +23,7 @@ class Comparison1v1:
         self.game_class = game_class
         self.players = players
         self.statistics = None
-
-        # Assign the players a unique 'player index' (this index is constant).
-        for i, p in enumerate(players):
-            p.index = i
+        set_indexes(players)
 
     def compare_ex_it(self, num_train_epoch, search_time,
                       num_matches, num_iteration, randomness):
@@ -33,7 +31,7 @@ class Comparison1v1:
             Self play is enabled for ExIt players between iterations.
             NB: This process never ends if num_iteration = None. """
 
-        self.statistics = Statistics(
+        self.statistics = Statistics1v1(
             num_train_epoch=num_train_epoch,
             search_time=search_time,
             num_matches=num_matches,
@@ -90,19 +88,19 @@ class Comparison1v1:
         self.players.append(player)
 
 
-class Statistics:
+class Statistics1v1:
     """ Class containing logic for storing statistics to disk """
 
     metadata = "metadata"
-    folder = "./Statistics/"
+    folder = "./Statistics1v1/"
 
     def __init__(self, num_train_epoch, search_time,
                  num_matches, num_iteration, players):
         folder_name = self.make_new_folder()
-        self.base_path = Statistics.folder + folder_name + "/"
+        self.base_path = Statistics1v1.folder + folder_name + "/"
 
         # Write initial information
-        with open(self.__get_path(file_name=Statistics.metadata, file_type="txt"), 'w') as file:
+        with open(self.__get_path(file_name=Statistics1v1.metadata, file_type="txt"), 'w') as file:
             file.write("num_train_epoch = " + str(num_train_epoch) + "\n")
             file.write("search_time = " + str(search_time) + "\n")
             file.write("num_matches = " + str(num_matches) + "\n")
@@ -130,7 +128,7 @@ class Statistics:
     def make_new_folder():
         folder_name = str(datetime.now().strftime('%Y-%m-%d___%H-%M-%S'))
         if not os.path.exists(folder_name):
-            os.makedirs(Statistics.folder + folder_name)
+            os.makedirs(Statistics1v1.folder + folder_name)
         else:
             raise Exception('Folder name already exists!')
         return folder_name
