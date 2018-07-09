@@ -1,9 +1,8 @@
 
 from Players.Players import BasePlayer
-from Games.GameLogic import GameResult
+from Games.GameLogic import GameResult, BaseGame
 
 
-# TODO: Add PGN notation log.
 class GameHandler:
     """ Class to organize a game between players """
 
@@ -17,13 +16,42 @@ class GameHandler:
         self.players = players
         self.randomness = randomness
         self.game = None
+        self.last_turn = None
+        self.move_switch_counter = 1
+        self.move_text = "NONE"
+        self.result_text = "NONE"
+
+    def update_movetext_result(self, state: BaseGame):
+        self.result_text = state.get_result(0).pgn_score() + "-" + state.get_result(1).pgn_score()
+        self.move_text += " " + self.result_text
+
+    def update_movetext(self, a, turn, p, v):
+        if turn == 0 or turn == self.last_turn:
+            self.move_text += str(self.move_switch_counter) + ".\n"
+            self.move_switch_counter += 1
+        if p is not None:
+            p = [str(round(p_val, 2)) for p_val in p]
+            p_text = "{" + ', '.join(p) + "}"
+            v_text = str(round(v, 3))
+        else:
+            p_text = "None"
+            v_text = "None"
+        self.move_text += "   a" + str(a) + " | p=" + p_text + ", v=" + v_text + "\n"
 
     def play_game_until_finish(self):
         """ Starts the game and let the players play until the game has finished.
             Only the apprentice is used to decide the move if the player is an ExIt player. """
+        self.move_text = ""
+        self.result_text = ""
+        self.last_turn = None
+        self.move_switch_counter = 1
         state = self.game_class()
         while not state.is_game_over():
-            self.players[state.turn].move(state, randomness=self.randomness)
+            turn = state.turn
+            a, p, v = self.players[state.turn].move(state, randomness=self.randomness)
+            self.update_movetext(a, turn, p, v)
+            self.last_turn = turn
+        self.update_movetext_result(state)
         self.game = state
 
     def get_result(self):
