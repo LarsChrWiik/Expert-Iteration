@@ -7,6 +7,12 @@ from ExIt.ActionPolicy import e_greedy, get_action_index_exploit
 import numpy as np
 
 
+def set_indexes(players: ["BasePlayer"]):
+    # Assign the players a unique 'player index' (this index is constant).
+    for i, p in enumerate(players):
+        p.index = i
+
+
 class BasePlayer:
     """ Base player that is able to move """
 
@@ -16,14 +22,18 @@ class BasePlayer:
         # Unique index within each game. This can change between games.
         self.game_index = None
 
+    def __name__(self):
+        raise NotImplementedError("Please Implement this method")
+
     def move(self, state: BaseGame, randomness=False):
         raise NotImplementedError("Please Implement this method")
 
     @staticmethod
-    def move_random(game: BaseGame):
-        legal_moves = game.get_legal_moves()
-        action_index = rnd_choice(legal_moves)
-        game.advance(a=action_index)
+    def move_random(state: BaseGame):
+        legal_moves = state.get_legal_moves()
+        a = rnd_choice(legal_moves)
+        state.advance(a)
+        return a
 
 
 class BaseExItPlayer(BasePlayer):
@@ -46,15 +56,15 @@ class BaseExItPlayer(BasePlayer):
     def move(self, state: BaseGame, randomness=True, print_info=False):
         """ Move according to the apprentice (No expert) """
         fv = state.get_feature_vector()
-        pi = self.ex_it_algorithm.apprentice.pred_prob(fv)
+        p_pred = self.ex_it_algorithm.apprentice.pred_p(fv)
+        v_pred = self.ex_it_algorithm.apprentice.pred_v(fv)
         legal_moves = state.get_legal_moves()
 
         # Remove PI values that are not legal moves.
-        pi_new = [x for i, x in enumerate(pi) if i in legal_moves]
-        pi = pi_new
+        p = [x for i, x in enumerate(p_pred) if i in legal_moves]
 
         best_action, action_index = e_greedy(
-            pi=pi,
+            pi=p,
             legal_moves=legal_moves,
             e=BaseExItPlayer.exploration_degree
         )
@@ -62,10 +72,9 @@ class BaseExItPlayer(BasePlayer):
         if print_info:
             self.print_info(state=state, action_index=action_index)
 
-        if randomness:
-            state.advance(a=action_index)
-        else:
-            state.advance(a=best_action)
+        a = action_index if randomness else best_action
+        state.advance(a)
+        return a, p_pred, v_pred
 
     def start_ex_it(self, epochs, search_time):
         """ Starts Expert Iteration. NB: Time consuming process """
@@ -77,9 +86,9 @@ class BaseExItPlayer(BasePlayer):
     # TODO: Remove later (Used for testing).
     def print_info(self, state, action_index):
         print("fv = ", state.get_feature_vector())
-        print("evaluation = ", self.ex_it_algorithm.apprentice.pred_eval(
+        print("evaluation = ", self.ex_it_algorithm.apprentice.pred_v(
             X=state.get_feature_vector()))
-        print("action prob = ", self.ex_it_algorithm.apprentice.pred_prob(
+        print("action prob = ", self.ex_it_algorithm.apprentice.pred_p(
             X=state.get_feature_vector()))
         print("action_index = " + str(action_index))
         pi_update = np.zeros(state.num_actions, dtype=float)
