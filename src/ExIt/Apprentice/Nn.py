@@ -29,10 +29,11 @@ class Nn(BaseApprentice):
     dropout_rate = None
     v_size = 1
     regularisation_strength = 0.01
+    optimizer = Adam()
 
     def __init__(self):
         self.model = None
-        self.optimizer = None
+        self.optimizer = Nn.optimizer
         self.policy_network = None
         self.value_network = None
 
@@ -60,16 +61,14 @@ class Nn(BaseApprentice):
 
         model = Model(inputs=[input], outputs=[p, v])
 
-        optimizer = Adam()
         model.compile(
-            optimizer=optimizer,
+            optimizer=self.optimizer,
             loss={
                 'p_output': categorical_crossentropy,
                 'v_output': mean_squared_error
             }
         )
 
-        self.optimizer = optimizer
         self.model = model
         self.policy_network = Model(inputs=[input], outputs=[p])
         self.value_network = Model(inputs=[input], outputs=[v])
@@ -81,11 +80,11 @@ class Nn(BaseApprentice):
         )
         return policy_loss, value_loss
 
-    def pred_eval(self, X):
+    def pred_v(self, X):
         """ Return float representing state evaluation """
         return self.value_network.predict(x=np.array([X]))[0][0]
 
-    def pred_prob(self, X):
+    def pred_p(self, X):
         """ Return array of action probabilities """
         return self.policy_network.predict(x=np.array([X]))[0]
 
@@ -96,3 +95,9 @@ class Nn(BaseApprentice):
     def get_lr(self):
         """ Return the learning rate """
         return K.get_value(self.optimizer.lr)
+
+    def set_model(self, trained_model):
+        """ Set the model to a trained model """
+        self.model = trained_model
+        self.policy_network = Model(inputs=self.model.input, outputs=self.model.output[0])
+        self.value_network = Model(inputs=self.model.input, outputs=self.model.output[1])
