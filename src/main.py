@@ -18,7 +18,7 @@ epochs = 100
 
 
 def main():
-    elo_tournament()
+    comparison_trained()
 
 
 def elo_tournament():
@@ -37,6 +37,17 @@ def train_and_store():
         iterations=iterations,
         epochs=epochs,
         game_class=TicTacToe
+    )
+
+
+def comparison_trained():
+    players = [NnAlphaBetaPlayer(), RandomPlayer()]
+    compare_ex_it_trained(
+        game_class=TicTacToe,
+        players=players,
+        num_matches=1000,
+        randomness=False,
+        version=10
     )
 
 

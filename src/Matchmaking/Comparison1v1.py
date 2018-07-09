@@ -4,17 +4,19 @@ from Players.BasePlayers import set_indexes
 from Games.GameLogic import GameResult
 from Matchmaking.GameHandler import match
 from Misc.DiskHandler import create_comparison_folders, create_comparison_meta_file, \
-    create_comparison_files, save_comparison_result
+    create_comparison_files, save_comparison_result, load_trained_model
 from operator import add
 
 
-def compare_ex_it_trained(game_class, players, num_matches, randomness):
+def compare_ex_it_trained(game_class, players, num_matches, randomness, version):
     """ Compare trained players """
     set_indexes(players)
 
+    load_trained_model(game_class, players, version)
+
     # Create necessary folders and files and get base path.
     base_path = create_comparison_folders()
-    create_comparison_meta_file(base_path, num_matches, "None", "None", "None")
+    create_comparison_meta_file(base_path, players, num_matches, "None", "None", "None")
     create_comparison_files(base_path, players)
 
     results_list = start_matches(game_class, players, num_matches, randomness)

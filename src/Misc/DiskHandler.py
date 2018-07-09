@@ -28,6 +28,18 @@ def write_ex_it_model_info(file, ex_it_algorithm):
     file.write("   dropout_rate = " + str(ex_it_algorithm.apprentice.dropout_rate) + "\n")
 
 
+def load_trained_model(game_class, players, i):
+    """ Load trained model into the players """
+    for p in players:
+        if isinstance(p, BaseExItPlayer):
+            trained_model = load_model(
+                game_name=game_class.__name__,
+                algorithm_name=p.__name__(),
+                iteration=str(i)
+            )
+            p.ex_it_algorithm.apprentice.set_model(trained_model)
+
+
 # ******************** ELO ********************
 
 

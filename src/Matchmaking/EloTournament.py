@@ -1,7 +1,7 @@
 
 from Players.BasePlayers import BasePlayer, BaseExItPlayer
 from Matchmaking.GameHandler import GameHandler
-from Misc.DiskHandler import create_elo_folders, save_game_to_pgn, load_model
+from Misc.DiskHandler import create_elo_folders, save_game_to_pgn, load_trained_model
 from tqdm import trange
 
 
@@ -14,7 +14,7 @@ def start_elo_tournament(game_class, players: [BasePlayer], trained_iterations,
     # Start tournament iteration.
     with trange(trained_iterations) as t:
         for i in t:
-            load_trained_model(game_class, players, i)
+            load_trained_model(game_class, players, i+1)
 
             # Match players with all permutations 'num_matches' times.
             for _ in range(num_matches):
@@ -33,15 +33,3 @@ def get_all_match_permutations(players):
             if p1 is not p2:
                 match_permutations.append((i, j))
     return match_permutations
-
-
-def load_trained_model(game_class, players, i):
-    """ Load trained model into the players """
-    for p in players:
-        if isinstance(p, BaseExItPlayer):
-            trained_model = load_model(
-                game_name=game_class.__name__,
-                algorithm_name=p.__name__(),
-                iteration=str(i+1)
-            )
-            p.ex_it_algorithm.apprentice.set_model(trained_model)
