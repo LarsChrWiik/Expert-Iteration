@@ -1,13 +1,11 @@
 
 
 from Games.TicTacToe import TicTacToe
-from Games.ConnectFour import ConnectFour
 from Players.Players import *
-from Support.Debugger import debug_display_win_moves
-from Matchmaking.Comparison1v1 import Comparison1v1
-from Matchmaking.EloTournament import start_tournament
-from Support.Plotter import plot_result
-from Training import self_play_and_store_versions
+from Matchmaking.Comparison1v1 import compare_ex_it_trained, compare_ex_it_from_scratch
+from Matchmaking.EloTournament import start_elo_tournament
+from Misc.Debugger import debug_display_win_moves
+from Misc.Training import self_play_and_store_versions
 import numpy as np
 np.set_printoptions(suppress=True)
 
@@ -15,16 +13,16 @@ np.set_printoptions(suppress=True)
 search_time = 0.05
 num_matches = 1000
 
-iterations = 100
+iterations = 10
 epochs = 100
 
 
 def main():
-    test_tournament()
+    train_and_store()
 
 
-def test_tournament():
-    start_tournament(
+def elo_tournament():
+    start_elo_tournament(
         players=[NnAlphaBetaPlayer(), RandomPlayer()],
         game_class=TicTacToe,
         trained_iterations=10,
@@ -32,9 +30,9 @@ def test_tournament():
     )
 
 
-def train():
+def train_and_store():
     self_play_and_store_versions(
-        ex_it_algorithm=NnAlphaBetaPlayer().ex_it_algorithm,
+        ex_it_algorithm=NnMctsPlayer().ex_it_algorithm,
         search_time=search_time,
         iterations=iterations,
         epochs=epochs,
@@ -42,21 +40,22 @@ def train():
     )
 
 
-def comparison():
+def comparison_from_scratch():
     # Run Comparison with several iteration of self-play.
-    Comparison1v1(
+    players = [NnAlphaBetaPlayer(), RandomPlayer()]
+
+    compare_ex_it_from_scratch(
         game_class=TicTacToe,
-        players=[NnAlphaBetaPlayer(), RandomPlayer()]
-    ).compare_ex_it(
-        num_train_epoch=epochs,
+        players=players,
+        epochs=epochs,
         search_time=search_time,
         num_matches=num_matches,
-        num_iteration=iterations,
+        iterations=iterations,
         randomness=False
     )
 
 
-def normal_test():
+def normal_exit_test():
     # Run One iteration of self.play
     player = NnMctsPlayer()
     player.set_game(game_class=TicTacToe)
@@ -66,15 +65,10 @@ def normal_test():
     )
 
     # Display the agents calculations in predefined scenarios.
-    #debug_display_win_moves(player)
-
-
-def plot():
-    folder = '2018-06-20___00-39-18'
-    filename = "0"
-    plot_result(folder=folder, filename=filename)
+    debug_display_win_moves(player)
 
 
 if __name__ == "__main__":
     main()
+    #import cProfile
     #cProfile.run('main()')

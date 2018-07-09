@@ -1,143 +1,82 @@
 
-from Players.Players import BasePlayer, BaseExItPlayer
+from Players.Players import BaseExItPlayer
 from Players.BasePlayers import set_indexes
 from Games.GameLogic import GameResult
-from Matchmaking.GameHandler import GameHandler
+from Matchmaking.GameHandler import match
+from Misc.DiskHandler import create_comparison_folders, create_comparison_meta_file, \
+    create_comparison_files, save_comparison_result
 from operator import add
-from datetime import datetime
-import os
 
 
-def match(game_class, players, randomness):
-    """ Starts a new game match between players and returns the result.
-        Return a list of GameResult for each player according to Game Index. """
-    game_handler = GameHandler(game_class, players, randomness)
-    game_handler.play_game_until_finish()
-    return game_handler.get_result()
+def compare_ex_it_trained(game_class, players, num_matches, randomness):
+    """ Compare trained players """
+    set_indexes(players)
+
+    # Create necessary folders and files and get base path.
+    base_path = create_comparison_folders()
+    create_comparison_meta_file(base_path, num_matches, "None", "None", "None")
+    create_comparison_files(base_path, players)
+
+    results_list = start_matches(game_class, players, num_matches, randomness)
+    for p_index, results in enumerate(results_list):
+        save_comparison_result(base_path, results, 1, [p for p in players if p.index == p_index][0])
+    print(results_list)
 
 
-class Comparison1v1:
-    """ Logic for matching players """
+def compare_ex_it_from_scratch(game_class, players, epochs, search_time, num_matches, iterations, randomness):
+    """ Compare players through several iterations.
+        Self play is enabled for ExIt players between iterations. """
 
-    def __init__(self, game_class, players: [BasePlayer]):
-        self.game_class = game_class
-        self.players = players
-        self.statistics = None
-        set_indexes(players)
+    set_indexes(players)
 
-    def compare_ex_it(self, num_train_epoch, search_time,
-                      num_matches, num_iteration, randomness):
-        """ Compare players through several iterations.
-            Self play is enabled for ExIt players between iterations.
-            NB: This process never ends if num_iteration = None. """
+    # Create necessary folders and files and get base path.
+    base_path = create_comparison_folders()
+    create_comparison_meta_file(base_path, players, num_matches, iterations, epochs, search_time)
+    create_comparison_files(base_path, players)
 
-        self.statistics = Statistics1v1(
-            num_train_epoch=num_train_epoch,
-            search_time=search_time,
-            num_matches=num_matches,
-            num_iteration=num_iteration,
-            players=self.players
-        )
+    # Let the players know which game they are playing.
+    for p in players:
+        if isinstance(p, BaseExItPlayer):
+            if p.ex_it_algorithm.apprentice.model is None:
+                p.set_game(game_class)
 
-        # Let the players know which game they are playing.
-        for p in self.players:
-            if isinstance(p, BaseExItPlayer):
-                if p.ex_it_algorithm.apprentice.model is None:
-                    p.set_game(self.game_class)
-
-        """ Compare players through several iterations of self-play.
-            This process accepts non-ExIt player as well such as RandomPlayer. """
-        i = 0
-        while True:
-            results = self.__compare(num_matches=num_matches, randomness=randomness)
-            self.statistics.save(results=results)
-            if num_iteration is not None and i >= num_iteration:
-                break
-            self.__train(num_train_epoch=num_train_epoch, search_time=search_time)
-            i += 1
-
-    def __train(self, num_train_epoch, search_time):
-        """ Let the player train using ExIt self-play if the player
-            is instance of BaseExItPlayer """
-        for player in self.players:
-            if isinstance(player, BaseExItPlayer):
-                player.start_ex_it(
-                    epochs=num_train_epoch,
-                    search_time=search_time
-                )
-
-    def __compare(self, num_matches, randomness):
-        """ Compare players and store the statistics """
-        # 2D list: [win, lose, draw]. Position = player index. (NOT GAME INDEX).
-        results = [GameResult.get_new_result_list() for _ in self.players]
-
-        for _ in range(num_matches):
-            # Play game between players.
-            game_result = match(self.game_class, self.players, randomness)
-            # Get list of results for each player according to player index.
-            game_result_list = GameResult.get_players_result_list_(game_result)
-            # Add the result to the list of total results.
-            for i, result in enumerate(results):
-                results[i] = list(map(add, result, game_result_list[i]))
-            self.__rearrange_players()
-        return results
-
-    def __rearrange_players(self):
-        """ Moves the first player to the last position """
-        player = self.players.pop(0)
-        self.players.append(player)
+    """ Compare players through several iterations of self-play.
+        This process accepts non-ExIt player as well such as RandomPlayer. """
+    for i in range(iterations):
+        self_play(players, epochs, search_time)
+        results_list = start_matches(game_class, players, num_matches, randomness)
+        for p_index, results in enumerate(results_list):
+            save_comparison_result(base_path, results, i+1, [p for p in players if p.index == p_index][0])
+        rearrange_players(players)
+        print(results_list)
 
 
-class Statistics1v1:
-    """ Class containing logic for storing statistics to disk """
+def self_play(players, epochs, search_time):
+    """ Let the player train using ExIt self-play if the player
+        is instance of BaseExItPlayer """
+    for player in players:
+        if isinstance(player, BaseExItPlayer):
+            player.start_ex_it(
+                epochs=epochs,
+                search_time=search_time
+            )
 
-    metadata = "metadata"
-    folder = "./Statistics1v1/"
 
-    def __init__(self, num_train_epoch, search_time,
-                 num_matches, num_iteration, players):
-        folder_name = self.make_new_folder()
-        self.base_path = Statistics1v1.folder + folder_name + "/"
+def start_matches(game_class, players, num_matches, randomness):
+    """ Play several games between the players """
+    # 2D list: [win, lose, draw]. Position = player index.
+    results = [GameResult.get_new_result_list() for _ in players]
 
-        # Write initial information
-        with open(self.__get_path(file_name=Statistics1v1.metadata, file_type="txt"), 'w') as file:
-            file.write("num_train_epoch = " + str(num_train_epoch) + "\n")
-            file.write("search_time = " + str(search_time) + "\n")
-            file.write("num_matches = " + str(num_matches) + "\n")
-            file.write("num_iteration = " + str(num_iteration) + "\n")
-            file.write("\n")
-            file.write("Players:\n")
-            for p in players:
-                file.write("- " + str(type(p).__name__) + " id = " + str(p.index) + "\n")
-
-        for p in players:
-            with open(self.__get_path(file_name=str(p.index)), 'w') as file:
-                file.write("win,loss,draw" + "\n")
-
-    def save(self, results):
-        """ Save statistic about the game """
-        print(results)
+    for _ in range(num_matches):
+        game_result = match(game_class, players, randomness)
+        game_result_list = GameResult.get_players_result_list_(game_result)
         for i, result in enumerate(results):
-            with open(self.__get_path(file_name=str(i)), 'a') as file:
-                file.write(self.__convert_result(result=result) + "\n")
+            results[i] = list(map(add, result, game_result_list[i]))
+        rearrange_players(players)
+    return results
 
-    def __get_path(self, file_name, file_type="csv"):
-        return self.base_path + file_name + str(".") + file_type
 
-    @staticmethod
-    def make_new_folder():
-        folder_name = str(datetime.now().strftime('%Y-%m-%d___%H-%M-%S'))
-        if not os.path.exists(folder_name):
-            os.makedirs(Statistics1v1.folder + folder_name)
-        else:
-            raise Exception('Folder name already exists!')
-        return folder_name
-
-    @staticmethod
-    def __convert_result(result):
-        result_new = ""
-        for i, v in enumerate(result):
-            result_new += str(v)
-            if i != len(result) - 1:
-                result_new += ","
-        return result_new
+def rearrange_players(players):
+    """ Moves the first player to the last position """
+    player = players.pop(0)
+    players.append(player)
