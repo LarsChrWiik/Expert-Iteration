@@ -3,7 +3,7 @@ from Games.GameLogic import BaseGame
 from ExIt.ExpertIteration import ExpertIteration
 from random import choice as rnd_choice
 from ExIt.Evaluator import get_reward_for_action
-from ExIt.ActionPolicy import e_greedy, get_action_index_exploit
+from ExIt.ActionPolicy import e_greedy
 import numpy as np
 
 
@@ -19,8 +19,6 @@ class BasePlayer:
     def __init__(self):
         # Unique index of a player.
         self.index = None
-        # Unique index within each game. This can change between games.
-        self.game_index = None
 
     def __name__(self):
         raise NotImplementedError("Please Implement this method")
@@ -40,7 +38,7 @@ class BaseExItPlayer(BasePlayer):
     """ Base player that is able to improve its strategy using Expert Iteration """
 
     """ Exploration degree that is used in move function.
-        This allows game states to differ during comparisons. """
+        This allows some randomness when comparing two ExIt-algorithms. """
     exploration_degree = 0.1
 
     def __init__(self, ex_it_algorithm: ExpertIteration):
