@@ -15,8 +15,11 @@ class BaseApprentice:
     def train(self, X, Y_pi, Y_r):
         raise NotImplementedError("Please Implement this method")
 
-    def pred_eval(self, X):
+    def pred_v(self, X):
         raise NotImplementedError("Please Implement this method")
 
-    def pred_prob(self, X):
+    def pred_p(self, X):
+        raise NotImplementedError("Please Implement this method")
+
+    def set_model(self, trained_model):
         raise NotImplementedError("Please Implement this method")
