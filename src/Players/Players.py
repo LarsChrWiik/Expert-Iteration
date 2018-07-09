@@ -12,8 +12,11 @@ from math import sqrt
 class RandomPlayer(BasePlayer):
     """ Player that plays random moves """
 
-    def move(self, game: BaseGame, randomness=False):
-        self.move_random(game=game)
+    def __name__(self):
+        return type(self).__name__
+
+    def move(self, state: BaseGame, randomness=False):
+        return self.move_random(state), None, None
 
 
 class NnMctsPlayer(BaseExItPlayer):
