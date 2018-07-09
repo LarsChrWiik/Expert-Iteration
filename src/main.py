@@ -5,6 +5,7 @@ from Games.ConnectFour import ConnectFour
 from Players.Players import *
 from Support.Debugger import debug_display_win_moves
 from Matchmaking.Comparison1v1 import Comparison1v1
+from Matchmaking.EloTournament import start_tournament
 from Support.Plotter import plot_result
 from Training import self_play_and_store_versions
 import numpy as np
@@ -19,7 +20,16 @@ epochs = 100
 
 
 def main():
-    comparison()
+    test_tournament()
+
+
+def test_tournament():
+    start_tournament(
+        players=[NnAlphaBetaPlayer(), RandomPlayer()],
+        game_class=TicTacToe,
+        trained_iterations=10,
+        randomness=False
+    )
 
 
 def train():
