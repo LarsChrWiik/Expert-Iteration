@@ -62,7 +62,7 @@ class BaseExItPlayer(BasePlayer):
         p = [x for i, x in enumerate(p_pred) if i in legal_moves]
 
         best_action, action_index = e_greedy(
-            pi=p,
+            p=p,
             legal_moves=legal_moves,
             e=BaseExItPlayer.exploration_degree
         )
