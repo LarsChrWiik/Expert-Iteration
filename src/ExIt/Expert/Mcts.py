@@ -48,7 +48,7 @@ class Mcts(BaseExpert):
             u_max = -float("inf")
             a_best = -1
             for i, a in enumerate(legal_moves):
-                if is_root and Q[s][a] == 0:
+                if N[s][a] == 0:
                     u = float("inf")
                 else:
                     u = Q[s][a] + self.c * P[s][a] * sqrt(sum(N[s])) / (1 + N[s][a])
@@ -78,7 +78,8 @@ class Mcts(BaseExpert):
         # Get V values and action indexes of legal moves.
         legal_moves = state.get_legal_moves()
         s = tuple(state.get_feature_vector())
-        v_values = [v for i, v in enumerate(Q[s]) if i in legal_moves]
-        v_root = None #sum(Q[s]) / len(Q[s])
+        # TODO: change to N[]
+        v_values = [n for i, n in enumerate(N[s]) if i in legal_moves]
+        v_root = None
 
         return v_values, legal_moves, v_root
