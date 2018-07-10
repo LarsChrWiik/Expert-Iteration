@@ -5,6 +5,7 @@ from Games.GameLogic import BaseGame
 from Misc.Timer import Timer
 from ExIt.Evaluator import zero_sum_2v2_evaluation
 from math import sqrt
+from random import shuffle
 
 
 class Mcts(BaseExpert):
@@ -47,7 +48,9 @@ class Mcts(BaseExpert):
             # Find action that maximizes Upper Confidence Bound (UCB).
             u_max = -float("inf")
             a_best = -1
-            for i, a in enumerate(legal_moves):
+            a_shuffled = list(enumerate(legal_moves))
+            shuffle(a_shuffled)
+            for i, a in a_shuffled:
                 if N[s][a] == 0:
                     u = float("inf")
                 else:
