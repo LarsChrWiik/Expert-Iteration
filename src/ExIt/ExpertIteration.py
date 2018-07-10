@@ -4,7 +4,7 @@ from ExIt.Expert import BaseExpert
 from Games.GameLogic import BaseGame
 from ExIt.DataSet import DataSet
 from Misc.Timer import Timer
-from ExIt.ActionPolicy import get_action_index_exploit
+from ExIt.ActionPolicy import exploit_action
 from tqdm import trange
 import numpy as np
 from random import choice as rnd_element
@@ -145,7 +145,7 @@ class ExpertIteration:
             search_time=self.search_time
         )
 
-        best_action = get_action_index_exploit(values=v_values, legal_moves=legal_moves)
+        best_action = exploit_action(values=v_values, legal_moves=legal_moves)
 
         s, p, t = generate_sample(state=state, action_index=best_action)
         return s, p, v, t, best_action
