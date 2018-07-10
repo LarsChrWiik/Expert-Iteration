@@ -52,7 +52,8 @@ class Mcts(BaseExpert):
             shuffle(a_shuffled)
             for i, a in a_shuffled:
                 if N[s][a] == 0:
-                    u = float("inf")
+                    a_best = a
+                    break
                 else:
                     u = Q[s][a] + self.c * P[s][a] * sqrt(sum(N[s])) / (1 + N[s][a])
                 if u > u_max:
