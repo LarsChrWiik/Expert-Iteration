@@ -3,18 +3,12 @@ from ExIt.Apprentice import BaseApprentice
 from ExIt.Expert import BaseExpert
 from Games.GameLogic import BaseGame
 from ExIt.DataSet import DataSet
-from Misc.Timer import Timer
-from ExIt.ActionPolicy import exploit_action
+from ExIt.ActionPolicy import explore_action, p_proportional, exploit_action
+from ExIt.Expert.Mcts import Mcts
 from tqdm import trange
 import numpy as np
 from random import choice as rnd_element
 import random
-
-
-timer = Timer()
-
-# 1.0 = explore. 0.0 = exploit.
-exploration_degree = 0.0
 
 
 def update_v_values_to_game_outcome(final_state: BaseGame, turn_array, v_array):
@@ -25,9 +19,9 @@ def update_v_values_to_game_outcome(final_state: BaseGame, turn_array, v_array):
     return v_array
 
 
-def generate_sample(state: BaseGame, action_index):
+def generate_sample(state: BaseGame, a):
     p_new = np.zeros(state.num_actions, dtype=float)
-    p_new[action_index] = 1
+    p_new[a] = 1
     return state.get_feature_vector(), p_new, state.turn
 
 
@@ -44,13 +38,16 @@ def add_different_advance(state, best_action, state_copies):
 
 class ExpertIteration:
 
-    def __init__(self, apprentice: BaseApprentice, expert: BaseExpert):
+    def __init__(self, apprentice: BaseApprentice, expert: BaseExpert,
+                 use_off_policy=True, dataset=DataSet(), state_branch_degree=0.0):
         self.apprentice = apprentice
         self.expert = expert
-        self.data_set = DataSet()
+        self.data_set = dataset
         self.search_time = None
         self.game_class = None
         self.games_generated = 0
+        self.state_branch_degree = state_branch_degree
+        self.use_off_policy = use_off_policy
         # Set name.
         try:
             self.__name__ = str(type(self.apprentice).__name__) + "_" + str(self.expert.__name__)
@@ -84,43 +81,43 @@ class ExpertIteration:
             # Train on mini-batches.
             for _ in range(self.games_generated):
                 X_s, Y_p, Y_v = self.data_set.get_sample_batch()
-                p, v = self.apprentice.train(X_s=X_s, Y_p=Y_p, Y_v=Y_v)
+                pi_loss, v_loss = self.apprentice.train(X_s=X_s, Y_p=Y_p, Y_v=Y_v)
                 if verbose:
-                    return p, v
+                    return pi_loss, v_loss
 
         if verbose:
             with trange(epochs) as t:
                 for _ in t:
-                    p, v = self_play()
+                    pi_loss, v_loss = self_play()
                     t.set_postfix(
                         memory_size='%d' % len(self.data_set.memory),
                         games_generated='%d' % self.games_generated,
-                        pl='%01.2f' % p,
-                        vl='%01.2f' % v
+                        pi_loss='%01.2f' % pi_loss,
+                        v_loss='%01.2f' % v_loss
                     )
         else:
             for _ in range(epochs):
                 self_play()
 
     def ex_it_game(self, state):
-        s_array, p_array, v_array, turn_array = [], [], [], []
+        s_array, pi_array, v_array, turn_array = [], [], [], []
         state_copies = []
 
         while not state.is_game_over():
-            s, p, v, t, best_action = self.ex_it_state(state)
+            s, p, v, t, a = self.ex_it_state(state)
 
-            if random.uniform(0, 1) < exploration_degree:
+            if random.uniform(0, 1) < self.state_branch_degree:
                 # Make branch from the main line.
                 state_copies = add_different_advance(
                     state=state,
-                    best_action=best_action,
+                    best_action=a,
                     state_copies=state_copies
                 )
 
-            state.advance(a=best_action)
+            state.advance(a)
             # Store info.
             s_array.append(s)
-            p_array.append(p)
+            pi_array.append(p)
             v_array.append(v)
             turn_array.append(t)
 
@@ -130,22 +127,27 @@ class ExpertIteration:
         for s in state_copies:
             s_array2, p_array2, v_array2 = self.ex_it_game(state=s)
             s_array.extend(s_array2)
-            p_array.extend(p_array2)
+            pi_array.extend(p_array2)
             v_array.extend(v_array2)
 
         self.games_generated += 1
 
-        return s_array, p_array, v_array
+        return s_array, pi_array, v_array
 
     def ex_it_state(self, state: BaseGame):
         """ Expert Iteration for a given state """
-        v_values, legal_moves, v = self.expert.search(
-            state=state,
-            predictor=self.apprentice,
-            search_time=self.search_time
-        )
+        x, v = self.expert.search(state, self.apprentice, self.search_time)
 
-        best_action = exploit_action(values=v_values, legal_moves=legal_moves)
+        lm = state.get_legal_moves()
+        if isinstance(self.expert, Mcts):
+            a_on_policy = explore_action(x, lm)
+            a_off_policy = exploit_action(x, lm)
+        else:
+            a_off_policy, a_on_policy = p_proportional(
+                self.apprentice.pred_pi(state.get_feature_vector()), x, lm
+            )
 
-        s, p, t = generate_sample(state=state, action_index=best_action)
-        return s, p, v, t, best_action
+        a = a_off_policy if self.use_off_policy else a_on_policy
+
+        s, pi, t = generate_sample(state, a)
+        return s, pi, v, t, a_on_policy
