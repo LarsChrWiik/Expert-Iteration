@@ -144,7 +144,9 @@ class ExpertIteration:
             a_off_policy = exploit_action(x, lm)
         else:
             a_off_policy, a_on_policy = p_proportional(
-                self.apprentice.pred_pi(state.get_feature_vector()), x, lm
+                pi=self.apprentice.pred_pi(state.get_feature_vector()),
+                vi=x,
+                legal_moves=lm
             )
 
         a = a_off_policy if self.use_off_policy else a_on_policy
