@@ -11,7 +11,6 @@ from random import shuffle
 class Mcts(BaseExpert):
 
     def __init__(self, c):
-        self.timer = Timer()
         # Exploration parameter in UCB.
         self.c = c
 
@@ -76,8 +75,9 @@ class Mcts(BaseExpert):
 
         """ ***** SEARCH CODE ***** """
 
-        self.timer.start_search_timer(search_time)
-        while self.timer.have_time_left() or len(N) <= 1:
+        timer = Timer(search_time)
+        timer.start()
+        while timer.have_time_left() or len(N) <= 1:
             mcts_search(state)
 
         # Get V values and action indexes of legal moves.

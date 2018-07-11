@@ -107,8 +107,8 @@ class Minimax(BaseExpert):
             return vi, legal_moves, v
         else:
             # Iterative deepening.
-            timer = Timer()
-            timer.start_search_timer(search_time=search_time)
+            timer = Timer(search_time)
+            timer.start()
             vi, v = None, None
             depth = 1
             while True:

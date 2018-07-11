@@ -15,6 +15,7 @@ num_matches = 1000
 
 iterations = 10
 epochs = 100
+training_time = 1
 
 
 """
