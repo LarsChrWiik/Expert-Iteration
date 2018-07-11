@@ -54,7 +54,7 @@ class BaseExItPlayer(BasePlayer):
     def move(self, state: BaseGame, randomness=True, print_info=False):
         """ Move according to the apprentice (No expert) """
         fv = state.get_feature_vector()
-        p_pred = self.ex_it_algorithm.apprentice.pred_p(fv)
+        p_pred = self.ex_it_algorithm.apprentice.pred_pi(fv)
         v_pred = self.ex_it_algorithm.apprentice.pred_v(fv)
         legal_moves = state.get_legal_moves()
 
@@ -62,7 +62,7 @@ class BaseExItPlayer(BasePlayer):
         p = [x for i, x in enumerate(p_pred) if i in legal_moves]
 
         best_action, action_index = e_greedy(
-            p=p,
+            pi=p,
             legal_moves=legal_moves,
             e=BaseExItPlayer.exploration_degree
         )
@@ -86,7 +86,7 @@ class BaseExItPlayer(BasePlayer):
         print("fv = ", state.get_feature_vector())
         print("evaluation = ", self.ex_it_algorithm.apprentice.pred_v(
             X=state.get_feature_vector()))
-        print("action prob = ", self.ex_it_algorithm.apprentice.pred_p(
+        print("action prob = ", self.ex_it_algorithm.apprentice.pred_pi(
             X=state.get_feature_vector()))
         print("action_index = " + str(action_index))
         pi_update = np.zeros(state.num_actions, dtype=float)
