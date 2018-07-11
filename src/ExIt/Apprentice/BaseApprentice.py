@@ -18,7 +18,7 @@ class BaseApprentice:
     def pred_v(self, X):
         raise NotImplementedError("Please Implement this method")
 
-    def pred_p(self, X):
+    def pred_pi(self, X):
         raise NotImplementedError("Please Implement this method")
 
     def set_model(self, trained_model):
