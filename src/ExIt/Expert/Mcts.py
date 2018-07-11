@@ -27,7 +27,7 @@ class Mcts(BaseExpert):
 
         original_turn = state.turn
 
-        def mcts_search(state, is_root=False):
+        def mcts_search(state):
 
             fv = state.get_feature_vector()
             legal_moves = state.get_legal_moves()
@@ -35,7 +35,7 @@ class Mcts(BaseExpert):
 
             # When unexplored child - predict and store info from this state.
             if s not in P:
-                P[s] = predictor.pred_p(X=fv)
+                P[s] = predictor.pred_pi(X=fv)
                 V[s] = zero_sum_2v2_evaluation(state, original_turn, predictor)
                 N[s] = [0 for _ in range(state.num_actions)]
                 Q[s] = [0 for _ in range(state.num_actions)]
@@ -52,7 +52,7 @@ class Mcts(BaseExpert):
             shuffle(a_shuffled)
             for i, a in a_shuffled:
                 if N[s][a] == 0:
-                    # Choose this action if it has not been tried. 
+                    # Choose this action if it has not been tried.
                     a_best = a
                     break
                 else:
@@ -77,14 +77,12 @@ class Mcts(BaseExpert):
         """ ***** SEARCH CODE ***** """
 
         self.timer.start_search_timer(search_time)
-        while self.timer.have_time_left():
-            mcts_search(state, is_root=True)
+        while self.timer.have_time_left() or len(N) <= 1:
+            mcts_search(state)
 
         # Get V values and action indexes of legal moves.
         legal_moves = state.get_legal_moves()
         s = tuple(state.get_feature_vector())
-        # TODO: change to N[]
-        v_values = [n for i, n in enumerate(N[s]) if i in legal_moves]
-        v_root = None
+        n_values = [n for i, n in enumerate(N[s]) if i in legal_moves]
 
-        return v_values, legal_moves, v_root
+        return n_values, None
