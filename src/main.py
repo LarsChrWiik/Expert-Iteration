@@ -17,8 +17,28 @@ iterations = 10
 epochs = 100
 
 
+"""
+***** Variable information in the project *****
+s   = state
+a   = action
+fv  = feature vector
+v   = predicted value of state
+vi  = list of values
+pi  = predicted action probability
+lm  = legal moves
+
+Q[s]    = Expected Q values from state s
+Q[s][a] = Expected Q values when taking action a from state s. 
+N[s]    = Number of times state s was visited. 
+P[s]    = Predicted P values from state s.
+P[s][a] = Predicted P values when taking action a from state s.
+V[s]    = Predicted v value of state s.
+***********************************************
+"""
+
+
 def main():
-    comparison_trained()
+    comparison_from_scratch()
 
 
 def elo_tournament():
@@ -53,7 +73,7 @@ def comparison_trained():
 
 def comparison_from_scratch():
     # Run Comparison with several iteration of self-play.
-    players = [NnAlphaBetaPlayer(), RandomPlayer()]
+    players = [NnMinimaxPlayer(), RandomPlayer()]
 
     compare_ex_it_from_scratch(
         game_class=TicTacToe,
