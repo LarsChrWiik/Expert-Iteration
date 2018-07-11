@@ -17,6 +17,7 @@ class Minimax(BaseExpert):
         self.fixed_depth = fixed_depth
         self.alpha = None if not use_alpha_beta else float('-inf')
         self.beta = None if not use_alpha_beta else float('inf')
+        self.stop_search_contradiction = True
         self.__name__ = "Minimax" if (self.alpha, self.beta) == (None, None) else "AlphaBeta"
 
     def search(self, state: BaseGame, predictor: BaseApprentice, search_time: float):
@@ -69,6 +70,11 @@ class Minimax(BaseExpert):
                     return v_values, legal_moves, val
                 return val
 
+            if depth == 0 and not state.is_game_over():
+                """ Disapproval of the contradiction.
+                    Which means that a greater depth is needed. """
+                self.stop_search_contradiction = False
+
             if state.is_game_over() or depth <= 0 or \
                     (not is_root and timer is not None and not timer.have_time_left()):
                 """ The root will never enter this if-statement.
@@ -106,6 +112,7 @@ class Minimax(BaseExpert):
             v_values, legal_moves, val = None, None, None
             depth = 1
             while True:
+                self.stop_search_contradiction = True
                 v_values_new, legal_moves_new, val_new = alpha_beta_search(
                     state=state,
                     alpha=self.alpha,
@@ -119,15 +126,15 @@ class Minimax(BaseExpert):
                     v_values, legal_moves, val = v_values_new, legal_moves_new, val_new
 
                 if not timer.have_time_left():
-                    # This prevents unfinished evaluation updates, which
-                    # ensures that the final evaluations are calculated using full AB search.
+                    """ This prevents unfinished evaluation updates, which
+                        ensures that the final evaluations are calculated using full AB search. """
                     break
 
                 # Update evaluations.
                 v_values, legal_moves, val = v_values_new, legal_moves_new, val_new
 
-                # Allow early search stop if it is not needed.
-                if depth >= state.max_game_depth:
+                if self.stop_search_contradiction:
+                    # Early stopping - no greater depth is needed.
                     break
 
                 depth += 1
