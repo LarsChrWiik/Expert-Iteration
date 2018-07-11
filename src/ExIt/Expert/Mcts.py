@@ -52,6 +52,7 @@ class Mcts(BaseExpert):
             shuffle(a_shuffled)
             for i, a in a_shuffled:
                 if N[s][a] == 0:
+                    # Choose this action if it has not been tried. 
                     a_best = a
                     break
                 else:
