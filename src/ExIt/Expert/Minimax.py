@@ -31,44 +31,44 @@ class Minimax(BaseExpert):
             """ If alpha and beta is None, then this is a Minimax search """
 
             def max_value(state, alpha, beta, depth):
-                val = float('-inf')
+                v = float('-inf')
                 legal_moves = state.get_legal_moves()
-                v_values = [0 for _ in legal_moves]
+                vi = [0 for _ in legal_moves]
                 for i, a in enumerate(legal_moves):
                     c = state.copy()
                     c.advance(a)
-                    val = max(
-                        val,
+                    v = max(
+                        v,
                         alpha_beta_search(c, alpha, beta, depth - 1)
                     )
-                    v_values[i] = val
+                    vi[i] = v
                     if (alpha, beta) != (None, None):
-                        if val >= beta:
-                            return val
-                        alpha = max(alpha, val)
+                        if v >= beta:
+                            return v
+                        alpha = max(alpha, v)
                 if is_root:
-                    return v_values, legal_moves, val
-                return val
+                    return vi, v
+                return v
 
             def min_value(state, alpha, beta, depth):
-                val = float('inf')
+                v = float('inf')
                 legal_moves = state.get_legal_moves()
-                v_values = [0 for _ in legal_moves]
+                vi = [0 for _ in legal_moves]
                 for i, a in enumerate(legal_moves):
                     c = state.copy()
                     c.advance(a)
-                    val = min(
-                        val,
+                    v = min(
+                        v,
                         alpha_beta_search(c, alpha, beta, depth - 1)
                     )
-                    v_values[i] = val
+                    vi[i] = v
                     if (alpha, beta) != (None, None):
-                        if val <= alpha:
-                            return val
-                        beta = min(beta, val)
+                        if v <= alpha:
+                            return v
+                        beta = min(beta, v)
                 if is_root:
-                    return v_values, legal_moves, val
-                return val
+                    return vi, v
+                return v
 
             if depth == 0 and not state.is_game_over():
                 """ Disapproval of the contradiction.
@@ -97,23 +97,23 @@ class Minimax(BaseExpert):
 
         if self.fixed_depth is not None:
             # Fixed depth.
-            v_values, legal_moves, val = alpha_beta_search(
+            vi, legal_moves, v = alpha_beta_search(
                 state=state,
                 alpha=self.alpha,
                 beta=self.beta,
                 depth=self.fixed_depth,
                 is_root=True
             )
-            return v_values, legal_moves, val
+            return vi, legal_moves, v
         else:
             # Iterative deepening.
             timer = Timer()
             timer.start_search_timer(search_time=search_time)
-            v_values, legal_moves, val = None, None, None
+            vi, v = None, None
             depth = 1
             while True:
                 self.stop_search_contradiction = True
-                v_values_new, legal_moves_new, val_new = alpha_beta_search(
+                vi_new, v_new = alpha_beta_search(
                     state=state,
                     alpha=self.alpha,
                     beta=self.beta,
@@ -121,9 +121,9 @@ class Minimax(BaseExpert):
                     is_root=True
                 )
 
-                if v_values is None:
+                if vi is None:
                     # This ensures that at least one iteration is stored.
-                    v_values, legal_moves, val = v_values_new, legal_moves_new, val_new
+                    vi, v = vi_new, v_new
 
                 if not timer.have_time_left():
                     """ This prevents unfinished evaluation updates, which
@@ -131,7 +131,7 @@ class Minimax(BaseExpert):
                     break
 
                 # Update evaluations.
-                v_values, legal_moves, val = v_values_new, legal_moves_new, val_new
+                vi, v = vi_new, v_new
 
                 if self.stop_search_contradiction:
                     # Early stopping - no greater depth is needed.
@@ -139,4 +139,4 @@ class Minimax(BaseExpert):
 
                 depth += 1
 
-            return v_values, legal_moves, val
+            return vi, v
