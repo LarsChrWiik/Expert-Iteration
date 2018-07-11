@@ -26,6 +26,7 @@ v   = predicted value of state
 vi  = list of values
 pi  = predicted action probability
 lm  = legal moves
+t = turn
 
 Q[s]    = Expected Q values from state s
 Q[s][a] = Expected Q values when taking action a from state s. 
