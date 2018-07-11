@@ -13,7 +13,6 @@ class TicTacToe(BaseGame):
         self.board = np.zeros((TicTacToe.num_squares,), dtype=int)
         self.fv_size = TicTacToe.num_squares * 2
         self.num_actions = TicTacToe.num_squares
-        self.max_game_depth = TicTacToe.num_squares
 
     def copy(self):
         board_copy = TicTacToe()

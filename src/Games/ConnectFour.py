@@ -17,7 +17,6 @@ class ConnectFour(BaseGame):
         self.board = np.zeros((ConnectFour.num_squares,), dtype=int)
         self.fv_size = ConnectFour.num_squares * 2
         self.num_actions = ConnectFour.columns
-        self.max_game_depth = ConnectFour.num_squares
         self.in_a_row_to_win = 4
 
     def copy(self):

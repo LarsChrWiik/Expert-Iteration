@@ -23,7 +23,6 @@ class BaseGame:
         # 0 = player1, 1 = player2. (Index of the winning player).
         self.turn = 0
         self.num_players = 2
-        self.max_game_depth = float('inf')
 
         self.board = None
         self.num_actions = None
