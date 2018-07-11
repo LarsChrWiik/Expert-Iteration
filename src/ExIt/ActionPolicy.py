@@ -39,4 +39,4 @@ def p_proportional(pi, vi, legal_moves):
 
     a_on_policy = explore_action(pi, legal_moves)
 
-    return a_off_policy, a_on_policy
+    return a_on_policy, a_off_policy
