@@ -31,9 +31,10 @@ class Nn(BaseApprentice):
     regularisation_strength = 0.01
     optimizer = Adam()
 
-    def __init__(self):
+    def __init__(self, use_custom_loss=False):
         self.model = None
         self.optimizer = Nn.optimizer
+        self.use_custom_loss = use_custom_loss
         self.policy_network = None
         self.value_network = None
 
@@ -51,26 +52,26 @@ class Nn(BaseApprentice):
                 x = Dropout(rate=Nn.dropout_rate)(x)
 
         # Output layer pi = Action probability.
-        p = Dense(pi_size, kernel_regularizer=l2(Nn.regularisation_strength))(x)
-        p = BatchNormalization()(p)
-        p = Activation("softmax", name='p_output')(p)
+        pi = Dense(pi_size, kernel_regularizer=l2(Nn.regularisation_strength))(x)
+        pi = BatchNormalization()(pi)
+        pi = Activation("softmax", name='p_output')(pi)
         # Output layer v = state evaluation
         v = Dense(Nn.v_size, kernel_regularizer=l2(Nn.regularisation_strength))(x)
         v = BatchNormalization()(v)
         v = Activation("tanh", name='v_output')(v)
 
-        model = Model(inputs=[input], outputs=[p, v])
+        model = Model(inputs=[input], outputs=[pi, v])
 
         model.compile(
             optimizer=self.optimizer,
             loss={
-                'p_output': categorical_crossentropy,
+                'p_output': custom_loss if self.use_custom_loss else categorical_crossentropy,
                 'v_output': mean_squared_error
             }
         )
 
         self.model = model
-        self.policy_network = Model(inputs=[input], outputs=[p])
+        self.policy_network = Model(inputs=[input], outputs=[pi])
         self.value_network = Model(inputs=[input], outputs=[v])
 
     def train(self, X_s, Y_p, Y_v):
@@ -84,7 +85,7 @@ class Nn(BaseApprentice):
         """ Return float representing state evaluation """
         return self.value_network.predict(x=np.array([X]))[0][0]
 
-    def pred_p(self, X):
+    def pred_pi(self, X):
         """ Return array of action probabilities """
         return self.policy_network.predict(x=np.array([X]))[0]
 
