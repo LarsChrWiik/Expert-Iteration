@@ -14,7 +14,7 @@ import random
 timer = Timer()
 
 # 1.0 = explore. 0.0 = exploit.
-exploration_degree = 0.1
+exploration_degree = 0.0
 
 
 def update_v_values_to_game_outcome(final_state: BaseGame, turn_array, v_array):
