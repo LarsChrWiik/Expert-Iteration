@@ -61,9 +61,9 @@ class BaseExItPlayer(BasePlayer):
         # Remove PI values that are not legal moves.
         pi = [x for i, x in enumerate(p_pred) if i in lm]
 
-        best_action, action_index = e_greedy(
-            pi=pi,
-            legal_moves=lm,
+        action_index, best_action = e_greedy(
+            xi=pi,
+            lm=lm,
             e=BaseExItPlayer.exploration_degree
         )
 
