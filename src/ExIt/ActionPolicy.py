@@ -7,7 +7,7 @@ def exploit_action(values, legal_moves):
     """ EXPLOIT.
         Assumes that 'values' has removed moves that are not legal.
         Also assumes that the index of 'values' and legal_moves corresponds. """
-    a_off_policy = legal_moves[np.argmax(values)]
+    a_off_policy = legal_moves[argmax(values)]
     return a_off_policy
 
 
@@ -22,7 +22,7 @@ def explore_action(values, legal_moves):
 
 def e_greedy(pi, legal_moves, e):
     """ Assumes that PI has removed moves that are not legal.
-        Also assumes that the index of pi and action_indexes corresponds. """
+        Also assumes that the index of pi and legal_moves corresponds. """
     best_action = exploit_action(values=pi, legal_moves=legal_moves)
     if random.uniform(0, 1) < e:
         return best_action, random.choice(legal_moves)
@@ -31,13 +31,19 @@ def e_greedy(pi, legal_moves, e):
 
 def p_proportional(pi, vi, legal_moves):
     """ Assumes that VI has removed moves that are not legal.
-        Also assumes that the index of pi and action_indexes corresponds. """
-    a_best = exploit_action(vi, legal_moves)
-
-    pi[a_best] += 0.1
-    pi = pi[legal_moves]
-    pi = pi / pi.sum()
-
+        Also assumes that the index of pi and vi corresponds. """
+    if len(pi) != len(vi):
+        raise Exception("pi and vi do not have equal length, but they should. ")
+    pi[argmax(vi)] += 0.1
     a_on_policy = explore_action(pi, legal_moves)
-
     return a_on_policy
+
+
+def argmax(array):
+    """ Return a random index of a value that is equal to the maximum value in the array """
+    x_max = max(array)
+    indexes = []
+    for i, x in enumerate(array):
+        if x == x_max:
+            indexes.append(i)
+    return random.choice(indexes)
