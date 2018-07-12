@@ -4,7 +4,7 @@ from ExIt.Apprentice import BaseApprentice
 from Games.GameLogic import BaseGame
 from Misc.TrainingTimer import TrainingTimer
 from ExIt.Evaluator import zero_sum_2v2_evaluation
-from ExIt.ActionPolicy import explore_action, exploit_action, p_proportional
+from ExIt.ActionPolicy import explore_action, exploit_action, p_proportional, argmax
 from math import sqrt
 from random import shuffle
 
@@ -15,7 +15,7 @@ class Mcts(BaseExpert):
         # Exploration parameter in UCB.
         self.c = c
 
-    def search(self, state: BaseGame, predictor: BaseApprentice, search_time: float):
+    def search(self, state: BaseGame, predictor: BaseApprentice, search_time, use_off_policy):
         # Expected Q values from state s.       Q[s]   or   Q[s][a]
         Q = {}
         # Number of times state s was visited.  N[s]
@@ -87,9 +87,9 @@ class Mcts(BaseExpert):
         ni = [n for i, n in enumerate(N[s]) if i in lm]
         vi = [q for i, q in enumerate(Q[s]) if i in lm]
 
-        # Off-policy is the proportional of the N values.
-        a_off_policy = explore_action(ni, lm)
-        # On-policy is the action that leads to the best Q value.
-        a_on_policy = exploit_action(vi, lm)
-
-        return a_on_policy, a_off_policy, None
+        if use_off_policy:
+            # Off-policy is the proportional of the N values.
+            return explore_action(ni, lm), lm[argmax(ni)], None
+        else:
+            # On-policy is the action that leads to the best Q value.
+            return exploit_action(vi, lm), lm[argmax(vi)]
