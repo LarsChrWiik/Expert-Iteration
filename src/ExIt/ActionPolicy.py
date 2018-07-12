@@ -30,13 +30,14 @@ def e_greedy(pi, legal_moves, e):
 
 
 def p_proportional(pi, vi, legal_moves):
-    """ Also assumes that the index of pi and action_indexes corresponds. """
-    a_off_policy = exploit_action(values=vi, legal_moves=legal_moves)
+    """ Assumes that VI has removed moves that are not legal.
+        Also assumes that the index of pi and action_indexes corresponds. """
+    a_best = exploit_action(vi, legal_moves)
 
-    pi[a_off_policy] += 0.1
+    pi[a_best] += 0.1
     pi = pi[legal_moves]
     pi = pi / pi.sum()
 
     a_on_policy = explore_action(pi, legal_moves)
 
-    return a_on_policy, a_off_policy
+    return a_on_policy

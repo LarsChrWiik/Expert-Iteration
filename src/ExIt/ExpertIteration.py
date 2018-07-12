@@ -147,20 +147,9 @@ class ExpertIteration:
 
     def ex_it_state(self, state: BaseGame):
         """ Expert Iteration for a given state """
-        xi, v = self.expert.search(state, self.apprentice, self.search_time)
 
-        lm = state.get_legal_moves()
-        if isinstance(self.expert, Mcts):
-            a_on_policy = explore_action(xi, lm)
-            a_off_policy = exploit_action(xi, lm)
-        else:
-            a_on_policy, a_off_policy = p_proportional(
-                pi=self.apprentice.pred_pi(state.get_feature_vector()),
-                vi=xi,
-                legal_moves=lm
-            )
-
+        a_on_policy, a_off_policy, v = self.expert.search(state, self.apprentice, self.search_time)
         a = a_off_policy if self.use_off_policy else a_on_policy
 
         s, pi, t = generate_sample(state, a)
-        return s, pi, v, t, a_on_policy
+        return s, pi, v, t, a

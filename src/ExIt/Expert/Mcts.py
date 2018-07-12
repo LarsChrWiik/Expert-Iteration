@@ -4,6 +4,7 @@ from ExIt.Apprentice import BaseApprentice
 from Games.GameLogic import BaseGame
 from Misc.TrainingTimer import TrainingTimer
 from ExIt.Evaluator import zero_sum_2v2_evaluation
+from ExIt.ActionPolicy import explore_action, exploit_action, p_proportional
 from math import sqrt
 from random import shuffle
 
@@ -81,8 +82,14 @@ class Mcts(BaseExpert):
             mcts_search(state)
 
         # Get V values and action indexes of legal moves.
-        legal_moves = state.get_legal_moves()
+        lm = state.get_legal_moves()
         s = tuple(state.get_feature_vector())
-        n_values = [n for i, n in enumerate(N[s]) if i in legal_moves]
+        ni = [n for i, n in enumerate(N[s]) if i in lm]
+        vi = [q for i, q in enumerate(Q[s]) if i in lm]
 
-        return n_values, None
+        # Off-policy is the proportional of the N values.
+        a_off_policy = explore_action(ni, lm)
+        # On-policy is the action that leads to the best Q value.
+        a_on_policy = exploit_action(vi, lm)
+
+        return a_on_policy, a_off_policy, None

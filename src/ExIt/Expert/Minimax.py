@@ -4,6 +4,7 @@ from ExIt.Apprentice import BaseApprentice
 from Games.GameLogic import BaseGame
 from Misc.TrainingTimer import TrainingTimer
 from ExIt.Evaluator import zero_sum_2v2_evaluation
+from ExIt.ActionPolicy import explore_action, p_proportional, exploit_action
 
 
 class Minimax(BaseExpert):
@@ -139,4 +140,15 @@ class Minimax(BaseExpert):
 
                 depth += 1
 
-            return vi, v
+            lm = state.get_legal_moves()
+            vi = [v for i, v in enumerate(vi) if i in lm]
+            pi = predictor.pred_pi(state.get_feature_vector())
+            pi = [p for i, p in enumerate(pi) if i in lm]
+
+            # Off-policy is the proportional of the P values with guidance of vi.
+            a_off_policy = p_proportional(pi, vi, lm)
+
+            # On-policy is the action that leads to the best v value.
+            a_on_policy = exploit_action(vi, lm)
+
+            return a_on_policy, a_off_policy, v

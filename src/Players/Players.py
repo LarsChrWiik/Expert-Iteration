@@ -64,7 +64,7 @@ class LarsPlayer(BaseExItPlayer):
             ex_it_algorithm=ExpertIteration(
                 apprentice=Nn(),
                 expert=Minimax(fixed_depth=fixed_depth, use_alpha_beta=True),
-                use_off_policy=True,
+                use_off_policy=False,
                 data_set=DataSetUniqueStates(),
                 state_branch_degree=0.1
             )
