@@ -99,7 +99,7 @@ class ExpertIteration:
                 # Update progress bar.
                 progress_bar.update(training_timer.get_time_since_last_check())
                 progress_bar.set_postfix(
-                    memory_size='%d' % len(self.data_set.memory),
+                    memory_size='%d' % self.data_set.get_size(),
                     games_generated='%d' % self.games_generated,
                     pi_loss='%01.2f' % pi_loss,
                     v_loss='%01.2f' % v_loss
@@ -117,7 +117,7 @@ class ExpertIteration:
         while not state.is_game_over():
             s, pi, v, t, a = self.ex_it_state(state)
 
-            if random.uniform(0, 1) < self.state_branch_degree and self.use_off_policy:
+            if random.uniform(0, 1) < self.state_branch_degree and not self.use_off_policy:
                 # Make branch from the main line.
                 state_copies = add_different_advance(
                     state=state,
