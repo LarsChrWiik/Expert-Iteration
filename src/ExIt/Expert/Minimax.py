@@ -146,7 +146,7 @@ class Minimax(BaseExpert):
 
             if use_off_policy:
                 # Off-policy is the proportional of the P values with guidance of vi.
-                return p_proportional(pi, vi, lm), lm[argmax(pi)], v
+                return p_proportional(pi, vi, lm), lm[argmax(vi)], v
             else:
                 # On-policy is the action that leads to the best v value.
                 return exploit_action(vi, lm), lm[argmax(vi)], v
