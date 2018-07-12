@@ -2,7 +2,7 @@
 from ExIt.Expert.BaseExpert import BaseExpert
 from ExIt.Apprentice import BaseApprentice
 from Games.GameLogic import BaseGame
-from Misc.Timer import Timer
+from Misc.TrainingTimer import TrainingTimer
 from ExIt.Evaluator import zero_sum_2v2_evaluation
 from math import sqrt
 from random import shuffle
@@ -75,9 +75,9 @@ class Mcts(BaseExpert):
 
         """ ***** SEARCH CODE ***** """
 
-        timer = Timer(search_time)
-        timer.start()
-        while timer.have_time_left() or len(N) <= 1:
+        timer = TrainingTimer(search_time)
+        timer.start_new_lap()
+        while timer.has_time_left() or len(N) <= 1:
             mcts_search(state)
 
         # Get V values and action indexes of legal moves.

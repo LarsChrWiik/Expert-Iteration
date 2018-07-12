@@ -2,7 +2,7 @@
 from ExIt.Expert.BaseExpert import BaseExpert
 from ExIt.Apprentice import BaseApprentice
 from Games.GameLogic import BaseGame
-from Misc.Timer import Timer
+from Misc.TrainingTimer import TrainingTimer
 from ExIt.Evaluator import zero_sum_2v2_evaluation
 
 
@@ -76,7 +76,7 @@ class Minimax(BaseExpert):
                 self.stop_search_contradiction = False
 
             if state.is_game_over() or depth <= 0 or \
-                    (not is_root and timer is not None and not timer.have_time_left()):
+                    (not is_root and timer is not None and not timer.has_time_left()):
                 """ The root will never enter this if-statement.
                     This assumes that the root is never a state that is game over. """
                 s = tuple(state.get_feature_vector())
@@ -107,8 +107,8 @@ class Minimax(BaseExpert):
             return vi, legal_moves, v
         else:
             # Iterative deepening.
-            timer = Timer(search_time)
-            timer.start()
+            timer = TrainingTimer(search_time)
+            timer.start_new_lap()
             vi, v = None, None
             depth = 1
             while True:
@@ -125,7 +125,7 @@ class Minimax(BaseExpert):
                     # This ensures that at least one iteration is stored.
                     vi, v = vi_new, v_new
 
-                if not timer.have_time_left():
+                if not timer.has_time_left():
                     """ This prevents unfinished evaluation updates, which
                         ensures that the final evaluations are calculated using full AB search. """
                     break
