@@ -37,13 +37,13 @@ search_time = get_seconds(ms=50)
 num_matches = 1000
 
 training_timer = TrainingTimer(
-    time_limit=get_seconds(s=10),
-    num_versions=5
+    time_limit=get_seconds(m=10),
+    num_versions=10
 )
 
 
 def main():
-    elo_tournament()
+    comparison_from_scratch()
 
 
 def elo_tournament():
@@ -77,7 +77,7 @@ def comparison_trained():
 
 def comparison_from_scratch():
     # Run Comparison with several iteration of self-play.
-    players = [NnAlphaBetaPlayer(), LarsPlayer()]
+    players = [NnMctsPlayer(), RandomPlayer()]
 
     compare_ex_it_from_scratch(
         game_class=TicTacToe,
