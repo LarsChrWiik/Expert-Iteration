@@ -92,4 +92,4 @@ class Mcts(BaseExpert):
             return explore_action(ni, lm), lm[argmax(ni)], None
         else:
             # On-policy is the action that leads to the best Q value.
-            return exploit_action(vi, lm), lm[argmax(vi)]
+            return exploit_action(vi, lm), lm[argmax(vi)], None
