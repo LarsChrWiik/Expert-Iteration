@@ -85,11 +85,11 @@ class Mcts(BaseExpert):
         lm = state.get_legal_moves()
         s = tuple(state.get_feature_vector())
         ni = [n for i, n in enumerate(N[s]) if i in lm]
-        vi = [q for i, q in enumerate(Q[s]) if i in lm]
+        qi = [q for i, q in enumerate(Q[s]) if i in lm]
 
         if use_off_policy:
             # Off-policy is the proportional of the N values.
             return explore_action(ni, lm), lm[argmax(ni)], None
         else:
             # On-policy is the action that leads to the best Q value.
-            return exploit_action(vi, lm), lm[argmax(vi)], None
+            return exploit_action(qi, lm), lm[argmax(qi)], None
