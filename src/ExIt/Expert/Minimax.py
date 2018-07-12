@@ -4,7 +4,8 @@ from ExIt.Apprentice import BaseApprentice
 from Games.GameLogic import BaseGame
 from Misc.TrainingTimer import TrainingTimer
 from ExIt.Evaluator import zero_sum_2v2_evaluation
-from ExIt.ActionPolicy import explore_action, p_proportional, exploit_action, argmax
+from ExIt.ActionPolicy import explore_action, p_proportional, exploit_action, e_greedy
+import random
 
 
 class Minimax(BaseExpert):
@@ -96,21 +97,20 @@ class Minimax(BaseExpert):
 
         """ ***** SEARCH CODE ***** """
 
+        vi, v = None, None
         if self.fixed_depth is not None:
             # Fixed depth.
-            vi, legal_moves, v = alpha_beta_search(
+            vi, v = alpha_beta_search(
                 state=state,
                 alpha=self.alpha,
                 beta=self.beta,
                 depth=self.fixed_depth,
                 is_root=True
             )
-            return vi, legal_moves, v
         else:
             # Iterative deepening.
             timer = TrainingTimer(search_time)
             timer.start_new_lap()
-            vi, v = None, None
             depth = 1
             while True:
                 self.stop_search_contradiction = True
@@ -140,13 +140,26 @@ class Minimax(BaseExpert):
 
                 depth += 1
 
-            lm = state.get_legal_moves()
+        lm = state.get_legal_moves()
+        if use_off_policy:
             pi = predictor.pred_pi(state.get_feature_vector())
             pi = [p for i, p in enumerate(pi) if i in lm]
+            # Off-policy is the proportional of the P values with guidance of vi.
+            return p_proportional(pi, vi, lm), exploit_action(vi, lm), v
+            # Normalized version of vi.
+            #return explore_action(normalize_vi(vi), lm), exploit_action(vi, lm), v
+            # E-greedy.
+            #a, a_best = e_greedy(vi, lm, e=0.1)
+            #return a, a_best, v
 
-            if use_off_policy:
-                # Off-policy is the proportional of the P values with guidance of vi.
-                return p_proportional(pi, vi, lm), lm[argmax(vi)], v
-            else:
-                # On-policy is the action that leads to the best v value.
-                return exploit_action(vi, lm), lm[argmax(vi)], v
+        else:
+            # On-policy is the action that leads to the best v value.
+            return exploit_action(vi, lm), exploit_action(vi, lm), v
+
+
+def normalize_vi(vi):
+    vi = [x + 1 for x in vi]
+    s = sum(vi)
+    if s == 0:
+        return [1 / len(vi) for _ in vi]
+    return [x / s for x in vi]
