@@ -148,8 +148,7 @@ class ExpertIteration:
     def ex_it_state(self, state: BaseGame):
         """ Expert Iteration for a given state """
 
-        a_on_policy, a_off_policy, v = self.expert.search(state, self.apprentice, self.search_time)
-        a = a_off_policy if self.use_off_policy else a_on_policy
+        a, a_best, v = self.expert.search(state, self.apprentice, self.search_time, self.use_off_policy)
 
-        s, pi, t = generate_sample(state, a)
+        s, pi, t = generate_sample(state, a_best)
         return s, pi, v, t, a
