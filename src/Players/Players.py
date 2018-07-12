@@ -6,6 +6,7 @@ from ExIt.Expert.Minimax import Minimax
 from ExIt.Expert.Mcts import Mcts
 from ExIt.ExpertIteration import ExpertIteration
 from Players.BasePlayers import BasePlayer, BaseExItPlayer
+from ExIt.DataSet import DataSet, DataSetUniqueStates
 from math import sqrt
 
 
@@ -51,5 +52,20 @@ class NnAlphaBetaPlayer(BaseExItPlayer):
             ex_it_algorithm=ExpertIteration(
                 apprentice=Nn(),
                 expert=Minimax(fixed_depth=fixed_depth, use_alpha_beta=True)
+            )
+        )
+
+
+class LarsPlayer(BaseExItPlayer):
+    """ Player that uses Minimax as expert and NN as apprentice """
+
+    def __init__(self, fixed_depth=None):
+        super().__init__(
+            ex_it_algorithm=ExpertIteration(
+                apprentice=Nn(),
+                expert=Minimax(fixed_depth=fixed_depth, use_alpha_beta=True),
+                use_off_policy=True,
+                data_set=DataSetUniqueStates(),
+                state_branch_degree=0.1
             )
         )
