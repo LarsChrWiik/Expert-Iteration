@@ -4,7 +4,7 @@ from ExIt.Apprentice import BaseApprentice
 from Games.GameLogic import BaseGame
 from Misc.TrainingTimer import TrainingTimer
 from ExIt.Evaluator import zero_sum_2v2_evaluation
-from ExIt.ActionPolicy import explore_action, exploit_action, p_proportional, argmax
+from ExIt.ActionPolicy import explore_action, exploit_action, p_proportional
 from math import sqrt
 from random import shuffle
 
@@ -89,7 +89,7 @@ class Mcts(BaseExpert):
 
         if use_off_policy:
             # Off-policy is the proportional of the N values.
-            return explore_action(ni, lm), lm[argmax(ni)], None
+            return explore_action(ni, lm), exploit_action(ni, lm), None
         else:
             # On-policy is the action that leads to the best Q value.
-            return exploit_action(qi, lm), lm[argmax(qi)], None
+            return exploit_action(qi, lm), exploit_action(qi, lm), None
