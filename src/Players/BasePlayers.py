@@ -17,7 +17,7 @@ class BasePlayer:
     """ Base player that is able to move """
 
     def __init__(self):
-        # Unique index of a player.
+        # Unique index of the player.
         self.index = None
 
     def __name__(self):
@@ -56,14 +56,14 @@ class BaseExItPlayer(BasePlayer):
         fv = state.get_feature_vector()
         p_pred = self.ex_it_algorithm.apprentice.pred_pi(fv)
         v_pred = self.ex_it_algorithm.apprentice.pred_v(fv)
-        legal_moves = state.get_legal_moves()
+        lm = state.get_legal_moves()
 
         # Remove PI values that are not legal moves.
-        p = [x for i, x in enumerate(p_pred) if i in legal_moves]
+        pi = [x for i, x in enumerate(p_pred) if i in lm]
 
         best_action, action_index = e_greedy(
-            pi=p,
-            legal_moves=legal_moves,
+            pi=pi,
+            legal_moves=lm,
             e=BaseExItPlayer.exploration_degree
         )
 
@@ -74,10 +74,10 @@ class BaseExItPlayer(BasePlayer):
         state.advance(a)
         return a, p_pred, v_pred
 
-    def start_ex_it(self, epochs, search_time):
+    def start_ex_it(self, training_timer, search_time):
         """ Starts Expert Iteration. NB: Time consuming process """
         self.ex_it_algorithm.start_ex_it(
-            epochs=epochs,
+            training_timer=training_timer,
             search_time=search_time
         )
 
