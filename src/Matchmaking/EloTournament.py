@@ -1,18 +1,20 @@
 
 from Players.BasePlayers import BasePlayer, BaseExItPlayer
 from Matchmaking.GameHandler import GameHandler
-from Misc.DiskHandler import create_elo_folders, save_game_to_pgn, load_trained_model
+from Misc.DiskHandler import create_elo_folders, save_game_to_pgn, load_trained_model, count_trained_models
 from tqdm import trange
+import os
 
 
-def start_elo_tournament(game_class, players: [BasePlayer], trained_iterations,
-                         num_matches=100, randomness=True):
+def start_elo_tournament(game_class, players: [BasePlayer], num_matches=100, randomness=True):
     """ Match players in a tournament and writes matches to PGN files """
     match_permutations = get_all_match_permutations(players)
     base_path = create_elo_folders(game_class)
 
+    trained_versions = count_trained_models(game_class, players)
+
     # Start tournament iteration.
-    with trange(trained_iterations) as t:
+    with trange(trained_versions) as t:
         for i in t:
             load_trained_model(game_class, players, i+1)
 

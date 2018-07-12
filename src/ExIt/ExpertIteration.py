@@ -5,7 +5,7 @@ from Games.GameLogic import BaseGame
 from ExIt.DataSet import DataSet
 from ExIt.ActionPolicy import explore_action, p_proportional, exploit_action
 from ExIt.Expert.Mcts import Mcts
-from tqdm import trange
+from tqdm import tqdm
 import numpy as np
 from random import choice as rnd_element
 import random
@@ -39,20 +39,26 @@ def add_different_advance(state, best_action, state_copies):
 class ExpertIteration:
 
     def __init__(self, apprentice: BaseApprentice, expert: BaseExpert,
-                 use_off_policy=True, dataset=DataSet(), state_branch_degree=0.0):
+                 use_off_policy=True, data_set=DataSet(), state_branch_degree=0.0):
         self.apprentice = apprentice
         self.expert = expert
-        self.data_set = dataset
+        self.data_set = data_set
         self.search_time = None
         self.game_class = None
         self.games_generated = 0
         self.state_branch_degree = state_branch_degree
         self.use_off_policy = use_off_policy
         # Set name.
+        self.policy_str = "off-policy" if use_off_policy else "on-policy"
         try:
-            self.__name__ = str(type(self.apprentice).__name__) + "_" + str(self.expert.__name__)
+            self.__name__ = str(type(self.apprentice).__name__) + "_" + str(self.expert.__name__) \
+                            + "_" + self.policy_str + "_" + type(self.data_set).__name__ \
+                            + "_branch-" + str(state_branch_degree)
         except:
-            self.__name__ = str(type(self.apprentice).__name__) + "_" + str(type(self.expert).__name__)
+            self.__name__ = str(type(self.apprentice).__name__) + "_" \
+                            + str(type(self.expert).__name__) + "_" + self.policy_str \
+                            + "_" + type(self.data_set).__name__ \
+                            + "_branch-" + str(state_branch_degree)
 
     def set_game(self, game_class):
         self.game_class = game_class
@@ -61,7 +67,7 @@ class ExpertIteration:
             pi_size=game_class().num_actions
         )
 
-    def start_ex_it(self, epochs, search_time: float, verbose=True):
+    def start_ex_it(self, training_timer, search_time: float, verbose=True):
         """ Start Expert Iteration to master the given game.
             This process is time consuming. """
         self.search_time = search_time
@@ -86,17 +92,22 @@ class ExpertIteration:
                     return pi_loss, v_loss
 
         if verbose:
-            with trange(epochs) as t:
-                for _ in t:
-                    pi_loss, v_loss = self_play()
-                    t.set_postfix(
-                        memory_size='%d' % len(self.data_set.memory),
-                        games_generated='%d' % self.games_generated,
-                        pi_loss='%01.2f' % pi_loss,
-                        v_loss='%01.2f' % v_loss
-                    )
+            training_timer.start_new_lap()
+            progress_bar = tqdm(range(int(training_timer.version_time)))
+            while training_timer.has_time_left():
+                pi_loss, v_loss = self_play()
+                # Update progress bar.
+                progress_bar.update(training_timer.get_time_since_last_check())
+                progress_bar.set_postfix(
+                    memory_size='%d' % len(self.data_set.memory),
+                    games_generated='%d' % self.games_generated,
+                    pi_loss='%01.2f' % pi_loss,
+                    v_loss='%01.2f' % v_loss
+                )
+            progress_bar.close()
         else:
-            for _ in range(epochs):
+            training_timer.start_new_lap()
+            while training_timer.has_time_left():
                 self_play()
 
     def ex_it_game(self, state):
@@ -104,9 +115,9 @@ class ExpertIteration:
         state_copies = []
 
         while not state.is_game_over():
-            s, p, v, t, a = self.ex_it_state(state)
+            s, pi, v, t, a = self.ex_it_state(state)
 
-            if random.uniform(0, 1) < self.state_branch_degree:
+            if random.uniform(0, 1) < self.state_branch_degree and self.use_off_policy:
                 # Make branch from the main line.
                 state_copies = add_different_advance(
                     state=state,
@@ -117,7 +128,7 @@ class ExpertIteration:
             state.advance(a)
             # Store info.
             s_array.append(s)
-            pi_array.append(p)
+            pi_array.append(pi)
             v_array.append(v)
             turn_array.append(t)
 
@@ -136,16 +147,16 @@ class ExpertIteration:
 
     def ex_it_state(self, state: BaseGame):
         """ Expert Iteration for a given state """
-        x, v = self.expert.search(state, self.apprentice, self.search_time)
+        xi, v = self.expert.search(state, self.apprentice, self.search_time)
 
         lm = state.get_legal_moves()
         if isinstance(self.expert, Mcts):
-            a_on_policy = explore_action(x, lm)
-            a_off_policy = exploit_action(x, lm)
+            a_on_policy = explore_action(xi, lm)
+            a_off_policy = exploit_action(xi, lm)
         else:
             a_on_policy, a_off_policy = p_proportional(
                 pi=self.apprentice.pred_pi(state.get_feature_vector()),
-                vi=x,
+                vi=xi,
                 legal_moves=lm
             )
 

@@ -6,16 +6,10 @@ from Matchmaking.Comparison1v1 import compare_ex_it_trained, compare_ex_it_from_
 from Matchmaking.EloTournament import start_elo_tournament
 from Misc.Debugger import debug_display_win_moves
 from Misc.Training import self_play_and_store_versions
+from Misc.TrainingTimer import get_seconds
+from Misc.TrainingTimer import TrainingTimer
 import numpy as np
 np.set_printoptions(suppress=True)
-
-
-search_time = 0.05
-num_matches = 1000
-
-iterations = 10
-epochs = 100
-training_time = 1
 
 
 """
@@ -39,26 +33,34 @@ V[s]    = Predicted v value of state s.
 """
 
 
+search_time = get_seconds(ms=50)
+num_matches = 1000
+
+training_timer = TrainingTimer(
+    time_limit=get_seconds(s=10),
+    num_versions=5
+)
+
+
 def main():
-    comparison_from_scratch()
+    elo_tournament()
 
 
 def elo_tournament():
     start_elo_tournament(
-        players=[NnAlphaBetaPlayer(), NnMinimaxPlayer(), NnMctsPlayer(), RandomPlayer()],
+        players=[NnAlphaBetaPlayer(), NnMctsPlayer(), RandomPlayer()],
         game_class=TicTacToe,
-        trained_iterations=10,
         randomness=True
     )
 
 
 def train_and_store():
+    player = NnMctsPlayer()
     self_play_and_store_versions(
-        ex_it_algorithm=NnMinimaxPlayer().ex_it_algorithm,
+        game_class=TicTacToe,
+        ex_it_algorithm=player.ex_it_algorithm,
         search_time=search_time,
-        iterations=iterations,
-        epochs=epochs,
-        game_class=TicTacToe
+        training_timer=training_timer
     )
 
 
@@ -69,22 +71,21 @@ def comparison_trained():
         players=players,
         num_matches=1000,
         randomness=False,
-        version=10
+        version=5
     )
 
 
 def comparison_from_scratch():
     # Run Comparison with several iteration of self-play.
-    players = [NnMinimaxPlayer(), RandomPlayer()]
+    players = [NnAlphaBetaPlayer(), LarsPlayer()]
 
     compare_ex_it_from_scratch(
         game_class=TicTacToe,
         players=players,
-        epochs=epochs,
         search_time=search_time,
         num_matches=num_matches,
-        iterations=iterations,
-        randomness=False
+        training_timer=training_timer,
+        randomness=True
     )
 
 
@@ -93,7 +94,7 @@ def normal_exit_test():
     player = NnMctsPlayer()
     player.set_game(game_class=TicTacToe)
     player.start_ex_it(
-        epochs=10,
+        training_timer=training_timer,
         search_time=search_time
     )
 

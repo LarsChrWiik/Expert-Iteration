@@ -16,7 +16,7 @@ def compare_ex_it_trained(game_class, players, num_matches, randomness, version)
 
     # Create necessary folders and files and get base path.
     base_path = create_comparison_folders()
-    create_comparison_meta_file(base_path, players, num_matches, "None", "None", "None")
+    create_comparison_meta_file(base_path, players, num_matches, None, None, version)
     create_comparison_files(base_path, players)
 
     results_list = start_matches(game_class, players, num_matches, randomness)
@@ -25,7 +25,8 @@ def compare_ex_it_trained(game_class, players, num_matches, randomness, version)
     print(results_list)
 
 
-def compare_ex_it_from_scratch(game_class, players, epochs, search_time, num_matches, iterations, randomness):
+def compare_ex_it_from_scratch(game_class, players, search_time,
+                               num_matches, training_timer, randomness):
     """ Compare players through several iterations.
         Self play is enabled for ExIt players between iterations. """
 
@@ -33,7 +34,7 @@ def compare_ex_it_from_scratch(game_class, players, epochs, search_time, num_mat
 
     # Create necessary folders and files and get base path.
     base_path = create_comparison_folders()
-    create_comparison_meta_file(base_path, players, num_matches, iterations, epochs, search_time)
+    create_comparison_meta_file(base_path, players, num_matches, training_timer, search_time)
     create_comparison_files(base_path, players)
 
     # Let the players know which game they are playing.
@@ -44,24 +45,20 @@ def compare_ex_it_from_scratch(game_class, players, epochs, search_time, num_mat
 
     """ Compare players through several iterations of self-play.
         This process accepts non-ExIt player as well such as RandomPlayer. """
-    for i in range(iterations):
-        self_play(players, epochs, search_time)
+    for i in range(training_timer.num_versions):
+        # Let BaseExItPlayers train.
+        for player in players:
+            if isinstance(player, BaseExItPlayer):
+                player.start_ex_it(
+                    training_timer=training_timer,
+                    search_time=search_time
+                )
+        # Start match and get results.
         results_list = start_matches(game_class, players, num_matches, randomness)
         for p_index, results in enumerate(results_list):
             save_comparison_result(base_path, results, i+1, [p for p in players if p.index == p_index][0])
         rearrange_players(players)
         print(results_list)
-
-
-def self_play(players, epochs, search_time):
-    """ Let the player train using ExIt self-play if the player
-        is instance of BaseExItPlayer """
-    for player in players:
-        if isinstance(player, BaseExItPlayer):
-            player.start_ex_it(
-                epochs=epochs,
-                search_time=search_time
-            )
 
 
 def start_matches(game_class, players, num_matches, randomness):
