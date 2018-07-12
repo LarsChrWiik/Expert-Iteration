@@ -37,7 +37,7 @@ search_time = get_seconds(ms=50)
 num_matches = 1000
 
 training_timer = TrainingTimer(
-    time_limit=get_seconds(m=10),
+    time_limit=get_seconds(s=100),
     num_versions=10
 )
 
@@ -69,7 +69,7 @@ def comparison_trained():
     compare_ex_it_trained(
         game_class=TicTacToe,
         players=players,
-        num_matches=1000,
+        num_matches=num_matches,
         randomness=False,
         version=5
     )
@@ -85,7 +85,7 @@ def comparison_from_scratch():
         search_time=search_time,
         num_matches=num_matches,
         training_timer=training_timer,
-        randomness=True
+        randomness=False
     )
 
 
