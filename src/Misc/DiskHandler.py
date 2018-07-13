@@ -70,7 +70,6 @@ def create_elo_meta_file(base_path, game_class, players_classes, num_matches, ra
         file.write("Players: \n")
         for i, p in enumerate(players_classes):
             p = p()
-            print(type(p))
             file.write("   - " + p.__name__ + "\n")
 
 
@@ -118,7 +117,7 @@ def create_training_meta_file(base_path, ex_it_algorithm, search_time, training_
                    + str(training_timer.time_limit / training_timer.num_versions) + "\n")
         file.write("Search_time = " + str(search_time) + "\n")
         file.write("\n")
-        file.write("Policy = " + ex_it_algorithm.policy_str + "\n")
+        file.write("Policy = " + str(ex_it_algorithm.policy.value) + "\n")
         file.write("State branch degree = " + str(ex_it_algorithm.state_branch_degree) + "\n")
         file.write("Dataset type = " + type(ex_it_algorithm.data_set).__name__ + "\n")
         file.write("\n")
