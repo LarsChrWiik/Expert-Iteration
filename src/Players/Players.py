@@ -13,8 +13,9 @@ from math import sqrt
 class RandomPlayer(BasePlayer):
     """ Player that plays random moves """
 
-    def __name__(self):
-        return type(self).__name__
+    def __init__(self):
+        super().__init__()
+        self.__name__ = type(self).__name__
 
     def move(self, state: BaseGame, randomness=False):
         return self.move_random(state), None, None
@@ -64,7 +65,7 @@ class LarsPlayer(BaseExItPlayer):
             ex_it_algorithm=ExpertIteration(
                 apprentice=Nn(),
                 expert=Minimax(fixed_depth=fixed_depth, use_alpha_beta=True),
-                use_off_policy=False,
+                use_exploration_policy=False,
                 data_set=DataSetUniqueStates(),
                 state_branch_degree=0.1
             )
