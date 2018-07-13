@@ -4,7 +4,7 @@ from ExIt.Apprentice import BaseApprentice
 from Games.GameLogic import BaseGame
 from Misc.TrainingTimer import TrainingTimer
 from ExIt.Evaluator import zero_sum_2v2_evaluation
-from ExIt.ActionPolicy import explore_action, exploit_action, p_proportional
+from ExIt.Policy import explore_proportional, exploit_action, explore_proportional_with_guidance
 from math import sqrt
 from random import shuffle
 
@@ -15,7 +15,7 @@ class Mcts(BaseExpert):
         # Exploration parameter in UCB.
         self.c = c
 
-    def search(self, state: BaseGame, predictor: BaseApprentice, search_time, use_off_policy):
+    def search(self, state: BaseGame, predictor: BaseApprentice, search_time, use_exploration_policy):
         # Expected Q values from state s.       Q[s]   or   Q[s][a]
         Q = {}
         # Number of times state s was visited.  N[s]
@@ -30,7 +30,7 @@ class Mcts(BaseExpert):
         def mcts_search(state):
 
             fv = state.get_feature_vector()
-            legal_moves = state.get_legal_moves()
+            lm = state.get_legal_moves()
             s = tuple(fv)
 
             # When unexplored child - predict and store info from this state.
@@ -48,7 +48,7 @@ class Mcts(BaseExpert):
             # Find action that maximizes Upper Confidence Bound (UCB).
             u_max = -float("inf")
             a_best = -1
-            a_shuffled = list(enumerate(legal_moves))
+            a_shuffled = list(enumerate(lm))
             shuffle(a_shuffled)
             for i, a in a_shuffled:
                 if N[s][a] == 0:
@@ -87,9 +87,10 @@ class Mcts(BaseExpert):
         ni = [n for i, n in enumerate(N[s]) if i in lm]
         qi = [q for i, q in enumerate(Q[s]) if i in lm]
 
-        if use_off_policy:
+        a_best = exploit_action(qi, lm)
+        if use_exploration_policy:
             # Off-policy is the proportional of the N values.
-            return explore_action(ni, lm), exploit_action(ni, lm), None
+            return explore_proportional(ni, lm), a_best, None
         else:
             # On-policy is the action that leads to the best Q value.
-            return exploit_action(qi, lm), exploit_action(qi, lm), None
+            return a_best, a_best, None

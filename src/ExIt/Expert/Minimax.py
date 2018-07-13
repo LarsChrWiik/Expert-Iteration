@@ -4,8 +4,7 @@ from ExIt.Apprentice import BaseApprentice
 from Games.GameLogic import BaseGame
 from Misc.TrainingTimer import TrainingTimer
 from ExIt.Evaluator import zero_sum_2v2_evaluation
-from ExIt.ActionPolicy import explore_action, p_proportional, exploit_action, e_greedy
-import random
+from ExIt.Policy import explore_proportional, explore_proportional_with_guidance, exploit_action, e_greedy, vi_proportional
 
 
 class Minimax(BaseExpert):
@@ -22,7 +21,7 @@ class Minimax(BaseExpert):
         self.stop_search_contradiction = True
         self.__name__ = "Minimax" if (self.alpha, self.beta) == (None, None) else "AlphaBeta"
 
-    def search(self, state: BaseGame, predictor: BaseApprentice, search_time, use_off_policy):
+    def search(self, state: BaseGame, predictor: BaseApprentice, search_time, use_exploration_policy):
         # Predicted v value of state s.         V[s]
         V = {}
 
@@ -34,9 +33,9 @@ class Minimax(BaseExpert):
 
             def max_value(state, alpha, beta, depth):
                 v = float('-inf')
-                legal_moves = state.get_legal_moves()
-                vi = [0 for _ in legal_moves]
-                for i, a in enumerate(legal_moves):
+                lm = state.get_legal_moves()
+                vi = [0 for _ in lm]
+                for i, a in enumerate(lm):
                     c = state.copy()
                     c.advance(a)
                     v = max(
@@ -54,9 +53,9 @@ class Minimax(BaseExpert):
 
             def min_value(state, alpha, beta, depth):
                 v = float('inf')
-                legal_moves = state.get_legal_moves()
-                vi = [0 for _ in legal_moves]
-                for i, a in enumerate(legal_moves):
+                lm = state.get_legal_moves()
+                vi = [0 for _ in lm]
+                for i, a in enumerate(lm):
                     c = state.copy()
                     c.advance(a)
                     v = min(
@@ -141,25 +140,19 @@ class Minimax(BaseExpert):
                 depth += 1
 
         lm = state.get_legal_moves()
-        if use_off_policy:
+        if use_exploration_policy:
+            """ 
+            ***** Potential other Exploration-policies: *****
+                (proportional of VI)
+                return vi_proportional(vi, lm), exploit_action(vi, lm), v
+
+                (E-greedy)
+                return e_greedy(vi, lm, e=0.1), exploit_action(vi, lm), v 
+            """
+            # Exploration-policy: proportional of the PI with guidance of VI.
             pi = predictor.pred_pi(state.get_feature_vector())
             pi = [p for i, p in enumerate(pi) if i in lm]
-            # Off-policy is the proportional of the P values with guidance of vi.
-            return p_proportional(pi, vi, lm), exploit_action(vi, lm), v
-            # Normalized version of vi.
-            #return explore_action(normalize_vi(vi), lm), exploit_action(vi, lm), v
-            # E-greedy.
-            #a, a_best = e_greedy(vi, lm, e=0.1)
-            #return a, a_best, v
-
+            return explore_proportional_with_guidance(pi, vi, lm), exploit_action(vi, lm), v
         else:
-            # On-policy is the action that leads to the best v value.
+            # Exploration-policy: Exploit - the action that leads to the highest v value.
             return exploit_action(vi, lm), exploit_action(vi, lm), v
-
-
-def normalize_vi(vi):
-    vi = [x + 1 for x in vi]
-    s = sum(vi)
-    if s == 0:
-        return [1 / len(vi) for _ in vi]
-    return [x / s for x in vi]
