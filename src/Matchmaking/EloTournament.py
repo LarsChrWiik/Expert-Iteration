@@ -6,15 +6,14 @@ from Misc.DiskHandler import create_elo_folders, save_game_to_pgn, \
 from tqdm import trange
 
 
-def start_elo_tournament(game_class, players_classes, num_versions, num_matches=250, randomness=True):
+def start_elo_tournament(game_class, players_classes, num_versions, num_matches=210, randomness=True):
     """ Match players in a tournament and writes matches to PGN files """
 
     base_path = create_elo_folders(game_class)
     create_elo_meta_file(base_path, game_class, players_classes, num_matches, randomness)
 
     players = load_trained_model(game_class, players_classes, num_versions)
-    for p in players:
-        print(p.__name__)
+
     match_permutations = get_all_match_permutations(players)
     # Match players with all permutations 'num_matches' times.
     with trange(num_matches) as t:
