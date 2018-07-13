@@ -3,7 +3,7 @@ from Games.GameLogic import BaseGame
 from ExIt.ExpertIteration import ExpertIteration
 from random import choice as rnd_choice
 from ExIt.Evaluator import get_reward_for_action
-from ExIt.ActionPolicy import e_greedy
+from ExIt.Policy import e_greedy, exploit_action
 import numpy as np
 
 
@@ -20,16 +20,13 @@ class BasePlayer:
         # Unique index of the player.
         self.index = None
 
-    def __name__(self):
-        raise NotImplementedError("Please Implement this method")
-
     def move(self, state: BaseGame, randomness=False):
         raise NotImplementedError("Please Implement this method")
 
     @staticmethod
     def move_random(state: BaseGame):
-        legal_moves = state.get_legal_moves()
-        a = rnd_choice(legal_moves)
+        lm = state.get_legal_moves()
+        a = rnd_choice(lm)
         state.advance(a)
         return a
 
@@ -44,9 +41,7 @@ class BaseExItPlayer(BasePlayer):
     def __init__(self, ex_it_algorithm: ExpertIteration):
         super().__init__()
         self.ex_it_algorithm = ex_it_algorithm
-
-    def __name__(self):
-        return self.ex_it_algorithm.__name__
+        self.__name__ = ex_it_algorithm.__name__
 
     def set_game(self, game_class):
         self.ex_it_algorithm.set_game(game_class)
@@ -61,11 +56,12 @@ class BaseExItPlayer(BasePlayer):
         # Remove PI values that are not legal moves.
         pi = [x for i, x in enumerate(p_pred) if i in lm]
 
-        action_index, best_action = e_greedy(
+        action_index = e_greedy(
             xi=pi,
             lm=lm,
             e=BaseExItPlayer.exploration_degree
         )
+        best_action = exploit_action(pi, lm)
 
         if print_info:
             self.print_info(state=state, action_index=action_index)
@@ -94,7 +90,7 @@ class BaseExItPlayer(BasePlayer):
         print("updated pi_update = " + str(pi_update))
 
     # TODO: Remove later. (Used for testing).
-    def print_Q_info(self, state, pi, legal_moves):
+    def print_Q_info(self, state, pi, lm):
         Qs = [get_reward_for_action(state, a, self.ex_it_algorithm.apprentice) for a in state.get_legal_moves()]
         v_values, action_indexes, v = self.ex_it_algorithm.expert.search(
             state=state,
@@ -102,7 +98,7 @@ class BaseExItPlayer(BasePlayer):
             search_time=10
         )
         print("pi = ", pi)
-        print("legal_moves = ", legal_moves)
+        print("legal_moves = ", lm)
         print("Qs = ", Qs)
         print("v_values = ", v_values)
         print("action_indexes = ", action_indexes)
