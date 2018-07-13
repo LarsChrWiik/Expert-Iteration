@@ -28,16 +28,24 @@ def write_ex_it_model_info(file, ex_it_algorithm):
     file.write("   dropout_rate = " + str(ex_it_algorithm.apprentice.dropout_rate) + "\n")
 
 
-def load_trained_model(game_class, players, i):
+def load_trained_model(game_class, players_classes, trained_versions):
     """ Load trained model into the players """
-    for p in players:
-        if isinstance(p, BaseExItPlayer):
-            trained_model = load_model(
-                game_name=game_class.__name__,
-                ex_it_algorithm=p.ex_it_algorithm,
-                iteration=str(i)
-            )
-            p.ex_it_algorithm.apprentice.set_model(trained_model)
+    players = []
+    for p_class in players_classes:
+        if isinstance(p_class(), BaseExItPlayer):
+            for i in range(trained_versions):
+                new_player = p_class()
+                new_player.__name__ = new_player.__name__ + "_model" + str(i+1)
+                trained_model = load_model(
+                    game_name=game_class.__name__,
+                    ex_it_algorithm=new_player.ex_it_algorithm,
+                    iteration=str(trained_versions)
+                )
+                new_player.ex_it_algorithm.apprentice.set_model(trained_model)
+                players.append(new_player)
+        else:
+            players.append(p_class())
+    return players
 
 
 # ******************** ELO ********************
@@ -52,12 +60,26 @@ def create_elo_folders(game_class):
     return base_path
 
 
-def save_game_to_pgn(base_path, game_handler, p1, p2, i):
+def create_elo_meta_file(base_path, game_class, players_classes, num_matches, randomness):
+    with open(base_path + "/meta.txt", 'x') as file:
+        file.write("Datetime = " + str(datetime.now().strftime('%Y-%m-%d___%H:%M:%S')) + "\n")
+        file.write("Game = " + game_class.__name__ + "\n")
+        file.write("Randomness = " + str(randomness) + "\n")
+        file.write("Number of matches = " + str(num_matches) + "\n")
+        file.write("\n")
+        file.write("Players: \n")
+        for i, p in enumerate(players_classes):
+            p = p()
+            print(type(p))
+            file.write("   - " + p.__name__ + "\n")
+
+
+def save_game_to_pgn(base_path, game_handler, p1, p2):
     """ Convert game match into pgn format and writes it to file """
-    with open(base_path + "/" + str(i+1) + ".pgn", 'a') as file:
+    with open(base_path + "/1.pgn", 'a') as file:
         file.write("[Game \"" + str(game_handler.game_class.__name__) + "\"]\n")
-        file.write("[White \"" + p1.__name__() + "\"]\n")
-        file.write("[Black \"" + p2.__name__() + "\"]\n")
+        file.write("[White \"" + p1.__name__ + "\"]\n")
+        file.write("[Black \"" + p2.__name__ + "\"]\n")
         file.write("[Result \"" + game_handler.result_text + "\"]\n")
         file.write("\n")
         file.write(game_handler.move_text)
@@ -78,11 +100,6 @@ def load_model(game_name, ex_it_algorithm, iteration):
     return load_keras_model(
         "./Trained_models/" + game_name + "/" + ex_it_algorithm.__name__ + "/" + iteration + ".h5"
     )
-
-
-def count_trained_models(game_class, players):
-    files = os.listdir("./Trained_models/" + game_class.__name__ + "/" + players[0].ex_it_algorithm.__name__ + "/")
-    return len([x for x in files if x[-3:] == ".h5"])
 
 
 def create_training_folders(game_class, ex_it_algorithm):
@@ -132,7 +149,7 @@ def create_comparison_meta_file(base_path, players, num_matches, training_timer,
             file.write("version = " + str(version) + "\n")
         file.write("\n")
         for i, p in enumerate(players):
-            file.write(p.__name__() + "\n")
+            file.write(p.__name__ + "\n")
             if isinstance(p, BaseExItPlayer):
                 write_ex_it_model_info(file, p.ex_it_algorithm)
             if i != len(players) - 1:
@@ -141,12 +158,12 @@ def create_comparison_meta_file(base_path, players, num_matches, training_timer,
 
 def create_comparison_files(base_path, players):
     for p in players:
-        with open(base_path + "/" + p.__name__() + ".csv", 'x') as file:
+        with open(base_path + "/" + p.__name__ + ".csv", 'x') as file:
             file.write("iteration,win,loss,draw" + "\n")
 
 
 def save_comparison_result(base_path, results: [GameResult], i, p):
     """ Saves results to disk.
         NB: This function assumes that results_list is ordered by player index """
-    with open(base_path + "/" + p.__name__() + ".csv", 'a') as file:
+    with open(base_path + "/" + p.__name__ + ".csv", 'a') as file:
         file.write(str(i) + "," + GameResult.get_string_results(results) + "\n")
