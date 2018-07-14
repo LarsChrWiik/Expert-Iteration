@@ -2,7 +2,7 @@
 from ExIt.Apprentice import BaseApprentice
 from ExIt.Expert import BaseExpert
 from Games.GameLogic import BaseGame
-from ExIt.DataSet import DataSet
+from ExIt.MemoryList import MemoryList
 from ExIt.Policy import Policy
 from tqdm import tqdm
 import numpy as np
@@ -38,10 +38,10 @@ def add_different_advance(state, best_action, state_copies):
 class ExpertIteration:
 
     def __init__(self, apprentice: BaseApprentice, expert: BaseExpert, policy=Policy.OFF,
-                 use_exploration_policy=True, data_set=DataSet(), state_branch_degree=0.0):
+                 use_exploration_policy=True, memory=MemoryList(), state_branch_degree=0.0):
         self.apprentice = apprentice
         self.expert = expert
-        self.data_set = data_set
+        self.memory = memory
         self.search_time = None
         self.game_class = None
         self.games_generated = 0
@@ -49,15 +49,11 @@ class ExpertIteration:
         self.policy = policy
         self.use_exploration_policy = use_exploration_policy
         # Set name.
-        try:
-            self.__name__ = str(type(self.apprentice).__name__) + "_" + str(self.expert.__name__) \
-                            + "_" + str(self.policy.value) + "_" + type(self.data_set).__name__ \
-                            + "_branch-" + str(state_branch_degree)
-        except:
-            self.__name__ = str(type(self.apprentice).__name__) + "_" \
-                            + str(type(self.expert).__name__) + "_" + str(self.policy.value) \
-                            + "_" + type(self.data_set).__name__ \
-                            + "_branch-" + str(state_branch_degree)
+        self.__name__ = str(type(self.apprentice).__name__) + "_" + str(self.expert.__name__) \
+                        + "_" + str(self.policy.value)  \
+                        + "" if (isinstance(memory, MemoryList) and state_branch_degree == 0.0) \
+                            else ("_" + type(self.memory).__name__ + "_branch-"
+                                  + str(state_branch_degree))
 
     def set_game(self, game_class):
         self.game_class = game_class
@@ -77,7 +73,7 @@ class ExpertIteration:
             s_array, p_array, v_array = self.ex_it_game(state)
 
             # Store game history samples.
-            self.data_set.save_samples_in_memory(
+            self.memory.save(
                 s_array=s_array,
                 p_array=p_array,
                 v_array=v_array
@@ -85,7 +81,7 @@ class ExpertIteration:
 
             # Train on mini-batches.
             for _ in range(self.games_generated):
-                X_s, Y_p, Y_v = self.data_set.get_sample_batch()
+                X_s, Y_p, Y_v = self.memory.get_batch()
                 pi_loss, v_loss = self.apprentice.train(X_s=X_s, Y_p=Y_p, Y_v=Y_v)
                 if verbose:
                     return pi_loss, v_loss
@@ -98,7 +94,7 @@ class ExpertIteration:
                 # Update progress bar.
                 progress_bar.update(training_timer.get_time_since_last_check())
                 progress_bar.set_postfix(
-                    memory_size='%d' % self.data_set.get_size(),
+                    memory_size='%d' % self.memory.get_size(),
                     games_generated='%d' % self.games_generated,
                     pi_loss='%01.2f' % pi_loss,
                     v_loss='%01.2f' % v_loss
