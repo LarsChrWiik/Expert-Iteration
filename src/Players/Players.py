@@ -6,7 +6,7 @@ from ExIt.Expert.Minimax import Minimax
 from ExIt.Expert.Mcts import Mcts
 from ExIt.ExpertIteration import ExpertIteration
 from Players.BasePlayers import BasePlayer, BaseExItPlayer
-from ExIt.DataSet import DataSet, DataSetUniqueStates
+from ExIt.MemoryList import MemoryList, MemorySet
 from math import sqrt
 
 
@@ -66,7 +66,7 @@ class LarsPlayer(BaseExItPlayer):
                 apprentice=Nn(),
                 expert=Minimax(fixed_depth=fixed_depth, use_alpha_beta=True),
                 use_exploration_policy=False,
-                data_set=DataSetUniqueStates(),
+                memory=MemorySet(),
                 state_branch_degree=0.1
             )
         )
