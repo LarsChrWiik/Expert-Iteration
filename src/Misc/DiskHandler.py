@@ -4,7 +4,10 @@ from datetime import datetime
 from Players.BasePlayers import BaseExItPlayer
 from keras.models import load_model as load_keras_model
 from Games.GameLogic import GameResult
+from tqdm import tqdm, trange
 import os.path
+from copy import deepcopy
+
 
 # ******************** GENERAL ********************
 
@@ -28,23 +31,29 @@ def write_ex_it_model_info(file, ex_it_algorithm):
     file.write("   dropout_rate = " + str(ex_it_algorithm.apprentice.dropout_rate) + "\n")
 
 
-def load_trained_model(game_class, players_classes, trained_versions):
+def load_trained_models(game_class, players_classes, versions):
     """ Load trained model into the players """
     players = []
+    ex_it_players = [p for p in players_classes if isinstance(p(), BaseExItPlayer)]
+    progress_bar = tqdm(range(len(versions)*len(ex_it_players)))
+    progress_bar.set_description("load_trained_model")
     for p_class in players_classes:
         if isinstance(p_class(), BaseExItPlayer):
-            for i in range(trained_versions):
+            for v in versions:
+                version = v+1
                 new_player = p_class()
-                new_player.__name__ = new_player.__name__ + "_model" + str(i+1)
+                new_player.__name__ = new_player.__name__ + "_model" + str(version)
                 trained_model = load_model(
                     game_name=game_class.__name__,
                     ex_it_algorithm=new_player.ex_it_algorithm,
-                    iteration=str(trained_versions)
+                    iteration=str(version)
                 )
                 new_player.ex_it_algorithm.apprentice.set_model(trained_model)
                 players.append(new_player)
+                progress_bar.update(1)
         else:
             players.append(p_class())
+    progress_bar.close()
     return players
 
 
@@ -87,6 +96,56 @@ def save_game_to_pgn(base_path, game_handler, p1, p2):
         file.write("\n")
 
 
+def read_ratings(game_class, versions):
+    with open("./Elo/" + game_class.__name__ + "/ratings.txt", 'r') as file:
+        tournament = {}
+        lines = []
+        for i, line in enumerate(file):
+            if i == 0:
+                continue
+            words = line.split()
+            if words[1] == "RandomPlayer":
+                version = "1"
+            else:
+                version = str(words[1][-1])
+            lines.append((version, words))
+
+        # Make sure versions are added in order.
+        lines.sort()
+
+        for version, words in lines:
+            def add_info(player_name, info):
+                if player_name in tournament.keys():
+                    for key, value in tournament[player_name].items():
+                        tournament[player_name][key].extend(list(info[key]))
+                else:
+                    tournament[player_name] = deepcopy(info)
+
+            info = {
+                "elo": [float(words[2])],
+                "uncertainty-": [float(words[3])],
+                "uncertainty+": [-float(words[4])],
+                "games": [int(words[5])],
+                "score": [float(words[6][:-1])],
+                "oppo": [float(words[7])],
+                "draws": [float(words[8][:-1])]
+            }
+
+            if words[1] == "RandomPlayer":
+                player_name = str(words[1])
+                for _ in range(versions):
+                    add_info(player_name, info)
+            else:
+                player_name = str(words[1][:-7])
+                add_info(player_name, info)
+
+        # Convert to list and sort:
+        tournament = [(max(value["elo"]), {key: value}) for key, value in tournament.items()]
+        tournament.sort(reverse=True)
+        tournament = [dic for elo, dic in tournament]
+        return tournament
+
+
 # ******************** TRAINING ********************
 
 
@@ -119,7 +178,7 @@ def create_training_meta_file(base_path, ex_it_algorithm, search_time, training_
         file.write("\n")
         file.write("Policy = " + str(ex_it_algorithm.policy.value) + "\n")
         file.write("State branch degree = " + str(ex_it_algorithm.state_branch_degree) + "\n")
-        file.write("Dataset type = " + type(ex_it_algorithm.data_set).__name__ + "\n")
+        file.write("Dataset type = " + type(ex_it_algorithm.memory).__name__ + "\n")
         file.write("\n")
         file.write(ex_it_algorithm.__name__ + "\n")
         write_ex_it_model_info(file, ex_it_algorithm)
