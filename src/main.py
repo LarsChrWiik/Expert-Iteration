@@ -8,8 +8,13 @@ from Misc.Debugger import debug_display_win_moves
 from Misc.Training import self_play_and_store_versions
 from Misc.TrainingTimer import get_seconds
 from Misc.TrainingTimer import TrainingTimer
+from Misc.Plotter import plot_elo_ratings
 import numpy as np
 np.set_printoptions(suppress=True)
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
 
 
 """
@@ -36,16 +41,21 @@ V[s]    = Predicted v value of state s.
 search_time = get_seconds(ms=50)
 num_matches = 1000
 
-num_versions = 3
+time_limit = get_seconds(m=10)
+num_versions = 10
 
 training_timer = TrainingTimer(
-    time_limit=get_seconds(m=1),
+    time_limit=time_limit,
     num_versions=num_versions
 )
 
 
 def main():
-    comparison_from_scratch()
+    elo_tournament()
+
+
+def plot_elo():
+    plot_elo_ratings(TicTacToe, versions=num_versions)
 
 
 def elo_tournament():
@@ -53,7 +63,7 @@ def elo_tournament():
         players_classes=[NnAlphaBetaPlayer, NnMctsPlayer, RandomPlayer],
         num_versions=num_versions,
         game_class=TicTacToe,
-        randomness=True
+        randomness=True # <---------------------------------- Remember!
     )
 
 
@@ -68,19 +78,19 @@ def train_and_store():
 
 
 def comparison_trained():
-    players = [NnAlphaBetaPlayer(), RandomPlayer()]
+    players = [NnAlphaBetaPlayer, NnMctsPlayer]
     compare_ex_it_trained(
         game_class=TicTacToe,
-        players=players,
+        players_classes=players,
         num_matches=num_matches,
-        randomness=False,
-        version=5
+        randomness=True, # <---------------------------------- Remember!
+        version=3
     )
 
 
 def comparison_from_scratch():
     # Run Comparison with several iteration of self-play.
-    players = [NnAlphaBetaPlayer(), RandomPlayer()]
+    players = [NnMctsPlayer(), RandomPlayer()]
 
     compare_ex_it_from_scratch(
         game_class=TicTacToe,
@@ -88,7 +98,7 @@ def comparison_from_scratch():
         search_time=search_time,
         num_matches=num_matches,
         training_timer=training_timer,
-        randomness=False
+        randomness=True # <---------------------------------- Remember!
     )
 
 
