@@ -6,7 +6,7 @@ from ExIt.Expert.Minimax import Minimax
 from ExIt.Expert.Mcts import Mcts
 from ExIt.ExpertIteration import ExpertIteration
 from Players.BasePlayers import BasePlayer, BaseExItPlayer
-from ExIt.MemoryList import MemoryList, MemorySet
+from ExIt.Memory import MemoryList, MemorySet
 from math import sqrt
 
 
