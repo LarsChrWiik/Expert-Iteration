@@ -15,6 +15,7 @@ class Minimax(BaseExpert):
         two-player deterministic markov games """
 
     def __init__(self, fixed_depth=None, use_alpha_beta=False):
+        super().__init__()
         self.fixed_depth = fixed_depth
         self.alpha = None if not use_alpha_beta else float('-inf')
         self.beta = None if not use_alpha_beta else float('inf')
