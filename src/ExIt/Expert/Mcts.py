@@ -12,9 +12,9 @@ from random import shuffle
 class Mcts(BaseExpert):
 
     def __init__(self, c):
+        super().__init__()
         # Exploration parameter in UCB.
         self.c = c
-        self.__name__ = type(self).__name__
 
     def search(self, state: BaseGame, predictor: BaseApprentice, search_time, use_exploration_policy):
         # Expected Q values from state s.       Q[s]   or   Q[s][a]
