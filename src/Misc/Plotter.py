@@ -6,29 +6,59 @@ import numpy as np
 import csv
 
 
-def plot_elo_ratings(game_class, versions):
-    tournament = read_ratings(game_class, versions)
+def add_margins(ax, scale):
+    left = ax.get_xlim()[0]
+    right = ax.get_xlim()[1]
+    bottom = ax.get_ylim()[0]
+    top = ax.get_ylim()[1]
+
+    x = abs(left - right)
+    x_difference = x*scale
+    y = abs(bottom - top)
+    y_difference = y*scale
+
+    ax.set_xlim(left=left-x_difference, right=right+x_difference)
+    ax.set_ylim(bottom=bottom-y_difference, top=top+y_difference)
+
+
+def plot_elo_ratings(game_class, num_versions):
+    tournament = read_ratings(game_class, num_versions)
     colors = sns.color_palette("Set1", n_colors=len(tournament), desat=.5)
 
+    ax = None
     for i, dic in enumerate(tournament):
         player_key = list(dic.keys())[0]
         player_info = dic[player_key]
-        x = np.array([0] + player_info["elo"])
-        uncertainty = np.array([[0] + player_info["uncertainty+"], [0] + player_info["uncertainty-"]])
+        x = np.array(player_info["elo"])
+        uncertainty = np.array([player_info["uncertainty+"], player_info["uncertainty-"]])
         data = x + uncertainty
-        ax = sns.tsplot(data=data, color=colors[i], legend=True, condition=player_key, marker="o")
+        if player_key.startswith("ExIt"):
+            # ExIt players.
+            ax = sns.tsplot(data=data, time=range(1, num_versions+1), color=colors[i],
+                            condition=player_key, marker="o", linestyle="-",
+                            ax=ax)
+        else:
+            # Non-ExIt players.
+            data = [[a, a] for a in data.tolist()]
+            ax = sns.tsplot(data=data, time=[-100, num_versions*2], color=colors[i], linewidth=2,
+                       condition=player_key, marker="", linestyle="--", ax=ax)
+
+    plt.axvline(x=0, color="grey", linestyle="--")
+
+    ax.set_xlim(0, num_versions)
 
     # Legend above the diagram.
     ax.legend(
         bbox_to_anchor=(0., 1.02, 1., .102),
         loc=len(tournament),
         ncol=1,
-        mode="expand",
-        borderaxespad=0.
+        mode="expand"
     )
 
     ax.set(ylabel='Elo Rating', xlabel='Apprentice version')
     plt.subplots_adjust(top=.75, bottom=0.15)
+    add_margins(ax, scale=0.1)
+
     plt.show()
 
 
