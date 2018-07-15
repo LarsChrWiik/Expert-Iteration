@@ -38,22 +38,22 @@ def add_different_advance(state, best_action, state_copies):
 class ExpertIteration:
 
     def __init__(self, apprentice: BaseApprentice, expert: BaseExpert, policy=Policy.OFF,
-                 use_exploration_policy=True, memory=MemoryList(), state_branch_degree=0.0):
+                 use_exploration_policy=True, memory=MemoryList(), branch_prob=0.0):
         self.apprentice = apprentice
         self.expert = expert
         self.memory = memory
         self.search_time = None
         self.game_class = None
         self.games_generated = 0
-        self.state_branch_degree = state_branch_degree
+        self.state_branch_degree = branch_prob
         self.policy = policy
         self.use_exploration_policy = use_exploration_policy
         # Set name.
-        self.__name__ = str(type(self.apprentice).__name__) + "_" + str(self.expert.__name__) \
-                        + "_" + str(self.policy.value)  \
-                        + "" if (isinstance(memory, MemoryList) and state_branch_degree == 0.0) \
-                            else ("_" + type(self.memory).__name__ + "_branch-"
-                                  + str(state_branch_degree))
+        extra_name = ""
+        if not (isinstance(memory, MemoryList) and branch_prob == 0.0):
+            extra_name = "_" + type(self.memory).__name__ + "_branch-" + str(branch_prob)
+        self.__name__ = "ExIt_" + str(type(self.apprentice).__name__) + "_" + str(self.expert.__name__) \
+                        + "_" + str(self.policy.value) + extra_name
 
     def set_game(self, game_class):
         self.game_class = game_class
