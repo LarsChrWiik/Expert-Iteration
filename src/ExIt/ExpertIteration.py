@@ -51,7 +51,7 @@ class ExpertIteration:
         # Set name.
         extra_name = ""
         if not (isinstance(memory, MemoryList) and branch_prob == 0.0):
-            extra_name = "_" + type(self.memory).__name__ + "_branch-" + str(branch_prob)
+            extra_name = "_" + type(self.memory).__name__ + "_Branch-" + str(branch_prob)
         self.__name__ = "ExIt_" + str(type(self.apprentice).__name__) + "_" + str(self.expert.__name__) \
                         + "_" + str(self.policy.value) + extra_name
 
