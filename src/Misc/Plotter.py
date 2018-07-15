@@ -6,19 +6,15 @@ import numpy as np
 import csv
 
 
-def add_margins(ax, scale):
-    left = ax.get_xlim()[0]
-    right = ax.get_xlim()[1]
+def add_y_margins_inside(ax, num_versions, y_scale):
     bottom = ax.get_ylim()[0]
     top = ax.get_ylim()[1]
 
-    x = abs(left - right)
-    x_difference = x*scale
     y = abs(bottom - top)
-    y_difference = y*scale
+    y_difference = y * y_scale
 
-    ax.set_xlim(left=left-x_difference, right=right+x_difference)
     ax.set_ylim(bottom=bottom-y_difference, top=top+y_difference)
+    ax.set_xlim(0, num_versions + 1)
 
 
 def plot_elo_ratings(game_class, num_versions):
@@ -40,24 +36,22 @@ def plot_elo_ratings(game_class, num_versions):
         else:
             # Non-ExIt players.
             data = [[a, a] for a in data.tolist()]
-            ax = sns.tsplot(data=data, time=[-100, num_versions*2], color=colors[i], linewidth=2,
-                       condition=player_key, marker="", linestyle="--", ax=ax)
-
-    plt.axvline(x=0, color="grey", linestyle="--")
+            ax = sns.tsplot(data=data, time=[0, num_versions+1], color=colors[i], linewidth=2,
+                            condition=player_key, marker="", linestyle="--", ax=ax)
 
     ax.set_xlim(0, num_versions)
+
+    ax.set(ylabel='Elo Rating', xlabel='Apprentice version')
+    plt.subplots_adjust(top=0.9 - len(tournament)*0.04, bottom=0.15)
+    add_y_margins_inside(ax, num_versions, y_scale=0.1)
 
     # Legend above the diagram.
     ax.legend(
         bbox_to_anchor=(0., 1.02, 1., .102),
-        loc=len(tournament),
-        ncol=1,
+        loc=3,
+        borderaxespad=0.,
         mode="expand"
     )
-
-    ax.set(ylabel='Elo Rating', xlabel='Apprentice version')
-    plt.subplots_adjust(top=.75, bottom=0.15)
-    add_margins(ax, scale=0.1)
 
     plt.show()
 
