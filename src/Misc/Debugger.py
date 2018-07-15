@@ -31,5 +31,5 @@ def debug_display_ttt(player, action_list):
         game.advance(a)
     game.display()
     # Do the optimal move. (No randomness).
-    player.move(game, print_info=True, randomness=False)
+    player.move(game, randomness=False)
     game.display()
