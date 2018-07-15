@@ -32,17 +32,17 @@ def write_ex_it_model_info(file, ex_it_algorithm):
     file.write("   dropout_rate = " + str(ex_it_algorithm.apprentice.dropout_rate) + "\n")
 
 
-def load_trained_models(game_class, players_classes, versions):
+def load_trained_models(game_class, raw_players, versions):
     """ Load trained model into the players """
     players = []
-    ex_it_players = [p for p in players_classes if isinstance(p(), BaseExItPlayer)]
-    progress_bar = tqdm(range(len(versions)*len(ex_it_players)))
+    num_ex_it_players = len([1 for p in raw_players if isinstance(p, BaseExItPlayer)])
+    progress_bar = tqdm(range(len(versions) * num_ex_it_players))
     progress_bar.set_description("load_trained_model")
-    for p_class in players_classes:
-        if isinstance(p_class(), BaseExItPlayer):
+    for p in raw_players:
+        if isinstance(p, BaseExItPlayer):
             for v in versions:
                 version = v+1
-                new_player = p_class()
+                new_player = p.new_player()
                 new_player.__name__ = new_player.__name__ + "_model" + str(version)
                 trained_model = load_model(
                     game_name=game_class.__name__,
@@ -53,7 +53,7 @@ def load_trained_models(game_class, players_classes, versions):
                 players.append(new_player)
                 progress_bar.update(1)
         else:
-            players.append(p_class())
+            players.append(p.new_player())
     progress_bar.close()
     return players
 
@@ -70,7 +70,7 @@ def create_elo_folders(game_class):
     return base_path
 
 
-def create_elo_meta_file(base_path, game_class, players_classes, iterations, num_versions, match_permutations, randomness):
+def create_elo_meta_file(base_path, game_class, raw_players, iterations, num_versions, match_permutations, randomness):
     with open(base_path + "/meta.txt", 'x') as file:
         file.write("Datetime = " + str(datetime.now().strftime('%Y-%m-%d___%H:%M:%S')) + "\n")
         file.write("Game = " + game_class.__name__ + "\n")
@@ -81,8 +81,7 @@ def create_elo_meta_file(base_path, game_class, players_classes, iterations, num
         file.write("Total number of matches = " + str(match_permutations*iterations) + "\n")
         file.write("\n")
         file.write("Players: \n")
-        for i, p in enumerate(players_classes):
-            p = p()
+        for i, p in enumerate(raw_players):
             file.write("   - " + p.__name__ + "\n")
 
 
