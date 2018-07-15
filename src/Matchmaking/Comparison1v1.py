@@ -8,10 +8,10 @@ from Misc.DiskHandler import create_comparison_folders, create_comparison_meta_f
 from operator import add
 
 
-def compare_ex_it_trained(game_class, players_classes, num_matches, randomness, version):
+def compare_ex_it_trained(game_class, raw_players, num_matches, randomness, version):
     """ Compare trained players """
 
-    players = load_trained_models(game_class, players_classes, [version-1])
+    players = load_trained_models(game_class, raw_players, [version-1])
     set_indexes(players)
 
     # Create necessary folders and files and get base path.
