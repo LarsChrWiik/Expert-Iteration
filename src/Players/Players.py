@@ -20,6 +20,9 @@ class RandomPlayer(BasePlayer):
     def move(self, state: BaseGame, randomness=False):
         return self.move_random(state), None, None
 
+    def new_player(self):
+        return RandomPlayer()
+
 
 class NnMctsPlayer(BaseExItPlayer):
     """ Player that uses MCTS as the expert and NN as the apprentice """
@@ -31,6 +34,10 @@ class NnMctsPlayer(BaseExItPlayer):
                 expert=Mcts(c=c)
             )
         )
+        self.c = c
+
+    def new_player(self):
+        return NnMctsPlayer(c=self.c)
 
 
 class NnMinimaxPlayer(BaseExItPlayer):
@@ -43,6 +50,10 @@ class NnMinimaxPlayer(BaseExItPlayer):
                 expert=Minimax(fixed_depth=fixed_depth)
             )
         )
+        self.fixed_depth = fixed_depth
+
+    def new_player(self):
+        return NnMinimaxPlayer(fixed_depth=self.fixed_depth)
 
 
 class NnAlphaBetaPlayer(BaseExItPlayer):
@@ -55,6 +66,10 @@ class NnAlphaBetaPlayer(BaseExItPlayer):
                 expert=Minimax(fixed_depth=fixed_depth, use_alpha_beta=True)
             )
         )
+        self.fixed_depth = fixed_depth
+
+    def new_player(self):
+        return NnAlphaBetaPlayer(fixed_depth=self.fixed_depth)
 
 
 class LarsPlayer(BaseExItPlayer):
@@ -70,3 +85,7 @@ class LarsPlayer(BaseExItPlayer):
                 branch_prob=branch_prob
             )
         )
+        self.branch_prob = branch_prob
+
+    def new_player(self):
+        return LarsPlayer(branch_prob=self.branch_prob)

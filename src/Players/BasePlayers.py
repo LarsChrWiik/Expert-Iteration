@@ -23,6 +23,10 @@ class BasePlayer:
     def move(self, state: BaseGame, randomness=False):
         raise NotImplementedError("Please Implement this method")
 
+    def new_player(self):
+        """ Returns a new player with the same init parameters """
+        raise NotImplementedError("Please Implement this method")
+
     @staticmethod
     def move_random(state: BaseGame):
         lm = state.get_legal_moves()
@@ -45,6 +49,9 @@ class BaseExItPlayer(BasePlayer):
 
     def set_game(self, game_class):
         self.ex_it_algorithm.set_game(game_class)
+
+    def new_player(self):
+        raise NotImplementedError("Please Implement this method")
 
     def move(self, state: BaseGame, randomness=True, print_info=False):
         """ Move according to the apprentice (No expert) """
