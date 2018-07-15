@@ -20,7 +20,13 @@ class Minimax(BaseExpert):
         self.alpha = None if not use_alpha_beta else float('-inf')
         self.beta = None if not use_alpha_beta else float('inf')
         self.stop_search_contradiction = True
-        self.__name__ = "Minimax" if (self.alpha, self.beta) == (None, None) else "AlphaBeta"
+        extra_name = ""
+        if fixed_depth is not None:
+            extra_name = "_fixed_depth-" + str(fixed_depth)
+        if (self.alpha, self.beta) == (None, None):
+            self.__name__ = "Minimax" + extra_name
+        else:
+            self.__name__ = "AlphaBeta" + extra_name
 
     def search(self, state: BaseGame, predictor: BaseApprentice, search_time, use_exploration_policy):
         # Predicted v value of state s.         V[s]
