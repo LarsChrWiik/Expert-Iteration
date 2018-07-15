@@ -77,8 +77,8 @@ def create_elo_meta_file(base_path, game_class, raw_players, iterations, num_ver
         file.write("Randomness = " + str(randomness) + "\n")
         file.write("Iterations = " + str(iterations) + "\n")
         file.write("Number of versions = " + str(num_versions) + "\n")
-        file.write("match_permutations = " + str(match_permutations) + "\n")
-        file.write("Total number of matches = " + str(match_permutations*iterations) + "\n")
+        file.write("Number of match_permutations = " + str(len(match_permutations)) + "\n")
+        file.write("Total number of matches = " + str(len(match_permutations)*iterations) + "\n")
         file.write("\n")
         file.write("Players: \n")
         for i, p in enumerate(raw_players):
@@ -164,15 +164,14 @@ def load_model(game_name, ex_it_algorithm, iteration):
     )
 
 
-def create_training_folders(game_class, ex_it_algorithm):
-    print(ex_it_algorithm.__name__)
-    base_path = create_path_folders_if_needed("Trained_models", game_class.__name__, ex_it_algorithm.__name__)
+def create_training_folders(game_class, p):
+    base_path = create_path_folders_if_needed("Trained_models", game_class.__name__, p.__name__)
     if Path(base_path + "/meta.txt").exists():
         raise Exception("'" + base_path + "/meta.txt' already exist. ")
     return base_path
 
 
-def create_training_meta_file(base_path, ex_it_algorithm, search_time, training_timer):
+def create_training_meta_file(base_path, p: BaseExItPlayer, search_time, training_timer):
     with open(base_path + "/meta.txt", 'x') as file:
         file.write("Datetime = " + str(datetime.now().strftime('%Y-%m-%d___%H:%M:%S')) + "\n")
         file.write("Training time = " + str(training_timer.time_limit) + "\n")
@@ -181,12 +180,12 @@ def create_training_meta_file(base_path, ex_it_algorithm, search_time, training_
                    + str(training_timer.time_limit / training_timer.num_versions) + "\n")
         file.write("Search_time = " + str(search_time) + "\n")
         file.write("\n")
-        file.write("Policy = " + str(ex_it_algorithm.policy.value) + "\n")
-        file.write("State branch degree = " + str(ex_it_algorithm.state_branch_degree) + "\n")
-        file.write("Dataset type = " + type(ex_it_algorithm.memory).__name__ + "\n")
+        file.write("Policy = " + str(p.ex_it_algorithm.policy.value) + "\n")
+        file.write("State branch degree = " + str(p.ex_it_algorithm.state_branch_degree) + "\n")
+        file.write("Dataset type = " + type(p.ex_it_algorithm.memory).__name__ + "\n")
         file.write("\n")
-        file.write(ex_it_algorithm.__name__ + "\n")
-        write_ex_it_model_info(file, ex_it_algorithm)
+        file.write(p.__name__ + "\n")
+        write_ex_it_model_info(file, p.ex_it_algorithm)
 
 
 # ******************** COMPARISON 1v1 ********************
