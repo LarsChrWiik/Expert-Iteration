@@ -63,9 +63,6 @@ class BaseExItPlayer(BasePlayer):
         )
         best_action = exploit_action(pi, lm)
 
-        if print_info:
-            self.print_info(state=state, action_index=action_index)
-
         a = action_index if randomness else best_action
         state.advance(a)
         return a, p_pred, v_pred
@@ -76,30 +73,3 @@ class BaseExItPlayer(BasePlayer):
             training_timer=training_timer,
             search_time=search_time
         )
-
-    # TODO: Remove later (Used for testing).
-    def print_info(self, state, action_index):
-        print("fv = ", state.get_feature_vector())
-        print("evaluation = ", self.ex_it_algorithm.apprentice.pred_v(
-            X=state.get_feature_vector()))
-        print("action prob = ", self.ex_it_algorithm.apprentice.pred_pi(
-            X=state.get_feature_vector()))
-        print("action_index = " + str(action_index))
-        pi_update = np.zeros(state.num_actions, dtype=float)
-        pi_update[action_index] = 1
-        print("updated pi_update = " + str(pi_update))
-
-    # TODO: Remove later. (Used for testing).
-    def print_Q_info(self, state, pi, lm):
-        Qs = [get_reward_for_action(state, a, self.ex_it_algorithm.apprentice) for a in state.get_legal_moves()]
-        v_values, action_indexes, v = self.ex_it_algorithm.expert.search(
-            state=state,
-            predictor=self.ex_it_algorithm.apprentice,
-            search_time=10
-        )
-        print("pi = ", pi)
-        print("legal_moves = ", lm)
-        print("Qs = ", Qs)
-        print("v_values = ", v_values)
-        print("action_indexes = ", action_indexes)
-        print("")
