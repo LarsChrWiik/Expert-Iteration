@@ -60,13 +60,13 @@ class NnAlphaBetaPlayer(BaseExItPlayer):
 class LarsPlayer(BaseExItPlayer):
     """ Player that uses Minimax as expert and NN as apprentice """
 
-    def __init__(self, fixed_depth=None):
+    def __init__(self, fixed_depth=None, branch_prob=0.25):
         super().__init__(
             ex_it_algorithm=ExpertIteration(
                 apprentice=Nn(),
                 expert=Minimax(fixed_depth=fixed_depth, use_alpha_beta=True),
                 use_exploration_policy=False,
                 memory=MemorySet(),
-                state_branch_degree=0.1
+                branch_prob=branch_prob
             )
         )
