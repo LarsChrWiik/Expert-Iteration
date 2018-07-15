@@ -42,7 +42,13 @@ class BaseGame:
         return GameResult.LOSE
 
     def is_draw(self):
-        return (self.winner == -1 or self.winner is None) and len(self.get_legal_moves()) == 0
+        if self.winner == -1:
+            return True
+        if self.winner == 0 or self.winner == 1:
+            return False
+        # This must be reimplemented if a player can skip a move.
+        # This should then be tested for each player.
+        return len(self.get_legal_moves()) == 0
 
     def next_turn(self):
         raise NotImplementedError("Please Implement this method")
