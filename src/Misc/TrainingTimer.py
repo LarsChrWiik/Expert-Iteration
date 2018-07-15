@@ -3,6 +3,17 @@ from time import time as time_now
 
 
 def get_seconds(d=0, h=0, m=0, s=0, ms=0):
+    """
+    Converts inputs to seconds.
+
+    :param d: Days.
+    :param h: Hours.
+    :param m: Minutes.
+    :param s: Seconds.
+    :param ms: Milli seconds.
+
+    :return: float representing seconds.
+    """
     if (d, h, m, s) == (0, 0, 0):
         raise Exception("Cannot return 0 seconds. ")
     return s + 60*m + 60*60*h + 60*60*24*d + 0.001*ms
