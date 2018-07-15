@@ -7,6 +7,7 @@ from ExIt.Expert.Mcts import Mcts
 from ExIt.ExpertIteration import ExpertIteration
 from Players.BasePlayers import BasePlayer, BaseExItPlayer
 from ExIt.Memory import MemoryList, MemorySet
+from ExIt.Policy import Policy
 from math import sqrt
 
 
@@ -27,11 +28,12 @@ class RandomPlayer(BasePlayer):
 class NnMctsPlayer(BaseExItPlayer):
     """ Player that uses MCTS as the expert and NN as the apprentice """
 
-    def __init__(self, c=sqrt(2)):
+    def __init__(self, c=sqrt(2), policy=Policy.OFF):
         super().__init__(
             ex_it_algorithm=ExpertIteration(
                 apprentice=Nn(),
-                expert=Mcts(c=c)
+                expert=Mcts(c=c),
+                policy=policy
             )
         )
         self.c = c
@@ -43,11 +45,12 @@ class NnMctsPlayer(BaseExItPlayer):
 class NnMinimaxPlayer(BaseExItPlayer):
     """ Player that uses Minimax as expert and NN as apprentice """
 
-    def __init__(self, fixed_depth=None):
+    def __init__(self, fixed_depth=None, policy=Policy.OFF):
         super().__init__(
             ex_it_algorithm=ExpertIteration(
                 apprentice=Nn(),
-                expert=Minimax(fixed_depth=fixed_depth)
+                expert=Minimax(fixed_depth=fixed_depth),
+                policy=policy
             )
         )
         self.fixed_depth = fixed_depth
@@ -59,11 +62,12 @@ class NnMinimaxPlayer(BaseExItPlayer):
 class NnAlphaBetaPlayer(BaseExItPlayer):
     """ Player that uses Minimax as expert and NN as apprentice """
 
-    def __init__(self, fixed_depth=None):
+    def __init__(self, fixed_depth=None, policy=Policy.OFF):
         super().__init__(
             ex_it_algorithm=ExpertIteration(
                 apprentice=Nn(),
-                expert=Minimax(fixed_depth=fixed_depth, use_alpha_beta=True)
+                expert=Minimax(fixed_depth=fixed_depth, use_alpha_beta=True),
+                policy=policy
             )
         )
         self.fixed_depth = fixed_depth
@@ -80,6 +84,7 @@ class LarsPlayer(BaseExItPlayer):
             ex_it_algorithm=ExpertIteration(
                 apprentice=Nn(),
                 expert=Minimax(fixed_depth=fixed_depth, use_alpha_beta=True),
+                policy=Policy.OFF,
                 use_exploration_policy=False,
                 memory=MemorySet(),
                 branch_prob=branch_prob
