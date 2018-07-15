@@ -74,9 +74,10 @@ class BaseExItPlayer(BasePlayer):
         state.advance(a)
         return a, p_pred, v_pred
 
-    def start_ex_it(self, training_timer, search_time):
+    def start_ex_it(self, training_timer, search_time, verbose=True):
         """ Starts Expert Iteration. NB: Time consuming process """
         self.ex_it_algorithm.start_ex_it(
             training_timer=training_timer,
-            search_time=search_time
+            search_time=search_time,
+            verbose=verbose
         )
