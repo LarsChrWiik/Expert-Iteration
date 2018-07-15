@@ -6,6 +6,7 @@ from keras.models import load_model as load_keras_model
 from Games.GameLogic import GameResult
 from tqdm import tqdm, trange
 import os.path
+import re
 from copy import deepcopy
 
 
@@ -64,17 +65,20 @@ def create_elo_folders(game_class):
     """ Create Elo folders and return the base path.
         Also ensures that no overwriting is taking place. """
     base_path = create_path_folders_if_needed("Elo", game_class.__name__)
-    if Path(base_path + "/1.pgn").exists():
-        raise Exception("'" + base_path + "/1.pgn' already exist. ")
+    if Path(base_path + "/tournament.pgn").exists():
+        raise Exception("'" + base_path + "/tournament.pgn' already exist. ")
     return base_path
 
 
-def create_elo_meta_file(base_path, game_class, players_classes, num_matches, randomness):
+def create_elo_meta_file(base_path, game_class, players_classes, iterations, num_versions, match_permutations, randomness):
     with open(base_path + "/meta.txt", 'x') as file:
         file.write("Datetime = " + str(datetime.now().strftime('%Y-%m-%d___%H:%M:%S')) + "\n")
         file.write("Game = " + game_class.__name__ + "\n")
         file.write("Randomness = " + str(randomness) + "\n")
-        file.write("Number of matches = " + str(num_matches) + "\n")
+        file.write("Iterations = " + str(iterations) + "\n")
+        file.write("Number of versions = " + str(num_versions) + "\n")
+        file.write("match_permutations = " + str(match_permutations) + "\n")
+        file.write("Total number of matches = " + str(match_permutations*iterations) + "\n")
         file.write("\n")
         file.write("Players: \n")
         for i, p in enumerate(players_classes):
@@ -84,7 +88,7 @@ def create_elo_meta_file(base_path, game_class, players_classes, num_matches, ra
 
 def save_game_to_pgn(base_path, game_handler, p1, p2):
     """ Convert game match into pgn format and writes it to file """
-    with open(base_path + "/1.pgn", 'a') as file:
+    with open(base_path + "/tournament.pgn", 'a') as file:
         file.write("[Game \"" + str(game_handler.game_class.__name__) + "\"]\n")
         file.write("[White \"" + p1.__name__ + "\"]\n")
         file.write("[Black \"" + p2.__name__ + "\"]\n")
@@ -96,7 +100,7 @@ def save_game_to_pgn(base_path, game_handler, p1, p2):
         file.write("\n")
 
 
-def read_ratings(game_class, versions):
+def read_ratings(game_class, num_versions):
     with open("./Elo/" + game_class.__name__ + "/ratings.txt", 'r') as file:
         tournament = {}
         lines = []
@@ -104,10 +108,11 @@ def read_ratings(game_class, versions):
             if i == 0:
                 continue
             words = line.split()
-            if words[1] == "RandomPlayer":
-                version = "1"
+            if words[1].startswith("ExIt"):
+                version = re.findall(r'\d+', str(words[1]))[-1]
+                version = int(version)
             else:
-                version = str(words[1][-1])
+                version = 1
             lines.append((version, words))
 
         # Make sure versions are added in order.
@@ -117,7 +122,7 @@ def read_ratings(game_class, versions):
             def add_info(player_name, info):
                 if player_name in tournament.keys():
                     for key, value in tournament[player_name].items():
-                        tournament[player_name][key].extend(list(info[key]))
+                        tournament[player_name][key].append(info[key][0])
                 else:
                     tournament[player_name] = deepcopy(info)
 
@@ -131,18 +136,18 @@ def read_ratings(game_class, versions):
                 "draws": [float(words[8][:-1])]
             }
 
-            if words[1] == "RandomPlayer":
-                player_name = str(words[1])
-                for _ in range(versions):
-                    add_info(player_name, info)
+            if words[1].startswith("ExIt"):
+                player_name = str(words[1][:-(6 + len(str(version)))])
+                add_info(player_name, info)
             else:
-                player_name = str(words[1][:-7])
+                player_name = words[1]
                 add_info(player_name, info)
 
         # Convert to list and sort:
         tournament = [(max(value["elo"]), {key: value}) for key, value in tournament.items()]
         tournament.sort(reverse=True)
         tournament = [dic for elo, dic in tournament]
+
         return tournament
 
 
@@ -161,6 +166,7 @@ def load_model(game_name, ex_it_algorithm, iteration):
 
 
 def create_training_folders(game_class, ex_it_algorithm):
+    print(ex_it_algorithm.__name__)
     base_path = create_path_folders_if_needed("Trained_models", game_class.__name__, ex_it_algorithm.__name__)
     if Path(base_path + "/meta.txt").exists():
         raise Exception("'" + base_path + "/meta.txt' already exist. ")
