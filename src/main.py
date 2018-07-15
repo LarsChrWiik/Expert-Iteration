@@ -12,10 +12,6 @@ from Misc.Plotter import plot_elo_ratings
 import numpy as np
 np.set_printoptions(suppress=True)
 
-import matplotlib.pyplot as plt
-import seaborn as sns
-import numpy as np
-
 
 """
 ***** Variable information in the project *****
@@ -38,54 +34,68 @@ V[s]    = Predicted v value of state s.
 """
 
 
+# ********** Run info START **********
+
+# Game.
+game_class = TicTacToe
+
+# Players to compare.
+players = [
+    NnAlphaBetaPlayer(),
+    NnMctsPlayer(),
+    RandomPlayer()
+]
+# Search time for each player.
 search_time = get_seconds(ms=50)
-num_matches = 1000
 
-time_limit = get_seconds(m=10)
+# Total time for each player to self-train.
+time_limit = get_seconds(m=1)
+# Number of versions to be trained.
 num_versions = 10
+# Timer. NB: Each version is trained for time_limit / num_versions time)
+training_timer = TrainingTimer(time_limit, num_versions)
 
-training_timer = TrainingTimer(
-    time_limit=time_limit,
-    num_versions=num_versions
-)
+# Number of matches to compare the players. This is used to calculate Elo.
+# More matches = more certain of elo scores.
+all_vs_all_iterations = 10
+# Should some random moves be added in the tournament to generate new states.
+match_randomness = True
+
+# ********** Run info END **********
 
 
 def main():
-    elo_tournament()
+    pipeline()
 
 
-def plot_elo():
-    plot_elo_ratings(TicTacToe, versions=num_versions)
+def pipeline():
+    # Train.
+    self_play_and_store_versions(game_class, players, search_time, training_timer)
+    # Tournament.
+    start_elo_tournament(game_class, players, num_versions, all_vs_all_iterations, match_randomness)
 
 
-def elo_tournament():
-    start_elo_tournament(
-        players_classes=[NnAlphaBetaPlayer, NnMctsPlayer, RandomPlayer],
-        num_versions=num_versions,
-        game_class=TicTacToe,
-        randomness=True # <---------------------------------- Remember!
-    )
+if __name__ == "__main__":
+    main()
+    #import cProfile
+    #cProfile.run('main()')
+
+
+# TODO: Remove everything below later. (Used for testing).
 
 
 def train_and_store():
-    player = NnMctsPlayer()
+    players = [NnMctsPlayer(), RandomPlayer()]
     self_play_and_store_versions(
-        game_class=TicTacToe,
-        ex_it_algorithm=player.ex_it_algorithm,
-        search_time=search_time,
-        training_timer=training_timer
+        TicTacToe,
+        players,
+        search_time,
+        training_timer
     )
 
 
-def comparison_trained():
-    players = [NnAlphaBetaPlayer, NnMctsPlayer]
-    compare_ex_it_trained(
-        game_class=TicTacToe,
-        players_classes=players,
-        num_matches=num_matches,
-        randomness=True, # <---------------------------------- Remember!
-        version=3
-    )
+def plot_elo():
+    plot_elo_ratings(TicTacToe, num_versions)
 
 
 def comparison_from_scratch():
@@ -96,8 +106,30 @@ def comparison_from_scratch():
         game_class=TicTacToe,
         players=players,
         search_time=search_time,
-        num_matches=num_matches,
+        num_matches=1000,
         training_timer=training_timer,
+        randomness=True # <---------------------------------- Remember!
+    )
+
+
+def comparison_trained():
+    players = [NnAlphaBetaPlayer(), NnMctsPlayer()]
+    compare_ex_it_trained(
+        game_class=TicTacToe,
+        raw_players=players,
+        num_matches=1000,
+        randomness=True, # <---------------------------------- Remember!
+        version=3
+    )
+
+
+def elo_tournament():
+    players = [LarsPlayer(branch_prob=0.25), LarsPlayer(branch_prob=0.1)]
+    start_elo_tournament(
+        game_class=TicTacToe,
+        raw_players=players,
+        num_versions=num_versions,
+        iterations=all_vs_all_iterations,
         randomness=True # <---------------------------------- Remember!
     )
 
@@ -113,9 +145,3 @@ def normal_exit_test():
 
     # Display the agents calculations in predefined scenarios.
     debug_display_win_moves(player)
-
-
-if __name__ == "__main__":
-    main()
-    #import cProfile
-    #cProfile.run('main()')
