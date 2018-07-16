@@ -45,27 +45,24 @@ game_class = TicTacToe
 # Players to compare.
 players = [
     NnAlphaBetaPlayer(policy=Policy.OFF),
-    NnAlphaBetaPlayer(policy=Policy.ON),
-    NnMinimaxPlayer(),
+    LarsPlayer(branch_prob=0.25),
     NnMinimaxPlayer(fixed_depth=1),
     NnMctsPlayer(policy=Policy.OFF),
-    NnMctsPlayer(policy=Policy.ON),
-    LarsPlayer(branch_prob=0.25),
     RandomPlayer()
 ]
 # Search time for each player.
 search_time = get_seconds(ms=50)
 
 # Total time for each player to self-train.
-time_limit = get_seconds(m=1)
+time_limit = get_seconds(s=10)
 # Number of versions to be trained.
-num_versions = 10
+num_versions = 3
 # Timer. NB: Each version is trained for time_limit / num_versions time)
 training_timer = TrainingTimer(time_limit, num_versions)
 
 # Number of matches to compare the players. This is used to calculate Elo.
 # More matches = more certain of elo scores.
-num_elo_matches = 10000
+num_elo_matches = 1000
 # Should some random moves be added in the tournament to generate new states.
 match_randomness = True
 
@@ -73,7 +70,8 @@ match_randomness = True
 
 
 def main():
-    pipeline()
+    plot_elo()
+    #pipeline()
 
 
 def pipeline():

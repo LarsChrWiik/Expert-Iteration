@@ -51,8 +51,10 @@ class ExpertIteration:
         # Set name.
         extra_name = ""
         if not (isinstance(memory, MemoryList) and branch_prob == 0.0):
-            extra_name = "_" + type(self.memory).__name__ + "_Branch-" + str(branch_prob)
-        self.__name__ = "ExIt_" + str(type(self.apprentice).__name__) + "_" + str(self.expert.__name__) \
+            extra_name += "_" + type(self.memory).__name__ + "_Branch-" + str(branch_prob)
+        if always_exploit:
+            extra_name += "_Exploit"
+        self.__name__ = str(type(self.apprentice).__name__) + "_" + str(self.expert.__name__) \
                         + "_" + str(self.policy.value) + extra_name
 
     def set_game(self, game_class):
@@ -89,6 +91,7 @@ class ExpertIteration:
         if verbose:
             training_timer.start_new_lap()
             progress_bar = tqdm(range(int(training_timer.version_time)))
+            progress_bar.set_description("Training " + self.__name__)
             while training_timer.has_time_left():
                 pi_loss, v_loss = self_play()
                 # Update progress bar.

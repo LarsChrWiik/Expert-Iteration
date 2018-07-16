@@ -57,5 +57,5 @@ def argmax(array):
 
 
 class Policy(Enum):
-    ON = "ON-Policy"
-    OFF = "OFF-Policy"
+    ON = "ON"
+    OFF = "OFF"

@@ -22,11 +22,11 @@ class Minimax(BaseExpert):
         self.stop_search_contradiction = True
         extra_name = ""
         if fixed_depth is not None:
-            extra_name = "_fixed_depth-" + str(fixed_depth)
+            extra_name = "_Depth-" + str(fixed_depth)
         if (self.alpha, self.beta) == (None, None):
             self.__name__ = "Minimax" + extra_name
         else:
-            self.__name__ = "AlphaBeta" + extra_name
+            self.__name__ = "AB" + extra_name
 
     def search(self, state: BaseGame, predictor: BaseApprentice, search_time, always_exploit):
         # Predicted v value of state s.         V[s]

@@ -43,7 +43,7 @@ def load_trained_models(game_class, raw_players, versions):
             for v in versions:
                 version = v+1
                 new_player = p.new_player()
-                new_player.__name__ = new_player.__name__ + "_model" + str(version)
+                new_player.__name__ = "ExIt_" + str(version) + "_" + new_player.__name__
                 trained_model = load_model(
                     game_name=game_class.__name__,
                     ex_it_algorithm=new_player.ex_it_algorithm,
@@ -106,7 +106,7 @@ def read_ratings(game_class):
                 continue
             words = line.split()
             if words[1].startswith("ExIt"):
-                version = re.findall(r'\d+', str(words[1]))[-1]
+                version = re.findall(r'\d+', str(words[1]))[0]
                 version = int(version)
             else:
                 version = 1
@@ -134,7 +134,8 @@ def read_ratings(game_class):
             }
 
             if words[1].startswith("ExIt"):
-                player_name = str(words[1][:-(6 + len(str(version)))])
+                # This will remove the model number and one underline "_" from the name.
+                player_name = str(words[1][0:5]) + str(words[1][6+len(str(version)):])
                 add_info(player_name, info)
             else:
                 player_name = words[1]
