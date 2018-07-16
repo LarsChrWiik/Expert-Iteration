@@ -174,7 +174,7 @@ def create_training_meta_file(base_path, p: BaseExItPlayer, search_time, trainin
         file.write("Datetime = " + str(datetime.now().strftime('%Y-%m-%d___%H:%M:%S')) + "\n")
         file.write("Training time = " + str(training_timer.time_limit) + "\n")
         file.write("Number of versions = " + str(training_timer.num_versions) + "\n")
-        file.write("Time pr version = "
+        file.write("Training time pr version = "
                    + str(training_timer.time_limit / training_timer.num_versions) + "\n")
         file.write("Search_time = " + str(search_time) + "\n")
         file.write("\n")
