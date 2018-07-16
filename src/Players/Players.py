@@ -37,9 +37,10 @@ class NnMctsPlayer(BaseExItPlayer):
             )
         )
         self.c = c
+        self.policy = policy
 
     def new_player(self):
-        return NnMctsPlayer(c=self.c)
+        return NnMctsPlayer(c=self.c, policy=self.policy)
 
 
 class NnMinimaxPlayer(BaseExItPlayer):
@@ -54,9 +55,10 @@ class NnMinimaxPlayer(BaseExItPlayer):
             )
         )
         self.fixed_depth = fixed_depth
+        self.policy = policy
 
     def new_player(self):
-        return NnMinimaxPlayer(fixed_depth=self.fixed_depth)
+        return NnMinimaxPlayer(fixed_depth=self.fixed_depth, policy=self.policy)
 
 
 class NnAlphaBetaPlayer(BaseExItPlayer):
@@ -71,9 +73,10 @@ class NnAlphaBetaPlayer(BaseExItPlayer):
             )
         )
         self.fixed_depth = fixed_depth
+        self.policy = policy
 
     def new_player(self):
-        return NnAlphaBetaPlayer(fixed_depth=self.fixed_depth)
+        return NnAlphaBetaPlayer(fixed_depth=self.fixed_depth, policy=self.policy)
 
 
 class LarsPlayer(BaseExItPlayer):
