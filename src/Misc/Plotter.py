@@ -1,5 +1,5 @@
 
-from Misc.DiskHandler import read_ratings
+from Misc.DiskHandler import read_ratings, get_comparison_base_path
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
@@ -18,7 +18,7 @@ def add_y_margins_inside(ax, num_versions, y_scale):
 
 
 def plot_elo_ratings(game_class, num_versions):
-    tournament = read_ratings(game_class, num_versions)
+    tournament = read_ratings(game_class)
     colors = sns.color_palette("Set1", n_colors=len(tournament), desat=.5)
 
     ax = None
@@ -56,39 +56,26 @@ def plot_elo_ratings(game_class, num_versions):
     plt.show()
 
 
-# TODO: Re-implement.
-def plot_result(folder, filename):
-    base_path = './Statistics' + "/" + folder
-    path = base_path + "/" + filename + ".csv"
+def plot_comparison1v1(folder, player):
+    base_path = get_comparison_base_path(folder)
+    path = base_path + player.__name__ + ".csv"
     with open(path) as csv_file:
         reader = csv.DictReader(csv_file)
         data = [[float(row["win"]), float(row["loss"]), float(row["draw"])] for row in reader]
 
-        print(data)
-        iterations = __get_iterations(base_path=base_path)
-        wins, losses, draws = __get_statistics(data=data, iterations=iterations)
+        wins = [row[0] for row in data]
+        losses = [row[1] for row in data]
+        draws = [row[2] for row in data]
+
         plt.plot(wins, label="Wins")
         plt.plot(losses, label="Losses")
         plt.plot(draws, label="Draws")
-        plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=3,
-                   ncol=3, mode="expand", borderaxespad=0.)
-        plt.axis(ymin=0, ymax=1.0)
+        plt.legend(
+            bbox_to_anchor=(0., 1.02, 1., .102),
+            loc=3,
+            ncol=3,
+            mode="expand",
+            borderaxespad=0.
+        )
+        plt.ylim(0, wins[0] + losses[0] + draws[0])
         plt.show()
-
-
-def __get_iterations(base_path):
-    path = base_path + "/" + "metadata" + ".txt"
-    with open(path) as txt_file:
-        content = txt_file.readlines()
-        return float(content[2].split(" ")[-1])
-
-
-def __get_statistics(data, iterations):
-    wins = []
-    losses = []
-    draws = []
-    for v in data:
-        wins.append(v[0] / iterations)
-        losses.append(v[1] / iterations)
-        draws.append(v[2] / iterations)
-    return wins, losses, draws
