@@ -70,15 +70,13 @@ def create_elo_folders(game_class):
     return base_path
 
 
-def create_elo_meta_file(base_path, game_class, raw_players, iterations, num_versions, match_permutations, randomness):
+def create_elo_meta_file(base_path, game_class, raw_players, num_matches, num_versions, randomness):
     with open(base_path + "/meta.txt", 'x') as file:
         file.write("Datetime = " + str(datetime.now().strftime('%Y-%m-%d___%H:%M:%S')) + "\n")
         file.write("Game = " + game_class.__name__ + "\n")
         file.write("Randomness = " + str(randomness) + "\n")
-        file.write("Iterations = " + str(iterations) + "\n")
         file.write("Number of versions = " + str(num_versions) + "\n")
-        file.write("Number of match_permutations = " + str(len(match_permutations)) + "\n")
-        file.write("Total number of matches = " + str(len(match_permutations)*iterations) + "\n")
+        file.write("Number of matches = " + str(num_matches) + "\n")
         file.write("\n")
         file.write("Players: \n")
         for i, p in enumerate(raw_players):
@@ -99,7 +97,7 @@ def save_game_to_pgn(base_path, game_handler, p1, p2):
         file.write("\n")
 
 
-def read_ratings(game_class, num_versions):
+def read_ratings(game_class):
     with open("./Elo/" + game_class.__name__ + "/ratings.txt", 'r') as file:
         tournament = {}
         lines = []
@@ -189,6 +187,10 @@ def create_training_meta_file(base_path, p: BaseExItPlayer, search_time, trainin
 
 
 # ******************** COMPARISON 1v1 ********************
+
+
+def get_comparison_base_path(folder):
+    return './Comparison1v1' + "/" + folder + "/"
 
 
 def create_comparison_folders():
