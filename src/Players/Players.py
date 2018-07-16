@@ -88,7 +88,7 @@ class LarsPlayer(BaseExItPlayer):
                 apprentice=Nn(),
                 expert=Minimax(fixed_depth=fixed_depth, use_alpha_beta=True),
                 policy=Policy.OFF,
-                use_exploration_policy=False,
+                always_exploit=True,
                 memory=MemorySet(),
                 branch_prob=branch_prob
             )

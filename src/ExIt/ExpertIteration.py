@@ -38,7 +38,7 @@ def add_different_advance(state, best_action, state_copies):
 class ExpertIteration:
 
     def __init__(self, apprentice: BaseApprentice, expert: BaseExpert, policy=Policy.OFF,
-                 use_exploration_policy=True, memory=MemoryList(), branch_prob=0.0):
+                 always_exploit=False, memory=MemoryList(), branch_prob=0.0):
         self.apprentice = apprentice
         self.expert = expert
         self.memory = memory
@@ -47,7 +47,7 @@ class ExpertIteration:
         self.games_generated = 0
         self.state_branch_degree = branch_prob
         self.policy = policy
-        self.use_exploration_policy = use_exploration_policy
+        self.always_exploit = always_exploit
         # Set name.
         extra_name = ""
         if not (isinstance(memory, MemoryList) and branch_prob == 0.0):
@@ -144,7 +144,7 @@ class ExpertIteration:
         """ Expert Iteration for a given state """
 
         a, a_best, v = self.expert.search(
-            state, self.apprentice, self.search_time, self.use_exploration_policy
+            state, self.apprentice, self.search_time, self.always_exploit
         )
         s, pi, t = generate_sample(state, a_best if self.policy == Policy.OFF else a)
         return s, pi, v, t, a

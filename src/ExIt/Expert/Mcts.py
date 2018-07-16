@@ -16,7 +16,7 @@ class Mcts(BaseExpert):
         # Exploration parameter in UCB.
         self.c = c
 
-    def search(self, state: BaseGame, predictor: BaseApprentice, search_time, use_exploration_policy):
+    def search(self, state: BaseGame, predictor: BaseApprentice, search_time, always_exploit):
         # Expected Q values from state s.       Q[s]   or   Q[s][a]
         Q = {}
         # Number of times state s was visited.  N[s]
@@ -89,9 +89,7 @@ class Mcts(BaseExpert):
         qi = [q for i, q in enumerate(Q[s]) if i in lm]
 
         a_best = exploit_action(qi, lm)
-        if use_exploration_policy:
-            # Off-policy is the proportional of the N values.
-            return explore_proportional(ni, lm), a_best, None
-        else:
-            # On-policy is the action that leads to the best Q value.
+        if always_exploit:
             return a_best, a_best, None
+        else:
+            return explore_proportional(ni, lm), a_best, None

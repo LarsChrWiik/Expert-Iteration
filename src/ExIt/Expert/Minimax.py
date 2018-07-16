@@ -28,7 +28,7 @@ class Minimax(BaseExpert):
         else:
             self.__name__ = "AlphaBeta" + extra_name
 
-    def search(self, state: BaseGame, predictor: BaseApprentice, search_time, use_exploration_policy):
+    def search(self, state: BaseGame, predictor: BaseApprentice, search_time, always_exploit):
         # Predicted v value of state s.         V[s]
         V = {}
 
@@ -147,19 +147,20 @@ class Minimax(BaseExpert):
                 depth += 1
 
         lm = state.get_legal_moves()
-        if use_exploration_policy:
+        best_a = exploit_action(vi, lm)
+        if always_exploit:
+            # Exploration-policy: Exploit - the action that leads to the highest v value.
+            return best_a, best_a, v
+        else:
             """ 
             ***** Potential other Exploration-policies: *****
                 (proportional of VI)
-                return vi_proportional(vi, lm), exploit_action(vi, lm), v
+                return vi_proportional(vi, lm), best_a, v
 
                 (E-greedy)
-                return e_greedy(vi, lm, e=0.1), exploit_action(vi, lm), v 
+                return e_greedy(vi, lm, e=0.1), best_a, v
             """
             # Exploration-policy: proportional of the PI with guidance of VI.
             pi = predictor.pred_pi(state.get_feature_vector())
             pi = [p for i, p in enumerate(pi) if i in lm]
-            return explore_proportional_with_guidance(pi, vi, lm), exploit_action(vi, lm), v
-        else:
-            # Exploration-policy: Exploit - the action that leads to the highest v value.
-            return exploit_action(vi, lm), exploit_action(vi, lm), v
+            return explore_proportional_with_guidance(pi, vi, lm), best_a, v
