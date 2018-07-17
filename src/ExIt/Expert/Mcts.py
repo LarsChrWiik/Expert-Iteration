@@ -86,9 +86,8 @@ class Mcts(BaseExpert):
         lm = state.get_legal_moves()
         s = tuple(state.get_feature_vector())
         ni = [n for i, n in enumerate(N[s]) if i in lm]
-        qi = [q for i, q in enumerate(Q[s]) if i in lm]
 
-        a_best = exploit_action(qi, lm)
+        a_best = exploit_action(ni, lm)
         if always_exploit:
             return a_best, a_best, None
         else:
