@@ -43,7 +43,7 @@ game_class = TicTacToe
 players = [
     RandomPlayer(),
     NnMctsPlayer(),
-    NnAlphaBetaPlayer(),
+    NnAlphaBetaPlayer()
 ]
 # Search time for each player.
 search_time = get_seconds(ms=50)
