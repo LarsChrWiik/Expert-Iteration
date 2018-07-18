@@ -93,7 +93,29 @@ class LarsPlayer(BaseExItPlayer):
                 branch_prob=branch_prob
             )
         )
+        self.fixed_depth = fixed_depth
         self.branch_prob = branch_prob
 
     def new_player(self):
-        return LarsPlayer(branch_prob=self.branch_prob)
+        return LarsPlayer(fixed_depth=self.fixed_depth, branch_prob=self.branch_prob)
+
+
+class LarsPlayer2(BaseExItPlayer):
+    """ Player that uses Minimax as expert and NN as apprentice """
+
+    def __init__(self, c=sqrt(2), branch_prob=0.25):
+        super().__init__(
+            ex_it_algorithm=ExpertIteration(
+                apprentice=Nn(),
+                expert=Mcts(c=c),
+                policy=Policy.OFF,
+                always_exploit=True,
+                memory=MemorySet(),
+                branch_prob=branch_prob
+            )
+        )
+        self.c = c
+        self.branch_prob = branch_prob
+
+    def new_player(self):
+        return LarsPlayer2(c=self.c, branch_prob=self.branch_prob)
