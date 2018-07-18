@@ -3,9 +3,7 @@
 from Games.TicTacToe import TicTacToe
 from Games.ConnectFour import ConnectFour
 from Players.Players import *
-from Matchmaking.Comparison1v1 import compare_ex_it_trained, compare_ex_it_from_scratch
 from Matchmaking.EloTournament import start_elo_tournament
-from Misc.Debugger import debug_display_win_moves
 from Misc.Training import self_play_and_store_versions
 from Misc.TrainingTimer import get_seconds
 from Misc.TrainingTimer import TrainingTimer
@@ -103,6 +101,7 @@ def plot_elo():
 
 
 def comparison_from_scratch():
+    from Matchmaking.Comparison1v1 import compare_ex_it_from_scratch
     # Run Comparison with several iteration of self-play.
     players = [NnMctsPlayer(), RandomPlayer()]
 
@@ -117,6 +116,7 @@ def comparison_from_scratch():
 
 
 def comparison_trained():
+    from Matchmaking.Comparison1v1 import compare_ex_it_trained
     players = [NnMctsPlayer(), RandomPlayer()]
     versions = range(10)
     compare_ex_it_trained(
@@ -140,6 +140,7 @@ def elo_tournament():
 
 
 def normal_exit_test():
+    from Misc.Debugger import debug_display_win_moves
     # Run One iteration of self.play
     player = NnMctsPlayer()
     player.set_game(game_class=TicTacToe)
