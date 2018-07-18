@@ -9,7 +9,7 @@ from Misc.Debugger import debug_display_win_moves
 from Misc.Training import self_play_and_store_versions
 from Misc.TrainingTimer import get_seconds
 from Misc.TrainingTimer import TrainingTimer
-from Misc.Plotter import plot_elo_ratings, plot_comparison1v1
+from Misc.Plotter import plot_elo_ratings
 from ExIt.Policy import Policy
 from Misc.PlayGameCLI import play
 import numpy as np
@@ -44,25 +44,25 @@ game_class = TicTacToe
 
 # Players to compare.
 players = [
-    NnAlphaBetaPlayer(policy=Policy.OFF),
-    LarsPlayer(branch_prob=0.25),
-    NnMinimaxPlayer(fixed_depth=1),
-    NnMctsPlayer(policy=Policy.OFF),
+    #NnAlphaBetaPlayer(policy=Policy.OFF),
+    #LarsPlayer(branch_prob=0.25),
+    #NnMinimaxPlayer(fixed_depth=1),
+    NnMctsPlayer(),
     RandomPlayer()
 ]
 # Search time for each player.
 search_time = get_seconds(ms=50)
 
 # Total time for each player to self-train.
-time_limit = get_seconds(s=10)
+time_limit = get_seconds(s=4)
 # Number of versions to be trained.
-num_versions = 3
+num_versions = 10
 # Timer. NB: Each version is trained for time_limit / num_versions time)
 training_timer = TrainingTimer(time_limit, num_versions)
 
 # Number of matches to compare the players. This is used to calculate Elo.
 # More matches = more certain of elo scores.
-num_elo_matches = 1000
+num_elo_matches = 10000
 # Should some random moves be added in the tournament to generate new states.
 match_randomness = True
 
@@ -70,7 +70,8 @@ match_randomness = True
 
 
 def main():
-    plot_elo()
+    comparison_from_scratch()
+    #plot_elo_ratings(TicTacToe, num_versions)
     #pipeline()
 
 
@@ -98,6 +99,7 @@ def train_and_store():
 
 
 def plot_elo():
+    from Misc.Plotter import plot_elo_ratings
     plot_elo_ratings(TicTacToe, num_versions)
 
 
@@ -116,13 +118,14 @@ def comparison_from_scratch():
 
 
 def comparison_trained():
-    players = [NnAlphaBetaPlayer(), RandomPlayer()]
+    players = [NnMctsPlayer(), RandomPlayer()]
+    versions = range(10)
     compare_ex_it_trained(
         game_class=TicTacToe,
         raw_players=players,
         num_matches=1000,
-        randomness=True, # <---------------------------------- Remember!
-        version=10
+        randomness=False,  # <---------------------------------- Remember!
+        versions=versions
     )
 
 

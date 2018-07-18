@@ -8,21 +8,25 @@ from Misc.DiskHandler import create_comparison_folders, create_comparison_meta_f
 from operator import add
 
 
-def compare_ex_it_trained(game_class, raw_players, num_matches, randomness, version):
+def compare_ex_it_trained(game_class, raw_players, num_matches, randomness, versions):
     """ Compare trained players """
-
-    players = load_trained_models(game_class, raw_players, [version-1])
-    set_indexes(players)
 
     # Create necessary folders and files and get base path.
     base_path = create_comparison_folders()
-    create_comparison_meta_file(base_path, players, num_matches, None, None, version)
-    create_comparison_files(base_path, players)
+    create_comparison_meta_file(base_path, raw_players, num_matches, None, None, versions)
+    create_comparison_files(base_path, raw_players)
 
-    results_list = start_matches(game_class, players, num_matches, randomness)
-    for p_index, results in enumerate(results_list):
-        save_comparison_result(base_path, results, 1, [p for p in players if p.index == p_index][0])
-    print(results_list)
+    for version in versions:
+        players = load_trained_models(game_class, raw_players, [version])
+        set_indexes(players)
+
+        results_list = start_matches(game_class, players, num_matches, randomness)
+        for p_index, results in enumerate(results_list):
+            player = [p for p in players if p.index == p_index][0]
+            if player.__name__.startswith("ExIt"):
+                player.__name__ = player.__name__[6+len(str(version+1)):]
+            save_comparison_result(base_path, results, version+1, player)
+        print("version " + str(version+1) + ") " + str(results_list))
 
 
 def compare_ex_it_from_scratch(game_class, players, search_time,

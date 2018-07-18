@@ -200,7 +200,7 @@ def create_comparison_folders():
     )
 
 
-def create_comparison_meta_file(base_path, players, num_matches, training_timer, search_time, version=None):
+def create_comparison_meta_file(base_path, players, num_matches, training_timer, search_time, versions=None):
     with open(base_path + "/meta.txt", 'x') as file:
         file.write("Date time = " + str(datetime.now().strftime('%Y-%m-%d___%H:%M:%S')) + "\n")
         file.write("Number of matches = " + str(num_matches) + "\n")
@@ -210,8 +210,8 @@ def create_comparison_meta_file(base_path, players, num_matches, training_timer,
             file.write("Time pr version = "
                        + str(training_timer.time_limit / training_timer.num_versions) + "\n")
             file.write("Search time = " + str(search_time) + "\n")
-        if version is not None:
-            file.write("version = " + str(version) + "\n")
+        if versions is not None:
+            file.write("versions = " + str([v+1 for v in versions]) + "\n")
         file.write("\n")
         for i, p in enumerate(players):
             file.write(p.__name__ + "\n")
@@ -227,8 +227,8 @@ def create_comparison_files(base_path, players):
             file.write("iteration,win,loss,draw" + "\n")
 
 
-def save_comparison_result(base_path, results: [GameResult], i, p):
+def save_comparison_result(base_path, results: [GameResult], version, p):
     """ Saves results to disk.
         NB: This function assumes that results_list is ordered by player index """
     with open(base_path + "/" + p.__name__ + ".csv", 'a') as file:
-        file.write(str(i) + "," + GameResult.get_string_results(results) + "\n")
+        file.write(str(version) + "," + GameResult.get_string_results(results) + "\n")
