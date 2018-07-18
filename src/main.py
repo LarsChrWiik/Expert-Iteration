@@ -41,17 +41,15 @@ game_class = TicTacToe
 
 # Players to compare.
 players = [
-    #NnAlphaBetaPlayer(policy=Policy.OFF),
-    #LarsPlayer(branch_prob=0.25),
-    #NnMinimaxPlayer(fixed_depth=1),
+    RandomPlayer(),
     NnMctsPlayer(),
-    RandomPlayer()
+    NnAlphaBetaPlayer(),
 ]
 # Search time for each player.
 search_time = get_seconds(ms=50)
 
 # Total time for each player to self-train.
-time_limit = get_seconds(s=4)
+time_limit = get_seconds(m=10)
 # Number of versions to be trained.
 num_versions = 10
 # Timer. NB: Each version is trained for time_limit / num_versions time)
@@ -67,9 +65,7 @@ match_randomness = True
 
 
 def main():
-    comparison_from_scratch()
-    #plot_elo_ratings(TicTacToe, num_versions)
-    #pipeline()
+    pipeline()
 
 
 def pipeline():
@@ -103,7 +99,7 @@ def plot_elo():
 def comparison_from_scratch():
     from Matchmaking.Comparison1v1 import compare_ex_it_from_scratch
     # Run Comparison with several iteration of self-play.
-    players = [NnMctsPlayer(), RandomPlayer()]
+    players = [NnAlphaBetaPlayer(), RandomPlayer()]
 
     compare_ex_it_from_scratch(
         game_class=TicTacToe,
@@ -117,7 +113,7 @@ def comparison_from_scratch():
 
 def comparison_trained():
     from Matchmaking.Comparison1v1 import compare_ex_it_trained
-    players = [NnMctsPlayer(), RandomPlayer()]
+    players = [NnAlphaBetaPlayer(), RandomPlayer()]
     versions = range(10)
     compare_ex_it_trained(
         game_class=TicTacToe,
