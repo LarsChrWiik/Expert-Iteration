@@ -9,7 +9,6 @@ from Misc.Debugger import debug_display_win_moves
 from Misc.Training import self_play_and_store_versions
 from Misc.TrainingTimer import get_seconds
 from Misc.TrainingTimer import TrainingTimer
-from Misc.Plotter import plot_elo_ratings
 from ExIt.Policy import Policy
 from Misc.PlayGameCLI import play
 import numpy as np
