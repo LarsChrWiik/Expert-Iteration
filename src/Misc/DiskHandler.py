@@ -158,9 +158,8 @@ def save_model(model, base_path, iteration):
 
 
 def load_model(game_name, ex_it_algorithm, iteration):
-    return load_keras_model(
-        "./Trained_models/" + game_name + "/" + ex_it_algorithm.__name__ + "/" + iteration + ".h5"
-    )
+    path = "./Trained_models/" + game_name + "/" + ex_it_algorithm.__name__ + "/" + iteration + ".h5"
+    return load_keras_model(path)
 
 
 def create_training_folders(game_class, p):
