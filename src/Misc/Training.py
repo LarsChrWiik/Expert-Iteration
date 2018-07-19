@@ -11,7 +11,6 @@ def self_play_and_store_versions(game_class, players, search_time, training_time
         if not isinstance(p, BaseExItPlayer):
             continue
         p.set_game(game_class)
-
         # Create folders and meta file and get get base path.
         base_path = create_training_folders(game_class, p)
         create_training_meta_file(base_path, p, search_time, training_timer)
