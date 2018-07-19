@@ -46,10 +46,10 @@ players = [
     NnAlphaBetaPlayer()
 ]
 # Search time for each player.
-search_time = get_seconds(ms=50)
+search_time = get_seconds(ms=100)
 
 # Total time for each player to self-train.
-time_limit = get_seconds(m=10)
+time_limit = get_seconds(m=40)
 # Number of versions to be trained.
 num_versions = 10
 # Timer. NB: Each version is trained for time_limit / num_versions time)
@@ -65,7 +65,7 @@ match_randomness = True
 
 
 def main():
-    pipeline()
+    elo_tournament()
 
 
 def pipeline():
@@ -82,7 +82,7 @@ def pipeline():
 
 
 def train_and_store():
-    players = [NnMctsPlayer(), RandomPlayer()]
+    players = [NnAlphaBetaPlayer(), RandomPlayer()]
     self_play_and_store_versions(
         TicTacToe,
         players,
@@ -125,7 +125,7 @@ def comparison_trained():
 
 
 def elo_tournament():
-    players = [LarsPlayer(branch_prob=0.25), LarsPlayer(branch_prob=0.1)]
+    players = [NnAlphaBetaPlayer(), RandomPlayer()]
     start_elo_tournament(
         game_class=TicTacToe,
         raw_players=players,
