@@ -65,7 +65,7 @@ match_randomness = True
 
 
 def main():
-    elo_tournament()
+    pipeline()
 
 
 def pipeline():
