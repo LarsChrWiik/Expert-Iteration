@@ -37,7 +37,7 @@ V[s]    = Predicted v value of state s.
 # ********** Run info START **********
 
 # Game.
-game_class = TicTacToe
+game_class = ConnectFour
 
 # Players to compare.
 players = [
@@ -46,10 +46,10 @@ players = [
     NnAlphaBetaPlayer()
 ]
 # Search time for each player.
-search_time = get_seconds(ms=100)
+search_time = get_seconds(ms=50)
 
 # Total time for each player to self-train.
-time_limit = get_seconds(m=40)
+time_limit = get_seconds(m=10)
 # Number of versions to be trained.
 num_versions = 10
 # Timer. NB: Each version is trained for time_limit / num_versions time)
@@ -93,7 +93,7 @@ def train_and_store():
 
 def plot_elo():
     from Misc.Plotter import plot_elo_ratings
-    plot_elo_ratings(TicTacToe, num_versions)
+    plot_elo_ratings(ConnectFour, num_versions)
 
 
 def comparison_from_scratch():
@@ -113,7 +113,7 @@ def comparison_from_scratch():
 
 def comparison_trained():
     from Matchmaking.Comparison1v1 import compare_ex_it_trained
-    players = [NnAlphaBetaPlayer(), RandomPlayer()]
+    players = [NnMctsPlayer(), RandomPlayer()]
     versions = range(10)
     compare_ex_it_trained(
         game_class=TicTacToe,
