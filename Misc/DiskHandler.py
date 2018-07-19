@@ -152,9 +152,9 @@ def read_ratings(game_class):
 # ******************** TRAINING ********************
 
 
-def save_model(model, base_path, iteration):
+def save_model(model, base_path, version):
     """ Store the model as a HDF5 file """
-    model.save(base_path + "/" + iteration + ".h5")
+    model.save(base_path + "/" + version + ".h5")
 
 
 def load_model(game_name, ex_it_algorithm, iteration):
