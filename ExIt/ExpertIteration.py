@@ -50,6 +50,8 @@ class ExpertIteration:
         self.always_exploit = always_exploit
         # Set name.
         extra_name = ""
+        if self.apprentice.use_custom_loss:
+            extra_name += "_custom_loss"
         if not (isinstance(memory, MemoryList) and branch_prob == 0.0):
             extra_name += "_" + type(self.memory).__name__ + "_Branch-" + str(branch_prob)
         if always_exploit:
