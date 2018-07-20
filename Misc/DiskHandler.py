@@ -127,10 +127,10 @@ def read_ratings(game_class):
                 "elo": [float(words[2])],
                 "uncertainty-": [float(words[3])],
                 "uncertainty+": [-float(words[4])],
-                "games": [int(words[5])],
-                "score": [float(words[6][:-1])],
-                "oppo": [float(words[7])],
-                "draws": [float(words[8][:-1])]
+                #"games": [int(words[5])],
+                #"score": [float(words[6][:-1])],
+                #"oppo": [float(words[7])],
+                #"draws": [float(words[8][:-1])]
             }
 
             if words[1].startswith("ExIt"):
@@ -142,9 +142,20 @@ def read_ratings(game_class):
                 add_info(player_name, info)
 
         # Convert to list and sort:
-        tournament = [(max(value["elo"]), {key: value}) for key, value in tournament.items()]
-        tournament.sort(reverse=True)
-        tournament = [dic for elo, dic in tournament]
+        tournament = list([(max(value["elo"]), {key: value}) for key, value in tournament.items()])
+
+        # Custom sorting is required due to unreliable results from "sorted" and ".sort"...
+        t3 = []
+        for _ in range(len(tournament)):
+            ind_max = -1
+            val = float("-inf")
+            for i, (elo, dic) in enumerate(tournament):
+                if elo > val:
+                    ind_max = i
+                    val = elo
+            t3.append(tournament[ind_max])
+            tournament.pop(ind_max)
+        tournament = [dic for elo, dic in t3]
 
         return tournament
 
