@@ -42,14 +42,14 @@ game_class = ConnectFour
 # Players to compare.
 players = [
     RandomPlayer(),
-    NnMctsPlayer(),
-    NnAlphaBetaPlayer()
+    NnMctsPlayer(use_custom_loss=True),
+    NnAlphaBetaPlayer(use_custom_loss=True)
 ]
 # Search time for each player.
 search_time = get_seconds(ms=50)
 
 # Total time for each player to self-train.
-time_limit = get_seconds(m=10)
+time_limit = get_seconds(h=1)
 # Number of versions to be trained.
 num_versions = 10
 # Timer. NB: Each version is trained for time_limit / num_versions time)
