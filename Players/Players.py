@@ -31,7 +31,7 @@ class NnMctsPlayer(BaseExItPlayer):
     def __init__(self, c=sqrt(2), policy=Policy.OFF, use_custom_loss=False):
         super().__init__(
             ex_it_algorithm=ExpertIteration(
-                apprentice=Nn(),
+                apprentice=Nn(use_custom_loss=use_custom_loss),
                 expert=Mcts(c=c),
                 policy=policy
             )
