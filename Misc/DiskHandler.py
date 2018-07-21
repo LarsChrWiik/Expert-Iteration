@@ -170,7 +170,13 @@ def save_model(model, base_path, version):
 
 def load_model(game_name, ex_it_algorithm, iteration):
     path = "./Trained_models/" + game_name + "/" + ex_it_algorithm.__name__ + "/" + iteration + ".h5"
-    return load_keras_model(path)
+    # Hard-coding the custom loss.
+    custom_objects = None
+    if ex_it_algorithm.apprentice.use_custom_loss:
+        from ExIt.Apprentice.Nn import custom_loss
+        custom_objects = {'custom_loss': custom_loss}
+
+    return load_keras_model(path, custom_objects=custom_objects)
 
 
 def create_training_folders(game_class, p):
