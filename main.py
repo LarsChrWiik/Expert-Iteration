@@ -42,8 +42,7 @@ game_class = ConnectFour
 # Players to compare.
 players = [
     RandomPlayer(),
-    NnMctsPlayer(use_custom_loss=True),
-    NnAlphaBetaPlayer(use_custom_loss=True)
+    LarsPlayer3()
 ]
 # Search time for each player.
 search_time = get_seconds(ms=50)
@@ -65,6 +64,7 @@ match_randomness = True
 
 
 def main():
+    #plot_elo()
     pipeline()
 
 

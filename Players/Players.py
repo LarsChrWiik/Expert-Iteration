@@ -124,3 +124,20 @@ class LarsPlayer2(BaseExItPlayer):
 
     def new_player(self):
         return LarsPlayer2(c=self.c, branch_prob=self.branch_prob, use_custom_loss=self.use_custom_loss)
+
+
+class LarsPlayer3(BaseExItPlayer):
+    """ Player that uses Minimax as expert and NN as apprentice """
+
+    def __init__(self):
+        super().__init__(
+            ex_it_algorithm=ExpertIteration(
+                apprentice=Nn(),
+                expert=Minimax(switch=True),
+                policy=Policy.OFF
+            )
+        )
+
+    def new_player(self):
+        return LarsPlayer3()
+

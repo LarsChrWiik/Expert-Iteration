@@ -14,21 +14,30 @@ class Minimax(BaseExpert):
         This implementation is designed for Zero-sum,
         two-player deterministic markov games """
 
-    def __init__(self, fixed_depth=None, use_alpha_beta=False):
+    def __init__(self, fixed_depth=None, use_alpha_beta=False, switch=False):
         super().__init__()
         self.fixed_depth = fixed_depth
-        self.alpha = None if not use_alpha_beta else float('-inf')
-        self.beta = None if not use_alpha_beta else float('inf')
+        self.alpha = float('-inf')
+        self.beta = float('inf')
         self.stop_search_contradiction = True
+        self.use_alpha_beta = use_alpha_beta
+        self.switch = switch
         extra_name = ""
         if fixed_depth is not None:
             extra_name = "_Depth-" + str(fixed_depth)
-        if (self.alpha, self.beta) == (None, None):
-            self.__name__ = "Minimax" + extra_name
+        if switch:
+            self.__name__ = "AB-Minimax" + extra_name
         else:
-            self.__name__ = "AB" + extra_name
+            if use_alpha_beta:
+                self.__name__ = "AB" + extra_name
+            else:
+                self.__name__ = "Minimax" + extra_name
 
     def search(self, state: BaseGame, predictor: BaseApprentice, search_time, always_exploit):
+        # Try with switching between Minimax and AB.
+        if self.switch:
+            self.use_alpha_beta = not self.use_alpha_beta
+
         # Predicted v value of state s.         V[s]
         V = {}
 
@@ -50,7 +59,7 @@ class Minimax(BaseExpert):
                         alpha_beta_search(c, alpha, beta, depth - 1)
                     )
                     vi[i] = v
-                    if (alpha, beta) != (None, None):
+                    if self.use_alpha_beta:
                         if v >= beta:
                             return v
                         alpha = max(alpha, v)
@@ -70,7 +79,7 @@ class Minimax(BaseExpert):
                         alpha_beta_search(c, alpha, beta, depth - 1)
                     )
                     vi[i] = v
-                    if (alpha, beta) != (None, None):
+                    if self.use_alpha_beta:
                         if v <= alpha:
                             return v
                         beta = min(beta, v)
