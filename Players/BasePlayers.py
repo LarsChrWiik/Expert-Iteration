@@ -53,15 +53,15 @@ class BaseExItPlayer(BasePlayer):
     def new_player(self):
         raise NotImplementedError("Please Implement this method")
 
-    def move(self, state: BaseGame, randomness=True, print_info=False):
+    def move(self, state: BaseGame, randomness=True):
         """ Move according to the apprentice (No expert) """
         fv = state.get_feature_vector()
-        p_pred = self.ex_it_algorithm.apprentice.pred_pi(fv)
+        pi_pred = self.ex_it_algorithm.apprentice.pred_pi(fv)
         v_pred = self.ex_it_algorithm.apprentice.pred_v(fv)
         lm = state.get_legal_moves()
 
         # Remove PI values that are not legal moves.
-        pi = [x for i, x in enumerate(p_pred) if i in lm]
+        pi = [x for i, x in enumerate(pi_pred) if i in lm]
 
         action_index = e_greedy(
             xi=pi,
@@ -72,7 +72,7 @@ class BaseExItPlayer(BasePlayer):
 
         a = action_index if randomness else best_action
         state.advance(a)
-        return a, p_pred, v_pred
+        return a, pi_pred, v_pred
 
     def start_ex_it(self, training_timer, search_time, verbose=True):
         """ Starts Expert Iteration. NB: Time consuming process """
