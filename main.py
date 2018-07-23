@@ -8,7 +8,7 @@ from Misc.Training import self_play_and_store_versions
 from Misc.TrainingTimer import get_seconds
 from Misc.TrainingTimer import TrainingTimer
 from ExIt.Policy import Policy
-from Misc.PlayGameCLI import play
+from Misc.PlayGameCLI import play, play_trained
 import numpy as np
 np.set_printoptions(suppress=True)
 
@@ -42,7 +42,10 @@ game_class = ConnectFour
 # Players to compare.
 players = [
     RandomPlayer(),
-    LarsPlayer3()
+    NnMctsPlayer(),
+    NnMinimaxPlayer(),
+    NnAlphaBetaPlayer()
+
 ]
 # Search time for each player.
 search_time = get_seconds(ms=50)
@@ -50,7 +53,7 @@ search_time = get_seconds(ms=50)
 # Total time for each player to self-train.
 time_limit = get_seconds(h=1)
 # Number of versions to be trained.
-num_versions = 10
+num_versions = 20
 # Timer. NB: Each version is trained for time_limit / num_versions time)
 training_timer = TrainingTimer(time_limit, num_versions)
 
@@ -64,13 +67,14 @@ match_randomness = True
 
 
 def main():
+    #play_trained(game_class=ConnectFour, player=NnAlphaBetaPlayer(), version=20)
     #plot_elo()
     pipeline()
 
 
 def pipeline():
     # Train.
-    self_play_and_store_versions(game_class, players, search_time, training_timer)
+    #self_play_and_store_versions(game_class, players, search_time, training_timer)
     # Tournament.
     start_elo_tournament(game_class, players, num_versions, num_elo_matches, match_randomness)
 
