@@ -169,7 +169,7 @@ def save_model(model, base_path, version):
 
 
 def load_model(game_name, ex_it_algorithm, iteration):
-    path = "./Trained_models/" + game_name + "/" + ex_it_algorithm.__name__ + "/" + iteration + ".h5"
+    path = "./Trained_models/" + game_name + "/" + ex_it_algorithm.__name__ + "/" + str(iteration) + ".h5"
     # Hard-coding the custom loss.
     custom_objects = None
     if ex_it_algorithm.apprentice.use_custom_loss:
