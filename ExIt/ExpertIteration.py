@@ -147,7 +147,6 @@ class ExpertIteration:
 
     def ex_it_state(self, state: BaseGame):
         """ Expert Iteration for a given state """
-
         a, a_best, v = self.expert.search(
             state, self.apprentice, self.search_time, self.always_exploit
         )
