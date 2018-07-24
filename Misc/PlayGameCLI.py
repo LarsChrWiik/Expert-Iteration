@@ -41,19 +41,21 @@ def play(game_class):
         input("Press enter to play another game: ")
 
 
-def play_trained(game_class, player, version, search_time=None, always_explot=True):
+def play_trained(game_class, player, version, search_time=None, always_exploit=True):
     trained_model = load_model(
         game_name=game_class.__name__,
         ex_it_algorithm=player.ex_it_algorithm,
         iteration=version
     )
     player.ex_it_algorithm.apprentice.set_model(trained_model)
+    player.ex_it_algorithm.search_time = search_time
+    player.ex_it_algorithm.always_exploit = always_exploit
 
     while True:
         print("*** New game of " + game_class.__name__ + " ***")
         print("")
 
-        a = input("Do you want to start? (\"y\" or \"n\"): ")
+        a = input("Do you want to do the first move? (\"y\" or \"n\"): ")
         if a != "y" and a != "n":
             print("ERROR: input not recognized! Input was: \'" + str(a) + "\' with type: " + str(type(a)))
             continue
@@ -79,9 +81,12 @@ def play_trained(game_class, player, version, search_time=None, always_explot=Tr
                     continue
             else:
                 if search_time is not None:
-                    a, a_best, v = player.expert.search(
-                        state, player.apprentice, player.search_time, always_explot
-                    )
+                    s, pi, v, t, a = player.ex_it_algorithm.ex_it_state(state)
+                    fv = state.get_feature_vector()
+                    pi_pred = player.ex_it_algorithm.apprentice.pred_pi(fv)
+                    print("pi_pred =", pi_pred)
+                    print("v =", v)
+                    print("a =", a)
                 else:
                     a, pi_pred, v_pred = player.move(state, randomness=False)
                     print("pi_pred =", pi_pred)
