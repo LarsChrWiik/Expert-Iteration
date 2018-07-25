@@ -6,6 +6,7 @@ from Matchmaking.GameHandler import match
 from Misc.DiskHandler import create_comparison_folders, create_comparison_meta_file, \
     create_comparison_files, save_comparison_result, load_trained_models
 from operator import add
+from tqdm import tqdm
 
 
 def compare_ex_it_trained(game_class, raw_players, num_matches, randomness, versions):
@@ -70,12 +71,16 @@ def start_matches(game_class, players, num_matches, randomness):
     # 2D list: [win, lose, draw]. Position = player index.
     results = [GameResult.get_new_result_list() for _ in players]
 
+    progress_bar = tqdm(range(int(num_matches)))
+    progress_bar.set_description("Matching players")
     for _ in range(num_matches):
         game_result = match(game_class, players, randomness)
         game_result_list = GameResult.get_players_result_list_(game_result)
         for i, result in enumerate(results):
             results[i] = list(map(add, result, game_result_list[i]))
         rearrange_players(players)
+        progress_bar.update(1)
+    progress_bar.close()
     return results
 
 
