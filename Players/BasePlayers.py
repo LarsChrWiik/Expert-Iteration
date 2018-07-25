@@ -20,7 +20,7 @@ class BasePlayer:
         # Unique index of the player.
         self.index = None
 
-    def move(self, state: BaseGame, randomness=False):
+    def move(self, state: BaseGame, randomness=False, verbose=False):
         raise NotImplementedError("Please Implement this method")
 
     def new_player(self):
@@ -38,10 +38,6 @@ class BasePlayer:
 class BaseExItPlayer(BasePlayer):
     """ Base player that is able to improve its strategy using Expert Iteration """
 
-    """ Exploration degree that is used in move function.
-        This allows some randomness when comparing two ExIt-algorithms. """
-    exploration_degree = 0.1
-
     def __init__(self, ex_it_algorithm: ExpertIteration):
         super().__init__()
         self.ex_it_algorithm = ex_it_algorithm
@@ -53,11 +49,10 @@ class BaseExItPlayer(BasePlayer):
     def new_player(self):
         raise NotImplementedError("Please Implement this method")
 
-    def move(self, state: BaseGame, randomness=True):
+    def move(self, state: BaseGame, randomness=False, verbose=True):
         """ Move according to the apprentice (No expert) """
         fv = state.get_feature_vector()
         pi_pred = self.ex_it_algorithm.apprentice.pred_pi(fv)
-        v_pred = self.ex_it_algorithm.apprentice.pred_v(fv)
         lm = state.get_legal_moves()
 
         # Remove PI values that are not legal moves.
@@ -65,14 +60,26 @@ class BaseExItPlayer(BasePlayer):
 
         action_index = e_greedy(
             xi=pi,
-            lm=lm,
-            e=BaseExItPlayer.exploration_degree
+            lm=lm
         )
         best_action = exploit_action(pi, lm)
 
         a = action_index if randomness else best_action
         state.advance(a)
-        return a, pi_pred, v_pred
+        if verbose:
+            print("Move-info:")
+            print("pi_pred:", pi_pred)
+            print("pi:", pi)
+            print("best_action:", best_action)
+            print("a:", a)
+        return a
+
+    def move_with_search_time(self, state: BaseGame, search_time=None):
+        if search_time is not None:
+            self.ex_it_algorithm.search_time = search_time
+        s, pi, v, t, a = self.ex_it_algorithm.ex_it_state(state)
+        state.advance(a)
+        return a
 
     def start_ex_it(self, training_timer, search_time, verbose=True):
         """ Starts Expert Iteration. NB: Time consuming process """
