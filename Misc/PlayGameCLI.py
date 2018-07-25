@@ -1,5 +1,6 @@
 
 from Misc.DiskHandler import load_model
+from Players.BasePlayers import BaseExItPlayer
 import numpy as np
 
 
@@ -41,15 +42,16 @@ def play(game_class):
         input("Press enter to play another game: ")
 
 
-def play_trained(game_class, player, version, search_time=None, always_exploit=True):
-    trained_model = load_model(
-        game_name=game_class.__name__,
-        ex_it_algorithm=player.ex_it_algorithm,
-        iteration=version
-    )
-    player.ex_it_algorithm.apprentice.set_model(trained_model)
-    player.ex_it_algorithm.search_time = search_time
-    player.ex_it_algorithm.always_exploit = always_exploit
+def play_player(game_class, player, version=None, search_time=None, always_exploit=True):
+    if isinstance(player, BaseExItPlayer) and version is not None:
+        trained_model = load_model(
+            game_name=game_class.__name__,
+            ex_it_algorithm=player.ex_it_algorithm,
+            iteration=version
+        )
+        player.ex_it_algorithm.apprentice.set_model(trained_model)
+        player.ex_it_algorithm.search_time = search_time
+        player.ex_it_algorithm.always_exploit = always_exploit
 
     while True:
         print("*** New game of " + game_class.__name__ + " ***")
@@ -79,25 +81,18 @@ def play_trained(game_class, player, version, search_time=None, always_exploit=T
                     print("ERROR: Action is not legal!")
                     print("")
                     continue
+                state.advance(a)
             else:
-                if search_time is not None:
-                    s, pi, v, t, a = player.ex_it_algorithm.ex_it_state(state)
-                    fv = state.get_feature_vector()
-                    pi_pred = player.ex_it_algorithm.apprentice.pred_pi(fv)
-                    print("pi_pred =", pi_pred)
-                    print("v =", v)
-                    print("a =", a)
+                if isinstance(player, BaseExItPlayer):
+                    if search_time is not None:
+                        a = player.move_with_search_time(state, search_time)
+                    else:
+                        a = player.move(state, randomness=False)
                 else:
-                    a, pi_pred, v_pred = player.move(state, randomness=False)
-                    print("pi_pred =", pi_pred)
-                    print("v_pred =", v_pred)
-                    print("Action taken is: " + str(a))
-                    print("")
-                    continue
+                    a = player.move(state, randomness=False)
 
             print("Action taken is: " + str(a))
             print("")
-            state.advance(a)
 
         state.display()
 
