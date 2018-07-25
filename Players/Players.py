@@ -1,6 +1,8 @@
 
 from Games.GameLogic import BaseGame
 from ExIt.Expert.Mcts import Mcts
+from ExIt.Policy import e_greedy_action
+from ExIt.Apprentice.RandomPredictor import RandomPredictor
 from ExIt.Apprentice.Nn import Nn
 from ExIt.Expert.Minimax import Minimax
 from ExIt.Expert.Mcts import Mcts
@@ -18,11 +20,38 @@ class RandomPlayer(BasePlayer):
         super().__init__()
         self.__name__ = type(self).__name__
 
-    def move(self, state: BaseGame, randomness=False):
+    def move(self, state: BaseGame, randomness=False, verbose=False):
         return self.move_random(state), None, None
 
     def new_player(self):
         return RandomPlayer()
+
+
+class StaticMinimaxPlayer(BasePlayer):
+    """ Static Minimax Player with a fixed depth """
+
+    def __init__(self, depth=2):
+        super().__init__()
+        self.depth = depth
+        self.minimax = Minimax(fixed_depth=depth)
+        self.predictor = RandomPredictor()
+        self.__name__ = type(self).__name__ + "_depth-" + str(depth)
+
+    def move(self, state: BaseGame, randomness=False, verbose=False):
+        a, best_a, v = self.minimax.search(
+            state=state,
+            predictor=self.predictor,
+            search_time=None,
+            always_exploit=True
+        )
+        if randomness:
+            state.advance(a)
+            return a
+        state.advance(best_a)
+        return best_a
+
+    def new_player(self):
+        return StaticMinimaxPlayer(depth=self.depth)
 
 
 class NnMctsPlayer(BaseExItPlayer):
