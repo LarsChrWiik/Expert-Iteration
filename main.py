@@ -42,16 +42,14 @@ game_class = ConnectFour
 # Players to compare.
 players = [
     RandomPlayer(),
-    #NnMctsPlayer(),
-    #NnMinimaxPlayer(),
+    NnMctsPlayer(),
     NnAlphaBetaPlayer(),
-    NnAlphaBetaPlayer(use_custom_loss=True)
 ]
 # Search time for each player.
-search_time = get_seconds(s=0.2)
+search_time = get_seconds(s=0.05)
 
 # Total time for each player to self-train.
-time_limit = get_seconds(m=10)
+time_limit = get_seconds(m=1)
 # Number of versions to be trained.
 num_versions = 10
 # Timer. NB: Each version is trained for time_limit / num_versions time).
@@ -77,16 +75,20 @@ def main():
     """
     #plot_elo()
     #comparison_from_scratch()
-    comparison_trained()
+    #comparison_trained()
+    pipeline()
 
 
 def pipeline():
     # Train.
-    #self_play_and_store_versions(game_class, players, search_time, training_timer)
+    self_play_and_store_versions(game_class, players, search_time, training_timer)
     # Tournament.
     start_elo_tournament(game_class, players, num_versions, num_elo_matches, match_randomness)
 
 
+def plot_elo():
+    from Misc.Plotter import plot_elo_ratings
+    plot_elo_ratings(ConnectFour, num_versions)
 
 
 
@@ -101,11 +103,6 @@ def train_and_store():
         search_time,
         training_timer
     )
-
-
-def plot_elo():
-    from Misc.Plotter import plot_elo_ratings
-    plot_elo_ratings(ConnectFour, num_versions)
 
 
 def comparison_from_scratch():
