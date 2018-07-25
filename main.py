@@ -8,7 +8,7 @@ from Misc.Training import self_play_and_store_versions
 from Misc.TrainingTimer import get_seconds
 from Misc.TrainingTimer import TrainingTimer
 from ExIt.Policy import Policy
-from Misc.PlayGameCLI import play, play_trained
+from Misc.PlayGameCLI import play, play_player
 import numpy as np
 np.set_printoptions(suppress=True)
 
@@ -42,19 +42,19 @@ game_class = ConnectFour
 # Players to compare.
 players = [
     RandomPlayer(),
-    NnMctsPlayer(),
-    NnMinimaxPlayer(),
-    NnAlphaBetaPlayer()
-
+    #NnMctsPlayer(),
+    #NnMinimaxPlayer(),
+    NnAlphaBetaPlayer(),
+    NnAlphaBetaPlayer(use_custom_loss=True)
 ]
 # Search time for each player.
-search_time = get_seconds(ms=50)
+search_time = get_seconds(s=0.2)
 
 # Total time for each player to self-train.
-time_limit = get_seconds(h=1)
+time_limit = get_seconds(m=10)
 # Number of versions to be trained.
-num_versions = 20
-# Timer. NB: Each version is trained for time_limit / num_versions time)
+num_versions = 10
+# Timer. NB: Each version is trained for time_limit / num_versions time).
 training_timer = TrainingTimer(time_limit, num_versions)
 
 # Number of matches to compare the players. This is used to calculate Elo.
@@ -67,9 +67,17 @@ match_randomness = True
 
 
 def main():
-    #play_trained(game_class=ConnectFour, player=NnAlphaBetaPlayer(), version=20)
+    """
+    play_player(
+        game_class=ConnectFour,
+        player=StaticMinimaxPlayer(),
+        search_time=1.0,
+        version=10
+    )
+    """
     #plot_elo()
-    pipeline()
+    #comparison_from_scratch()
+    comparison_trained()
 
 
 def pipeline():
@@ -103,26 +111,26 @@ def plot_elo():
 def comparison_from_scratch():
     from Matchmaking.Comparison1v1 import compare_ex_it_from_scratch
     # Run Comparison with several iteration of self-play.
-    players = [NnAlphaBetaPlayer(), RandomPlayer()]
+    players = [NnAlphaBetaPlayer(), StaticMinimaxPlayer()]
 
     compare_ex_it_from_scratch(
-        game_class=TicTacToe,
+        game_class=ConnectFour,
         players=players,
         search_time=search_time,
-        num_matches=1000,
+        num_matches=100,
         training_timer=training_timer,
-        randomness=False # <---------------------------------- Remember!
+        randomness=True # <---------------------------------- Remember!
     )
 
 
 def comparison_trained():
     from Matchmaking.Comparison1v1 import compare_ex_it_trained
-    players = [NnMctsPlayer(), RandomPlayer()]
+    players = [NnAlphaBetaPlayer(), StaticMinimaxPlayer()]
     versions = range(10)
     compare_ex_it_trained(
-        game_class=TicTacToe,
+        game_class=ConnectFour,
         raw_players=players,
-        num_matches=1000,
+        num_matches=100,
         randomness=False,  # <---------------------------------- Remember!
         versions=versions
     )
