@@ -1,5 +1,5 @@
 
-from Players.Players import BasePlayer
+from Players.Players import BasePlayer, BaseExItPlayer
 from Games.GameLogic import GameResult, BaseGame
 
 
@@ -56,7 +56,12 @@ class GameHandler:
         state = self.game_class()
         while not state.is_game_over():
             turn = state.turn
-            a, p, v = self.players[state.turn].move(state, randomness=self.randomness)
+            player = self.players[state.turn]
+            p, v = None, None
+            if isinstance(player, BaseExItPlayer):
+                p = player.ex_it_algorithm.apprentice.pred_pi(state.get_feature_vector())
+                v = player.ex_it_algorithm.apprentice.pred_v(state.get_feature_vector())
+            a = self.players[state.turn].move(state, randomness=self.randomness, verbose=False)
             self.update_movetext(a, turn, p, v)
             self.last_turn = turn
         self.update_movetext_result(state)
