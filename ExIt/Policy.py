@@ -4,6 +4,10 @@ import numpy as np
 import random
 
 
+# Used for E-greedy.
+exploration_degree = 0.1
+
+
 def exploit_action(values, lm):
     """ EXPLOIT.
         Assumes that 'values' has removed moves that are not legal.
@@ -19,13 +23,23 @@ def explore_proportional(values, lm):
     return np.random.choice(a=lm, size=1, p=p)[0]
 
 
-def e_greedy(xi, lm, e):
+def e_greedy(xi, lm, e=None):
     """ Assumes that PI has removed moves that are not legal.
         Also assumes that the index of pi and legal_moves corresponds. """
+    if e is None:
+        e = exploration_degree
     best_action = exploit_action(xi, lm)
     if random.uniform(0, 1) < e:
         return random.choice(lm)
     return best_action
+
+
+def e_greedy_action(a, a_best, e=None):
+    if e is None:
+        e = exploration_degree
+    if random.uniform(0, 1) < e:
+        return a
+    return a_best
 
 
 def explore_proportional_with_guidance(values, guide_values, lm, guide_percent=0.1):
