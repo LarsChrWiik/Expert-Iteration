@@ -84,21 +84,25 @@ class ExpertIteration:
                 self.__search_time += self.growing_search
             self.games_generated = 0
             state = self.game_class()
-            s_array, p_array, v_array = self.ex_it_game(state)
+            s_array, p_array, v_array = self.ex_it_game(state, training_timer)
 
-            # Store game history samples.
-            self.memory.save(
-                s_array=s_array,
-                p_array=p_array,
-                v_array=v_array
-            )
+            # If the time is up, don't train since it will result in an unfair advantage.
+            if training_timer.has_time_left():
+                # Store game history samples.
+                self.memory.save(
+                    s_array=s_array,
+                    p_array=p_array,
+                    v_array=v_array
+                )
 
-            # Train on mini-batches.
-            for _ in range(self.games_generated):
-                X_s, Y_p, Y_v = self.memory.get_batch()
-                pi_loss, v_loss = self.apprentice.train(X_s=X_s, Y_p=Y_p, Y_v=Y_v)
-                if verbose:
-                    return pi_loss, v_loss
+                # Train on mini-batches.
+                for _ in range(self.games_generated):
+                    X_s, Y_p, Y_v = self.memory.get_batch()
+                    pi_loss, v_loss = self.apprentice.train(X_s=X_s, Y_p=Y_p, Y_v=Y_v)
+                    if verbose:
+                        return pi_loss, v_loss
+            else:
+                return None, None
 
         if verbose:
             training_timer.start_new_lap()
@@ -106,14 +110,16 @@ class ExpertIteration:
             progress_bar.set_description("Training " + self.__name__)
             while training_timer.has_time_left():
                 pi_loss, v_loss = self_play()
-                # Update progress bar.
                 progress_bar.update(training_timer.get_time_since_last_check())
+                if not training_timer.has_time_left():
+                    break
+                # Update progress bar.
                 progress_bar.set_postfix(
                     memory_size='%d' % self.memory.get_size(),
                     games_generated='%d' % self.games_generated,
-                    pi_loss='%01.2f' % pi_loss,
-                    v_loss='%01.2f' % v_loss,
-                    search_time='%01.3f' % self.__search_time
+                    pi_loss='%.2f' % pi_loss,
+                    v_loss='%.2f' % v_loss,
+                    search_time='%.4f' % self.__search_time
                 )
             progress_bar.close()
         else:
@@ -121,11 +127,13 @@ class ExpertIteration:
             while training_timer.has_time_left():
                 self_play()
 
-    def ex_it_game(self, state):
+    def ex_it_game(self, state, training_timer=None):
         s_array, pi_array, v_array, turn_array = [], [], [], []
         state_copies = []
 
         while not state.is_game_over():
+            if training_timer is not None and not training_timer.has_time_left():
+                return None, None, None
             s, pi, v, t, a = self.ex_it_state(state)
 
             if random.uniform(0, 1) < self.state_branch_degree:
