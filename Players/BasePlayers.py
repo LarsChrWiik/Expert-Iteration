@@ -46,6 +46,9 @@ class BaseExItPlayer(BasePlayer):
     def set_game(self, game_class):
         self.ex_it_algorithm.set_game(game_class)
 
+    def set_search_time(self, search_time):
+        self.ex_it_algorithm.set_search_time(search_time)
+
     def new_player(self):
         raise NotImplementedError("Please Implement this method")
 
@@ -76,15 +79,14 @@ class BaseExItPlayer(BasePlayer):
 
     def move_with_search_time(self, state: BaseGame, search_time=None):
         if search_time is not None:
-            self.ex_it_algorithm.search_time = search_time
+            self.ex_it_algorithm.set_search_time(search_time)
         s, pi, v, t, a = self.ex_it_algorithm.ex_it_state(state)
         state.advance(a)
         return a
 
-    def start_ex_it(self, training_timer, search_time, verbose=True):
+    def start_ex_it(self, training_timer, verbose=True):
         """ Starts Expert Iteration. NB: Time consuming process """
         self.ex_it_algorithm.start_ex_it(
             training_timer=training_timer,
-            search_time=search_time,
             verbose=verbose
         )

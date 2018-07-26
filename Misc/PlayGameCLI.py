@@ -50,7 +50,7 @@ def play_player(game_class, player, version=None, search_time=None, always_explo
             iteration=version
         )
         player.ex_it_algorithm.apprentice.set_model(trained_model)
-        player.ex_it_algorithm.search_time = search_time
+        player.ex_it_algorithm.set_search_time(search_time)
         player.ex_it_algorithm.always_exploit = always_exploit
 
     while True:

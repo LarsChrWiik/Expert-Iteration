@@ -42,14 +42,14 @@ game_class = ConnectFour
 # Players to compare.
 players = [
     RandomPlayer(),
-    NnMctsPlayer(),
     NnAlphaBetaPlayer(),
+    NnAbGrowingSearchTimePlayer()
 ]
 # Search time for each player.
-search_time = get_seconds(s=0.05)
+search_time = get_seconds(s=1.0)
 
 # Total time for each player to self-train.
-time_limit = get_seconds(m=1)
+time_limit = get_seconds(h=1)
 # Number of versions to be trained.
 num_versions = 10
 # Timer. NB: Each version is trained for time_limit / num_versions time).
@@ -65,18 +65,11 @@ match_randomness = True
 
 
 def main():
-    """
-    play_player(
-        game_class=ConnectFour,
-        player=StaticMinimaxPlayer(),
-        search_time=1.0,
-        version=10
-    )
-    """
-    #plot_elo()
-    #comparison_from_scratch()
-    #comparison_trained()
     pipeline()
+    #plot_elo()
+    #comparison_trained()
+    #comparison_from_scratch()
+    #test_play()
 
 
 def pipeline():
@@ -95,6 +88,15 @@ def plot_elo():
 # TODO: Remove everything below later. (Used for testing).
 
 
+def test_play():
+    play_player(
+        game_class=ConnectFour,
+        player=NnAlphaBetaPlayer(),
+        search_time=None,
+        version=20
+    )
+
+
 def train_and_store():
     players = [NnAlphaBetaPlayer(), RandomPlayer()]
     self_play_and_store_versions(
@@ -108,7 +110,7 @@ def train_and_store():
 def comparison_from_scratch():
     from Matchmaking.Comparison1v1 import compare_ex_it_from_scratch
     # Run Comparison with several iteration of self-play.
-    players = [NnAlphaBetaPlayer(), StaticMinimaxPlayer()]
+    players = [NnAlphaBetaPlayer(), RandomPlayer()]
 
     compare_ex_it_from_scratch(
         game_class=ConnectFour,
@@ -123,12 +125,12 @@ def comparison_from_scratch():
 def comparison_trained():
     from Matchmaking.Comparison1v1 import compare_ex_it_trained
     players = [NnAlphaBetaPlayer(), StaticMinimaxPlayer()]
-    versions = range(10)
+    versions = range(20)
     compare_ex_it_trained(
         game_class=ConnectFour,
         raw_players=players,
         num_matches=100,
-        randomness=False,  # <---------------------------------- Remember!
+        randomness=True,  # <---------------------------------- Remember!
         versions=versions
     )
 
@@ -149,10 +151,9 @@ def normal_exit_test():
     # Run One iteration of self.play
     player = NnMctsPlayer()
     player.set_game(game_class=TicTacToe)
-    player.start_ex_it(
-        training_timer=training_timer,
-        search_time=search_time
-    )
+    if player.ex_it_algorithm.growing_search is None:
+        player.set_search_time(search_time)
+    player.start_ex_it(training_timer)
 
     # Display the agents calculations in predefined scenarios.
     debug_display_win_moves(player)

@@ -93,7 +93,7 @@ class NnMinimaxPlayer(BaseExItPlayer):
 
 
 class NnAlphaBetaPlayer(BaseExItPlayer):
-    """ Player that uses Minimax as expert and NN as apprentice """
+    """ Player that uses Alpha-Beta search as expert and NN as apprentice """
 
     def __init__(self, fixed_depth=None, policy=Policy.OFF, use_custom_loss=False):
         super().__init__(
@@ -109,6 +109,26 @@ class NnAlphaBetaPlayer(BaseExItPlayer):
 
     def new_player(self):
         return NnAlphaBetaPlayer(fixed_depth=self.fixed_depth, policy=self.policy, use_custom_loss=self.use_custom_loss)
+
+
+class NnAbGrowingSearchTimePlayer(BaseExItPlayer):
+    """ Player that uses Minimax as expert and NN as apprentice """
+
+    def __init__(self, policy=Policy.OFF, growing_search=0.0005):
+        super().__init__(
+            ex_it_algorithm=ExpertIteration(
+                apprentice=Nn(),
+                expert=Minimax(use_alpha_beta=True),
+                policy=policy,
+                growing_search=growing_search
+            )
+        )
+        self.policy = policy
+        self.growing_search = growing_search
+        self.set_search_time(0.0)
+
+    def new_player(self):
+        return NnAbGrowingSearchTimePlayer(policy=self.policy, growing_search=self.growing_search)
 
 
 class NnAbBranch(BaseExItPlayer):

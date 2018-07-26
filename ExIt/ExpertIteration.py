@@ -38,20 +38,23 @@ def add_different_advance(state, best_action, state_copies):
 class ExpertIteration:
 
     def __init__(self, apprentice: BaseApprentice, expert: BaseExpert, policy=Policy.OFF,
-                 always_exploit=False, memory=MemoryList(), branch_prob=0.0):
+                 always_exploit=False, memory=MemoryList(), branch_prob=0.0, growing_search=None):
         self.apprentice = apprentice
         self.expert = expert
         self.memory = memory
-        self.search_time = None
+        self.__search_time = None
         self.game_class = None
         self.games_generated = 0
         self.state_branch_degree = branch_prob
         self.policy = policy
         self.always_exploit = always_exploit
+        self.growing_search = growing_search
         # Set name.
         extra_name = ""
         if self.apprentice.use_custom_loss:
-            extra_name += "_custom-loss"
+            extra_name += "_Custom-loss"
+        if self.growing_search is not None:
+            extra_name += "_Growing-search"
         if not (isinstance(memory, MemoryList) and branch_prob == 0.0):
             extra_name += "_" + type(self.memory).__name__ + "_Branch-" + str(branch_prob)
         if always_exploit:
@@ -66,12 +69,16 @@ class ExpertIteration:
             pi_size=game_class().num_actions
         )
 
-    def start_ex_it(self, training_timer, search_time: float, verbose=True):
+    def set_search_time(self, search_time):
+        self.__search_time = search_time
+
+    def start_ex_it(self, training_timer, verbose=True):
         """ Start Expert Iteration to master the given game.
             This process is time consuming. """
-        self.search_time = search_time
 
         def self_play():
+            if self.growing_search is not None:
+                self.__search_time += self.growing_search
             self.games_generated = 0
             state = self.game_class()
             s_array, p_array, v_array = self.ex_it_game(state)
@@ -148,7 +155,7 @@ class ExpertIteration:
     def ex_it_state(self, state: BaseGame):
         """ Expert Iteration for a given state """
         a, a_best, v = self.expert.search(
-            state, self.apprentice, self.search_time, self.always_exploit
+            state, self.apprentice, self.__search_time, self.always_exploit
         )
         s, pi, t = generate_sample(state, a_best if self.policy == Policy.OFF else a)
         return s, pi, v, t, a

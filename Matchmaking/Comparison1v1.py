@@ -42,11 +42,13 @@ def compare_ex_it_from_scratch(game_class, players, search_time,
     create_comparison_meta_file(base_path, players, num_matches, training_timer, search_time)
     create_comparison_files(base_path, players)
 
-    # Let the players know which game they are playing.
+    # Let the players know which game they are playing and what search time to use.
     for p in players:
         if isinstance(p, BaseExItPlayer):
             if p.ex_it_algorithm.apprentice.model is None:
                 p.set_game(game_class)
+                if p.ex_it_algorithm.growing_search is None:
+                    p.set_search_time(search_time)
 
     """ Compare players through several iterations of self-play.
         This process accepts non-ExIt player as well such as RandomPlayer. """
@@ -54,10 +56,7 @@ def compare_ex_it_from_scratch(game_class, players, search_time,
         # Let BaseExItPlayers train.
         for player in players:
             if isinstance(player, BaseExItPlayer):
-                player.start_ex_it(
-                    training_timer=training_timer,
-                    search_time=search_time
-                )
+                player.start_ex_it(training_timer)
         # Start match and get results.
         results_list = start_matches(game_class, players, num_matches, randomness)
         for p_index, results in enumerate(results_list):
