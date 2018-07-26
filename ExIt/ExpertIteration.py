@@ -38,10 +38,13 @@ def add_different_advance(state, best_action, state_copies):
 class ExpertIteration:
 
     def __init__(self, apprentice: BaseApprentice, expert: BaseExpert, policy=Policy.OFF,
-                 always_exploit=False, memory=MemoryList(), branch_prob=0.0, growing_search=None):
+                 always_exploit=False, memory=None, branch_prob=0.0, growing_search=None):
         self.apprentice = apprentice
         self.expert = expert
-        self.memory = memory
+        if memory is None:
+            self.memory = MemoryList()
+        else:
+            self.memory = memory
         self.__search_time = None
         self.game_class = None
         self.games_generated = 0
@@ -55,7 +58,7 @@ class ExpertIteration:
             extra_name += "_Custom-loss"
         if self.growing_search is not None:
             extra_name += "_Search-grow-" + str(growing_search)
-        if not (isinstance(memory, MemoryList) and branch_prob == 0.0):
+        if not (isinstance(self.memory, MemoryList) and branch_prob == 0.0):
             extra_name += "_" + type(self.memory).__name__ + "_Branch-" + str(branch_prob)
         if always_exploit:
             extra_name += "_Exploit"
