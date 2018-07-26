@@ -43,7 +43,7 @@ game_class = ConnectFour
 players = [
     RandomPlayer(),
     NnAlphaBetaPlayer(),
-    NnAbGrowingSearchTimePlayer()
+    NnMctsPlayer()
 ]
 # Search time for each player.
 search_time = get_seconds(s=1.0)
