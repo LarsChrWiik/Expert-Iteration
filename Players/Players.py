@@ -111,7 +111,7 @@ class NnAlphaBetaPlayer(BaseExItPlayer):
         return NnAlphaBetaPlayer(fixed_depth=self.fixed_depth, policy=self.policy, use_custom_loss=self.use_custom_loss)
 
 
-class LarsPlayer(BaseExItPlayer):
+class NnAbBranch(BaseExItPlayer):
     """ Player that uses Minimax as expert and NN as apprentice """
 
     def __init__(self, fixed_depth=None, branch_prob=0.25, use_custom_loss=False):
@@ -130,10 +130,10 @@ class LarsPlayer(BaseExItPlayer):
         self.use_custom_loss = use_custom_loss
 
     def new_player(self):
-        return LarsPlayer(fixed_depth=self.fixed_depth, branch_prob=self.branch_prob, use_custom_loss=self.use_custom_loss)
+        return NnAbBranch(fixed_depth=self.fixed_depth, branch_prob=self.branch_prob, use_custom_loss=self.use_custom_loss)
 
 
-class LarsPlayer2(BaseExItPlayer):
+class NnMctsBranch(BaseExItPlayer):
     """ Player that uses Minimax as expert and NN as apprentice """
 
     def __init__(self, c=sqrt(2), branch_prob=0.25, use_custom_loss=False):
@@ -152,10 +152,10 @@ class LarsPlayer2(BaseExItPlayer):
         self.use_custom_loss = use_custom_loss
 
     def new_player(self):
-        return LarsPlayer2(c=self.c, branch_prob=self.branch_prob, use_custom_loss=self.use_custom_loss)
+        return NnMctsBranch(c=self.c, branch_prob=self.branch_prob, use_custom_loss=self.use_custom_loss)
 
 
-class LarsPlayer3(BaseExItPlayer):
+class NnMinimaxBranch(BaseExItPlayer):
     """ Player that uses Minimax as expert and NN as apprentice """
 
     def __init__(self):
@@ -168,5 +168,5 @@ class LarsPlayer3(BaseExItPlayer):
         )
 
     def new_player(self):
-        return LarsPlayer3()
+        return NnMinimaxBranch()
 
