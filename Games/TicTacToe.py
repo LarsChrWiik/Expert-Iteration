@@ -84,7 +84,7 @@ class TicTacToe(BaseGame):
             if x == 0: char_board += '-'
             if x == 1: char_board += 'x'
             if x == 2: char_board += 'o'
-        print("*** Print of TicTacToe game ***")
+        print("*** Print of " + str(type(self).__name__) + " game ***")
         print(char_board[:3])
         print(char_board[3:6])
         print(char_board[-3:])

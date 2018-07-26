@@ -133,7 +133,7 @@ class ConnectFour(BaseGame):
             if x == 0: char_board += '-'
             if x == 1: char_board += 'x'
             if x == 2: char_board += 'o'
-        print("*** Print of TicTacToe game ***")
+        print("*** Print of " + str(type(self).__name__) + " game ***")
         c = ConnectFour.columns
         for r in range(c):
             print(char_board[r*c:r*c + c])
