@@ -54,7 +54,7 @@ class ExpertIteration:
         if self.apprentice.use_custom_loss:
             extra_name += "_Custom-loss"
         if self.growing_search is not None:
-            extra_name += "_Growing-search"
+            extra_name += "_search-grow-" + str(growing_search)
         if not (isinstance(memory, MemoryList) and branch_prob == 0.0):
             extra_name += "_" + type(self.memory).__name__ + "_Branch-" + str(branch_prob)
         if always_exploit:
@@ -109,7 +109,8 @@ class ExpertIteration:
                     memory_size='%d' % self.memory.get_size(),
                     games_generated='%d' % self.games_generated,
                     pi_loss='%01.2f' % pi_loss,
-                    v_loss='%01.2f' % v_loss
+                    v_loss='%01.2f' % v_loss,
+                    search_time='%01.3f' % self.__search_time
                 )
             progress_bar.close()
         else:
