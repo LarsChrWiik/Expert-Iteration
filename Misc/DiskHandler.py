@@ -43,7 +43,7 @@ def load_trained_models(game_class, raw_players, versions):
             for v in versions:
                 version = v+1
                 new_player = p.new_player()
-                new_player.__name__ = "ExIt_" + str(version) + "_" + new_player.__name__
+                new_player.__name__ = new_player.__name__ + "_" + str(version)
                 trained_model = load_model(
                     game_name=game_class.__name__,
                     ex_it_algorithm=new_player.ex_it_algorithm,
@@ -70,13 +70,25 @@ def create_elo_folders(game_class):
     return base_path
 
 
-def create_elo_meta_file(base_path, game_class, raw_players, num_matches, num_versions, randomness):
+def create_elo_meta_file(base_path, game_class, raw_players, num_matches, num_versions, randomness, total_train_time):
     with open(base_path + "/meta.txt", 'x') as file:
         file.write("Datetime = " + str(datetime.now().strftime('%Y-%m-%d___%H:%M:%S')) + "\n")
         file.write("Game = " + game_class.__name__ + "\n")
         file.write("Randomness = " + str(randomness) + "\n")
         file.write("Number of versions = " + str(num_versions) + "\n")
         file.write("Number of matches = " + str(num_matches) + "\n")
+        file.write("\n")
+        file.write("Training time pr version:\n")
+        for i, (name, time) in enumerate(total_train_time):
+            file.write(str(name))
+            if i < len(total_train_time) - 1:
+                file.write(", ")
+        file.write("\n")
+        for i, (name, time) in enumerate(total_train_time):
+            file.write(str(time))
+            if i < len(total_train_time) - 1:
+                file.write(", ")
+        file.write("\n")
         file.write("\n")
         file.write("Players: \n")
         for i, p in enumerate(raw_players):
@@ -106,7 +118,7 @@ def read_ratings(game_class):
                 continue
             words = line.split()
             if words[1].startswith("ExIt"):
-                version = re.findall(r'\d+', str(words[1]))[0]
+                version = re.findall(r'\d+', str(words[1]))[-1]
                 version = int(version)
             else:
                 version = 1
@@ -135,7 +147,7 @@ def read_ratings(game_class):
 
             if words[1].startswith("ExIt"):
                 # This will remove the model number and one underline "_" from the name.
-                player_name = str(words[1][0:5]) + str(words[1][6+len(str(version)):])
+                player_name = words[1][0:-len(str(version))-1]
                 add_info(player_name, info)
             else:
                 player_name = words[1]
@@ -158,6 +170,34 @@ def read_ratings(game_class):
         tournament = [dic for elo, dic in t3]
 
         return tournament
+
+
+def load_train_version_time(game_class, raw_players):
+    version_times = []
+    for p in raw_players:
+        vt = None
+        if isinstance(p, BaseExItPlayer):
+            base_path = "./Trained_models/" + game_class.__name__ + "/" + p.__name__
+            with open(base_path + "/meta.txt", 'r') as file:
+                lines = [line for line in file]
+                version_time = re.findall("\d+\.\d+", str(lines[3]))[0]
+                vt = version_time
+        version_times.append((p.__name__, vt))
+    return version_times
+
+
+def load_elo_version_time(game_class):
+    path = "./Elo/" + game_class.__name__ + "/meta.txt"
+    version_times_dict = {}
+    with open(path, 'r') as file:
+        lines = [line for line in file]
+        players = lines[7].rstrip()
+        players = players.split(", ")
+        version_times = lines[8].rstrip()
+        version_times = version_times.split(", ")
+        for p, vt in zip(players, version_times):
+            version_times_dict[p] = 0 if vt == "None" else float(vt)
+    return version_times_dict
 
 
 # ******************** TRAINING ********************
