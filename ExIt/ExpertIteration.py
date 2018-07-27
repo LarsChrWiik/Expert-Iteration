@@ -62,7 +62,7 @@ class ExpertIteration:
             extra_name += "_" + type(self.memory).__name__ + "_Branch-" + str(branch_prob)
         if always_exploit:
             extra_name += "_Exploit"
-        self.__name__ = str(type(self.apprentice).__name__) + "_" + str(self.expert.__name__) \
+        self.__name__ = "ExIt_" + str(type(self.apprentice).__name__) + "_" + str(self.expert.__name__) \
                         + "_" + str(self.policy.value) + extra_name
 
     def set_game(self, game_class):
