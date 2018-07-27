@@ -6,7 +6,7 @@ import numpy as np
 import csv
 
 
-def add_y_margins_inside(ax, max_time, tournament_count, y_scale):
+def add_y_margins_inside(ax, max_time, num_versions, y_scale):
     bottom = ax.get_ylim()[0]
     top = ax.get_ylim()[1]
 
@@ -14,7 +14,7 @@ def add_y_margins_inside(ax, max_time, tournament_count, y_scale):
     y_difference = y * y_scale
 
     ax.set_ylim(bottom=bottom-y_difference, top=top+y_difference)
-    ax.set_xlim(0, max_time + (max_time / (tournament_count + 1)))
+    ax.set_xlim(0, max_time + (max_time / num_versions))
 
 
 def plot_elo_ratings(game_class, num_versions):
@@ -56,7 +56,7 @@ def plot_elo_ratings(game_class, num_versions):
 
     ax.set(ylabel='Elo Rating', xlabel='Training ' + unit_label)
     plt.subplots_adjust(top=0.9 - len(tournament) * 0.04, bottom=0.15)
-    add_y_margins_inside(ax, max_time, len(tournament), y_scale=0.1)
+    add_y_margins_inside(ax, max_time, num_versions, y_scale=0.1)
 
     # Legend above the diagram.
     ax.legend(
