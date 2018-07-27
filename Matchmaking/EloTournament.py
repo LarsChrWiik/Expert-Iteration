@@ -2,7 +2,7 @@
 from Players.BasePlayers import BasePlayer, BaseExItPlayer
 from Matchmaking.GameHandler import GameHandler
 from Misc.DiskHandler import create_elo_folders, save_game_to_pgn, \
-    load_trained_models, create_elo_meta_file
+    load_trained_models, create_elo_meta_file, load_train_version_time
 from tqdm import tqdm, trange
 import random
 
@@ -11,11 +11,10 @@ def start_elo_tournament(game_class, raw_players, num_versions, num_matches, ran
     """ Match players in a tournament and writes matches to PGN files """
 
     base_path = create_elo_folders(game_class)
-
+    total_train_time = load_train_version_time(game_class, raw_players)
+    create_elo_meta_file(base_path, game_class, raw_players, num_matches, num_versions, randomness, total_train_time)
     players = load_trained_models(game_class, raw_players, range(num_versions))
     player_indexes = range(len(players))
-
-    create_elo_meta_file(base_path, game_class, raw_players, num_matches, num_versions, randomness)
 
     # Match players with all permutations 'num_matches' times.
     progress_bar = tqdm(range(num_matches))
