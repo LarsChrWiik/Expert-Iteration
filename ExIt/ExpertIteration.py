@@ -169,5 +169,10 @@ class ExpertIteration:
         a, a_best, v = self.expert.search(
             state, self.apprentice, self.__search_time, self.always_exploit
         )
-        s, pi, t = generate_sample(state, a_best if self.policy == Policy.OFF else a)
+        if self.policy == Policy.OFF:
+            # Store best action.
+            s, pi, t = generate_sample(state, a_best)
+        else:
+            # Store action that was made in the game.
+            s, pi, t = generate_sample(state, a)
         return s, pi, v, t, a
