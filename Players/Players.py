@@ -134,7 +134,7 @@ class NnAbGrowingSearchTimePlayer(BaseExItPlayer):
 class NnAbBranch(BaseExItPlayer):
     """ Player that uses Minimax as expert and NN as apprentice """
 
-    def __init__(self, fixed_depth=None, branch_prob=0.25, use_custom_loss=False):
+    def __init__(self, fixed_depth=None, branch_prob=0.05, use_custom_loss=False):
         super().__init__(
             ex_it_algorithm=ExpertIteration(
                 apprentice=Nn(use_custom_loss=use_custom_loss),
@@ -173,20 +173,4 @@ class NnMctsBranch(BaseExItPlayer):
 
     def new_player(self):
         return NnMctsBranch(c=self.c, branch_prob=self.branch_prob, use_custom_loss=self.use_custom_loss)
-
-
-class NnMinimaxBranch(BaseExItPlayer):
-    """ Player that uses Minimax as expert and NN as apprentice """
-
-    def __init__(self):
-        super().__init__(
-            ex_it_algorithm=ExpertIteration(
-                apprentice=Nn(),
-                expert=Minimax(switch=True),
-                policy=Policy.OFF
-            )
-        )
-
-    def new_player(self):
-        return NnMinimaxBranch()
 
