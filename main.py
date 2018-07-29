@@ -42,16 +42,16 @@ game_class = ConnectFour
 # Players to compare.
 players = [
     RandomPlayer(),
-    NnAlphaBetaPlayer(),
-    NnMctsPlayer()
+    NnAbGrowSearchPlayer(),
+    NnAbGrowSearchGrowMemPlayer()
 ]
 # Search time for each player.
-search_time = get_seconds(s=1.0)
+search_time = get_seconds(s=0.25)
 
 # Total time for each player to self-train.
-time_limit = get_seconds(h=1)
+time_limit = get_seconds(h=4)
 # Number of versions to be trained.
-num_versions = 10
+num_versions = 20
 # Timer. NB: Each version is trained for time_limit / num_versions time).
 training_timer = TrainingTimer(time_limit, num_versions)
 
@@ -110,7 +110,7 @@ def train_and_store():
 def comparison_from_scratch():
     from Matchmaking.Comparison1v1 import compare_ex_it_from_scratch
     # Run Comparison with several iteration of self-play.
-    players = [NnAlphaBetaPlayer(), RandomPlayer()]
+    players = [NnAbGrowSearchGrowMemPlayer(), NnAbGrowSearchPlayer()]
 
     compare_ex_it_from_scratch(
         game_class=ConnectFour,
@@ -125,7 +125,7 @@ def comparison_from_scratch():
 def comparison_trained():
     from Matchmaking.Comparison1v1 import compare_ex_it_trained
     players = [NnAlphaBetaPlayer(), StaticMinimaxPlayer()]
-    versions = range(20)
+    versions = [17, 18, 19]#range(20)
     compare_ex_it_trained(
         game_class=ConnectFour,
         raw_players=players,
