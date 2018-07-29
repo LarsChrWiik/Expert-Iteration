@@ -8,7 +8,7 @@ from ExIt.Expert.Minimax import Minimax
 from ExIt.Expert.Mcts import Mcts
 from ExIt.ExpertIteration import ExpertIteration
 from Players.BasePlayers import BasePlayer, BaseExItPlayer
-from ExIt.Memory import MemoryList, MemorySet
+from ExIt.Memory import MemoryList, MemorySet, MemoryListGrowing
 from ExIt.Policy import Policy
 from math import sqrt
 
@@ -175,6 +175,28 @@ class NnAbBranchGrowingSearchTimePlayer(BaseExItPlayer):
 
     def new_player(self):
         return NnAbBranchGrowingSearchTimePlayer(
-            policy=self.policy, branch_prob=self.branch_prob, growing_search=self.growing_search
+            policy=self.policy, branch_prob = self.branch_prob, growing_search = self.growing_search
         )
 
+
+class NnAbGrowingSearchTimeGrowingMemoryPlayer(BaseExItPlayer):
+    """ Player that uses Minimax as expert and NN as apprentice """
+
+    def __init__(self, policy=Policy.OFF, growing_search=0.0001):
+        super().__init__(
+            ex_it_algorithm=ExpertIteration(
+                apprentice=Nn(),
+                expert=Minimax(use_alpha_beta=True),
+                policy=policy,
+                memory=MemoryListGrowing(),
+                growing_search=growing_search
+            )
+        )
+        self.policy = policy
+        self.growing_search = growing_search
+        self.set_search_time(0.0)
+
+    def new_player(self):
+        return NnAbGrowingSearchTimeGrowingMemoryPlayer(
+            policy=self.policy, growing_search=self.growing_search
+        )
