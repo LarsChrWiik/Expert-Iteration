@@ -2,7 +2,7 @@
 from ExIt.Apprentice import BaseApprentice
 from ExIt.Expert import BaseExpert
 from Games.GameLogic import BaseGame
-from ExIt.Memory import MemoryList
+from ExIt.Memory import MemoryList, MemoryListGrowing
 from ExIt.Policy import Policy
 from tqdm import tqdm
 import numpy as np
@@ -60,6 +60,8 @@ class ExpertIteration:
             extra_name += "_Grow-" + str(growing_search)
         if not (isinstance(self.memory, MemoryList) and branch_prob == 0.0):
             extra_name += "_Branch-" + str(branch_prob)
+        if isinstance(self.memory, MemoryListGrowing):
+            extra_name += "_MemGrow"
         if always_exploit:
             extra_name += "_Exploit"
         self.__name__ = "ExIt_" + str(type(self.apprentice).__name__) + "_" + str(self.expert.__name__) \
