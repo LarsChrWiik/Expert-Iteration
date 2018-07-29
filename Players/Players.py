@@ -153,7 +153,7 @@ class NnAbBranch(BaseExItPlayer):
         return NnAbBranch(fixed_depth=self.fixed_depth, branch_prob=self.branch_prob, use_custom_loss=self.use_custom_loss)
 
 
-class NnAbBranchGrowingSearchTimePlayer(BaseExItPlayer):
+class NnAbBranchGrowSearchPlayer(BaseExItPlayer):
     """ Player that uses Minimax as expert and NN as apprentice """
 
     def __init__(self, policy=Policy.OFF, branch_prob=0.05, growing_search=0.0001):
@@ -174,12 +174,12 @@ class NnAbBranchGrowingSearchTimePlayer(BaseExItPlayer):
         self.set_search_time(0.0)
 
     def new_player(self):
-        return NnAbBranchGrowingSearchTimePlayer(
+        return NnAbBranchGrowSearchPlayer(
             policy=self.policy, branch_prob = self.branch_prob, growing_search = self.growing_search
         )
 
 
-class NnAbGrowingSearchTimeGrowingMemoryPlayer(BaseExItPlayer):
+class NnAbGrowSearchGrowMemPlayer(BaseExItPlayer):
     """ Player that uses Minimax as expert and NN as apprentice """
 
     def __init__(self, policy=Policy.OFF, growing_search=0.0001):
@@ -197,6 +197,6 @@ class NnAbGrowingSearchTimeGrowingMemoryPlayer(BaseExItPlayer):
         self.set_search_time(0.0)
 
     def new_player(self):
-        return NnAbGrowingSearchTimeGrowingMemoryPlayer(
+        return NnAbGrowSearchGrowMemPlayer(
             policy=self.policy, growing_search=self.growing_search
         )
