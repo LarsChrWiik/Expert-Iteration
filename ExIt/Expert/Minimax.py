@@ -44,8 +44,11 @@ class Minimax(BaseExpert):
         timer = None
         original_turn = state.turn
 
-        def alpha_beta_search(state, alpha, beta, depth, is_root=False):
+        def alpha_beta_search(state, alpha, beta, depth, is_root=False, initial_search=False):
             """ If alpha and beta is None, then this is a Minimax search """
+
+            if not initial_search and timer is not None and not timer.has_time_left():
+                raise Exception("Stop Search")
 
             def max_value(state, alpha, beta, depth):
                 v = float('-inf')
@@ -56,7 +59,7 @@ class Minimax(BaseExpert):
                     c.advance(a)
                     v = max(
                         v,
-                        alpha_beta_search(c, alpha, beta, depth - 1)
+                        alpha_beta_search(c, alpha, beta, depth - 1, initial_search=initial_search)
                     )
                     vi[i] = v
                     if self.use_alpha_beta:
@@ -76,7 +79,7 @@ class Minimax(BaseExpert):
                     c.advance(a)
                     v = min(
                         v,
-                        alpha_beta_search(c, alpha, beta, depth - 1)
+                        alpha_beta_search(c, alpha, beta, depth - 1, initial_search=initial_search)
                     )
                     vi[i] = v
                     if self.use_alpha_beta:
@@ -127,16 +130,21 @@ class Minimax(BaseExpert):
             timer = TrainingTimer(search_time)
             timer.start_new_lap()
             depth = 1
+            initial_search = True
             while True:
                 self.stop_search_contradiction = True
-                vi_new, v_new = alpha_beta_search(
-                    state=state,
-                    alpha=self.alpha,
-                    beta=self.beta,
-                    depth=depth,
-                    is_root=True
-                )
-
+                try:
+                    vi_new, v_new = alpha_beta_search(
+                        state=state,
+                        alpha=self.alpha,
+                        beta=self.beta,
+                        depth=depth,
+                        is_root=True,
+                        initial_search=initial_search
+                    )
+                except:
+                    break
+                initial_search = False
                 if vi is None:
                     # This ensures that at least one iteration is stored.
                     vi, v = vi_new, v_new
