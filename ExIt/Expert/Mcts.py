@@ -11,7 +11,7 @@ from random import shuffle
 
 class Mcts(BaseExpert):
 
-    def __init__(self, c):
+    def __init__(self, c=sqrt(2)):
         super().__init__()
         # Exploration parameter in UCB.
         self.c = c
