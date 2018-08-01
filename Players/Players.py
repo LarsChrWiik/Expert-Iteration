@@ -55,26 +55,23 @@ class StaticMinimaxPlayer(BasePlayer):
 
 
 class NnMctsPlayer(BaseExItPlayer):
-    """ Player that uses MCTS as the expert and NN as the apprentice """
 
-    def __init__(self, c=sqrt(2), policy=Policy.OFF, use_custom_loss=False):
+    def __init__(self, policy=Policy.OFF, use_custom_loss=False):
         super().__init__(
             ex_it_algorithm=ExpertIteration(
                 apprentice=Nn(use_custom_loss=use_custom_loss),
-                expert=Mcts(c=c),
+                expert=Mcts(),
                 policy=policy
             )
         )
-        self.c = c
         self.policy = policy
         self.use_custom_loss = use_custom_loss
 
     def new_player(self):
-        return NnMctsPlayer(c=self.c, policy=self.policy, use_custom_loss=self.use_custom_loss)
+        return NnMctsPlayer(policy=self.policy, use_custom_loss=self.use_custom_loss)
 
 
 class NnMinimaxPlayer(BaseExItPlayer):
-    """ Player that uses Minimax as expert and NN as apprentice """
 
     def __init__(self, fixed_depth=None, policy=Policy.OFF, use_custom_loss=False):
         super().__init__(
@@ -93,7 +90,6 @@ class NnMinimaxPlayer(BaseExItPlayer):
 
 
 class NnAlphaBetaPlayer(BaseExItPlayer):
-    """ Player that uses Alpha-Beta search as expert and NN as apprentice """
 
     def __init__(self, fixed_depth=None, policy=Policy.OFF, use_custom_loss=False):
         super().__init__(
@@ -112,7 +108,6 @@ class NnAlphaBetaPlayer(BaseExItPlayer):
 
 
 class NnAbGrowSearchPlayer(BaseExItPlayer):
-    """ Player that uses Minimax as expert and NN as apprentice """
 
     def __init__(self, policy=Policy.OFF, growing_search=0.0001):
         super().__init__(
@@ -131,8 +126,26 @@ class NnAbGrowSearchPlayer(BaseExItPlayer):
         return NnAbGrowSearchPlayer(policy=self.policy, growing_search=self.growing_search)
 
 
+class NnMctsGrowSearchPlayer(BaseExItPlayer):
+
+    def __init__(self, policy=Policy.OFF, growing_search=0.0001):
+        super().__init__(
+            ex_it_algorithm=ExpertIteration(
+                apprentice=Nn(),
+                expert=Mcts(),
+                policy=policy,
+                growing_search=growing_search
+            )
+        )
+        self.policy = policy
+        self.growing_search = growing_search
+        self.set_search_time(0.0)
+
+    def new_player(self):
+        return NnMctsGrowSearchPlayer(policy=self.policy, growing_search=self.growing_search)
+
+
 class NnAbBranch(BaseExItPlayer):
-    """ Player that uses Minimax as expert and NN as apprentice """
 
     def __init__(self, fixed_depth=None, branch_prob=0.05, use_custom_loss=False):
         super().__init__(
@@ -154,7 +167,6 @@ class NnAbBranch(BaseExItPlayer):
 
 
 class NnAbBranchGrowSearchPlayer(BaseExItPlayer):
-    """ Player that uses Minimax as expert and NN as apprentice """
 
     def __init__(self, policy=Policy.OFF, branch_prob=0.05, growing_search=0.0001):
         super().__init__(
@@ -180,7 +192,6 @@ class NnAbBranchGrowSearchPlayer(BaseExItPlayer):
 
 
 class NnAbGrowSearchGrowMemPlayer(BaseExItPlayer):
-    """ Player that uses Minimax as expert and NN as apprentice """
 
     def __init__(self, policy=Policy.OFF, growing_search=0.0001):
         super().__init__(
