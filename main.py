@@ -41,7 +41,7 @@ game_class = ConnectFour
 
 # Players to compare.
 players = [
-    NnMinimaxPlayer(use_ab=True, soft_z=True)
+    NnMinimaxPlayer(use_ab=True, growing_depth=True)
 ]
 # Search time for each player.
 search_time = get_seconds(s=0.25)
@@ -108,7 +108,7 @@ def train_and_store():
 def comparison_from_scratch():
     from Matchmaking.Comparison1v1 import compare_ex_it_from_scratch
     # Run Comparison with several iteration of self-play.
-    players = [NnMinimaxPlayer(use_ab=True, soft_z=True), NnMinimaxPlayer()]
+    players = [NnMinimaxPlayer(use_ab=True), RandomPlayer()]
 
     compare_ex_it_from_scratch(
         game_class=ConnectFour,
