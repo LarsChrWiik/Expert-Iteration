@@ -38,7 +38,8 @@ def add_different_advance(state, best_action, state_copies):
 class ExpertIteration:
 
     def __init__(self, apprentice: BaseApprentice, expert: BaseExpert, policy=Policy.OFF,
-                 always_exploit=False, memory=None, branch_prob=0.0, growing_search=None):
+                 always_exploit=False, memory=None, branch_prob=0.0, growing_search=None,
+                 soft_z=False):
         self.apprentice = apprentice
         self.expert = expert
         if memory is None:
@@ -52,8 +53,11 @@ class ExpertIteration:
         self.policy = policy
         self.always_exploit = always_exploit
         self.growing_search = growing_search
+        self.soft_z = soft_z
         # Set name.
         extra_name = ""
+        if self.soft_z:
+            extra_name += "_Soft-Z"
         if self.apprentice.use_custom_loss:
             extra_name += "_Custom-loss"
         if self.growing_search is not None:
@@ -153,8 +157,9 @@ class ExpertIteration:
             v_array.append(v)
             turn_array.append(t)
 
-        # Update the v targets according to the outcome of the game.
-        v_array = update_v_values_to_game_outcome(state, turn_array, v_array)
+        if not self.soft_z:
+            # Update the v targets according to the outcome of the game.
+            v_array = update_v_values_to_game_outcome(state, turn_array, v_array)
 
         for s in state_copies:
             s_array2, p_array2, v_array2 = self.ex_it_game(state=s)
