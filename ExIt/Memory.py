@@ -13,9 +13,9 @@ class MemoryList:
 
     batch_size = global_batch_size
     max_memory_size = global_max_memory_size
+    counter = 0
 
     def __init__(self):
-        self.clear()
         self.memory = None
 
     def save(self, s_array, p_array, v_array):
@@ -27,7 +27,7 @@ class MemoryList:
             for i in range(len(self.memory)):
                 self.memory[i].extend(new_data_tuple[i])
             self.memory = [t[-self.max_memory_size:] for t in self.memory]
-        self.clear()
+        self.counter += len(s_array)
 
     def get_batch(self):
         """ Chooses a random batch from the samples stored in memory """
@@ -40,12 +40,14 @@ class MemoryList:
         )
         return list([np.array(k)[mini_batch_indices] for k in self.memory])
 
-    def clear(self):
-        """ Clears the history from previous game """
-        self.s_array, self.pi_array, self.v_array, self.turn_array = [[] for _ in range(4)]
-
     def get_size(self):
         return len(self.memory[0])
+
+    def should_increment(self):
+        if self.counter > self.max_memory_size:
+            self.counter = 0
+            return True
+        return False
 
 
 class MemorySet:
@@ -95,7 +97,6 @@ class MemoryListGrowing:
     absolute_max_memory_size = global_max_memory_size
 
     def __init__(self):
-        self.clear()
         self.memory = None
 
     def save(self, s_array, p_array, v_array):
@@ -111,7 +112,6 @@ class MemoryListGrowing:
                 if self.max_memory_size < self.absolute_max_memory_size:
                     self.max_memory_size += len(s_array)
             self.memory = [t[-self.absolute_max_memory_size:] for t in self.memory]
-        self.clear()
 
     def get_batch(self):
         """ Chooses a random batch from the samples stored in memory """
@@ -123,10 +123,6 @@ class MemoryListGrowing:
             replace=False
         )
         return list([np.array(k)[mini_batch_indices] for k in self.memory])
-
-    def clear(self):
-        """ Clears the history from previous game """
-        self.s_array, self.pi_array, self.v_array, self.turn_array = [[] for _ in range(4)]
 
     def get_size(self):
         return len(self.memory[0])
