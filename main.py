@@ -41,9 +41,7 @@ game_class = ConnectFour
 
 # Players to compare.
 players = [
-    RandomPlayer(),
-    NnAbGrowSearchPlayer(),
-    NnAbGrowSearchGrowMemPlayer()
+    NnMinimaxPlayer(use_ab=True, soft_z=True)
 ]
 # Search time for each player.
 search_time = get_seconds(s=0.25)
@@ -76,7 +74,7 @@ def pipeline():
     # Train.
     self_play_and_store_versions(game_class, players, search_time, training_timer)
     # Tournament.
-    start_elo_tournament(game_class, players, num_versions, num_elo_matches, match_randomness)
+    #start_elo_tournament(game_class, players, num_versions, num_elo_matches, match_randomness)
 
 
 def plot_elo():
@@ -91,14 +89,14 @@ def plot_elo():
 def test_play():
     play_player(
         game_class=ConnectFour,
-        player=NnAlphaBetaPlayer(),
+        player=NnMinimaxPlayer(use_ab=True),
         search_time=None,
         version=20
     )
 
 
 def train_and_store():
-    players = [NnAlphaBetaPlayer(), RandomPlayer()]
+    players = [NnMinimaxPlayer(use_ab=True), RandomPlayer()]
     self_play_and_store_versions(
         TicTacToe,
         players,
@@ -110,7 +108,7 @@ def train_and_store():
 def comparison_from_scratch():
     from Matchmaking.Comparison1v1 import compare_ex_it_from_scratch
     # Run Comparison with several iteration of self-play.
-    players = [NnAbGrowSearchGrowMemPlayer(), NnAbGrowSearchPlayer()]
+    players = [NnMinimaxPlayer(use_ab=True, soft_z=True), NnMinimaxPlayer()]
 
     compare_ex_it_from_scratch(
         game_class=ConnectFour,
@@ -124,7 +122,7 @@ def comparison_from_scratch():
 
 def comparison_trained():
     from Matchmaking.Comparison1v1 import compare_ex_it_trained
-    players = [NnAlphaBetaPlayer(), StaticMinimaxPlayer()]
+    players = [NnMinimaxPlayer(use_ab=True), StaticMinimaxPlayer()]
     versions = [17, 18, 19]#range(20)
     compare_ex_it_trained(
         game_class=ConnectFour,
@@ -136,7 +134,7 @@ def comparison_trained():
 
 
 def elo_tournament():
-    players = [NnAlphaBetaPlayer(), RandomPlayer()]
+    players = [NnMinimaxPlayer(use_ab=True), RandomPlayer()]
     start_elo_tournament(
         game_class=TicTacToe,
         raw_players=players,

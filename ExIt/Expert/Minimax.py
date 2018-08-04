@@ -14,13 +14,13 @@ class Minimax(BaseExpert):
         This implementation is designed for Zero-sum,
         two-player deterministic markov games """
 
-    def __init__(self, fixed_depth=None, use_alpha_beta=False, switch=False):
+    def __init__(self, fixed_depth=None, use_ab=False, switch=False):
         super().__init__()
         self.fixed_depth = fixed_depth
         self.alpha = float('-inf')
         self.beta = float('inf')
         self.stop_search_contradiction = True
-        self.use_alpha_beta = use_alpha_beta
+        self.use_ab = use_ab
         self.switch = switch
         extra_name = ""
         if fixed_depth is not None:
@@ -28,7 +28,7 @@ class Minimax(BaseExpert):
         if switch:
             self.__name__ = "AB-Minimax" + extra_name
         else:
-            if use_alpha_beta:
+            if use_ab:
                 self.__name__ = "AB" + extra_name
             else:
                 self.__name__ = "Minimax" + extra_name
@@ -36,7 +36,7 @@ class Minimax(BaseExpert):
     def search(self, state: BaseGame, predictor: BaseApprentice, search_time, always_exploit):
         # Try with switching between Minimax and AB.
         if self.switch:
-            self.use_alpha_beta = not self.use_alpha_beta
+            self.use_ab = not self.use_ab
 
         # Predicted v value of state s.         V[s]
         V = {}
@@ -62,7 +62,7 @@ class Minimax(BaseExpert):
                         alpha_beta_search(c, alpha, beta, depth - 1, initial_search=initial_search)
                     )
                     vi[i] = v
-                    if self.use_alpha_beta:
+                    if self.use_ab:
                         if v >= beta:
                             return v
                         alpha = max(alpha, v)
@@ -82,7 +82,7 @@ class Minimax(BaseExpert):
                         alpha_beta_search(c, alpha, beta, depth - 1, initial_search=initial_search)
                     )
                     vi[i] = v
-                    if self.use_alpha_beta:
+                    if self.use_ab:
                         if v <= alpha:
                             return v
                         beta = min(beta, v)
