@@ -39,7 +39,7 @@ class ExpertIteration:
 
     def __init__(self, apprentice: BaseApprentice, expert: BaseExpert, policy=Policy.OFF,
                  always_exploit=False, memory=None, branch_prob=0.0, growing_search=None,
-                 soft_z=False):
+                 soft_z=False, growing_depth=False):
         self.apprentice = apprentice
         self.expert = expert
         if memory is None:
@@ -54,8 +54,12 @@ class ExpertIteration:
         self.always_exploit = always_exploit
         self.growing_search = growing_search
         self.soft_z = soft_z
+        self.growing_depth = growing_depth
         # Set name.
         extra_name = ""
+        if self.growing_depth:
+            extra_name += "_Grow-depth"
+            self.expert.fixed_depth = 1
         if self.soft_z:
             extra_name += "_Soft-Z"
         if self.apprentice.use_custom_loss:
@@ -88,6 +92,10 @@ class ExpertIteration:
         def self_play():
             if self.growing_search is not None:
                 self.__search_time += self.growing_search
+            if self.growing_depth:
+                if self.memory.should_increment():
+                    # This is used for Minimax variants only.
+                    self.expert.fixed_depth += 1
             self.games_generated = 0
             state = self.game_class()
             s_array, p_array, v_array = self.ex_it_game(state, training_timer)
