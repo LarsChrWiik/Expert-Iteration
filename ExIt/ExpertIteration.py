@@ -2,7 +2,7 @@
 from ExIt.Apprentice import BaseApprentice
 from ExIt.Expert import BaseExpert
 from Games.GameLogic import BaseGame
-from ExIt.Memory import MemoryList, MemorySet, MemoryListGrowing
+from ExIt.Memory import MemoryList, MemorySet, MemoryListGrowing, MemorySetAvg
 from ExIt.Policy import Policy
 from tqdm import tqdm
 import numpy as np
@@ -38,14 +38,10 @@ def add_different_advance(state, best_action, state_copies):
 class ExpertIteration:
 
     def __init__(self, apprentice: BaseApprentice, expert: BaseExpert, policy=Policy.OFF,
-                 always_exploit=False, memory=None, branch_prob=0.0, growing_search=None,
+                 always_exploit=False, memory="default", branch_prob=0.0, growing_search=None,
                  soft_z=False, growing_depth=False):
         self.apprentice = apprentice
         self.expert = expert
-        if memory is None:
-            self.memory = MemoryList()
-        else:
-            self.memory = memory
         self.__search_time = None
         self.game_class = None
         self.games_generated = 0
@@ -55,8 +51,23 @@ class ExpertIteration:
         self.growing_search = growing_search
         self.soft_z = soft_z
         self.growing_depth = growing_depth
+
         # Set name.
         extra_name = ""
+        if memory is None or memory == "default" or memory == "MemoryList":
+            self.memory = MemoryList()
+        elif memory == "MemorySet":
+            self.memory = MemorySet()
+            extra_name += "_MemSet"
+        elif memory == "MemorySetAvg":
+            self.memory = MemorySetAvg()
+            extra_name += "_MemSetAvg"
+        elif memory == "MemoryListGrowing":
+            self.memory = MemoryListGrowing()
+            extra_name += "_MemGrow"
+        else:
+            raise Exception("Unknown Memory object!")
+
         if self.growing_depth:
             extra_name += "_Grow-depth"
             self.expert.fixed_depth = 1
@@ -66,10 +77,8 @@ class ExpertIteration:
             extra_name += "_Custom-loss"
         if self.growing_search is not None:
             extra_name += "_Grow-" + str(growing_search)
-        if isinstance(self.memory, MemorySet) and branch_prob == 0.0:
+        if branch_prob > 0.0:
             extra_name += "_Branch-" + str(branch_prob)
-        if isinstance(self.memory, MemoryListGrowing):
-            extra_name += "_MemGrow"
         if always_exploit:
             extra_name += "_Exploit"
         self.__name__ = "ExIt_" + str(type(self.apprentice).__name__) + "_" + str(self.expert.__name__) \

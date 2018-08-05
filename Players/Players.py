@@ -74,22 +74,26 @@ class StaticMinimaxPlayer(BasePlayer):
 
 class NnMctsPlayer(BaseExItPlayer):
 
-    def __init__(self, policy=Policy.OFF, growing_search=False):
+    def __init__(self, policy=Policy.OFF, growing_search=False, memory="default"):
         super().__init__(
             ex_it_algorithm=ExpertIteration(
                 apprentice=Nn(),
                 expert=Mcts(),
                 policy=policy,
                 growing_search=get_grow_search_val(growing_search),
+                memory=memory
             )
         )
         self.policy = policy
         self.growing_search = growing_search
+        self.memory = memory
         if growing_search:
             self.set_search_time(0.0)
 
     def new_player(self):
-        return NnMctsPlayer(policy=self.policy, growing_search=self.growing_search)
+        return NnMctsPlayer(
+            policy=self.policy, growing_search=self.growing_search, memory=self.memory
+        )
 
 
 """ ****************************************
@@ -100,7 +104,7 @@ class NnMctsPlayer(BaseExItPlayer):
 class NnMinimaxPlayer(BaseExItPlayer):
 
     def __init__(self, use_ab=False, fixed_depth=None, policy=Policy.OFF,
-                 growing_search=False, soft_z=False, growing_depth=True):
+                 growing_search=False, soft_z=False, growing_depth=False, memory="default"):
         if fixed_depth is not None and growing_search:
             raise Exception("Cannot have a fixed search depth and growing search timer!")
         super().__init__(
@@ -110,7 +114,8 @@ class NnMinimaxPlayer(BaseExItPlayer):
                 policy=policy,
                 growing_search=get_grow_search_val(growing_search),
                 soft_z=soft_z,
-                growing_depth=growing_depth
+                growing_depth=growing_depth,
+                memory=memory
             )
         )
         self.use_ab = use_ab
@@ -118,6 +123,7 @@ class NnMinimaxPlayer(BaseExItPlayer):
         self.policy = policy
         self.growing_search = growing_search
         self.soft_z = soft_z
+        self.memory = memory
         self.growing_depth = growing_depth
         if growing_search:
             self.set_search_time(0.0)
@@ -125,5 +131,6 @@ class NnMinimaxPlayer(BaseExItPlayer):
     def new_player(self):
         return NnMinimaxPlayer(
             use_ab=self.use_ab, fixed_depth=self.fixed_depth, policy=self.policy,
-            growing_search=self.growing_search, soft_z=self.soft_z, growing_depth=self.growing_depth
+            growing_search=self.growing_search, soft_z=self.soft_z,
+            growing_depth=self.growing_depth, memory=self.memory
         )
