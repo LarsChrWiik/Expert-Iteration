@@ -41,7 +41,7 @@ game_class = ConnectFour
 
 # Players to compare.
 players = [
-    NnMinimaxPlayer(use_ab=True, growing_depth=True)
+    NnMinimaxPlayer(use_ab=True, memory="MemorySetAvg")
 ]
 # Search time for each player.
 search_time = get_seconds(s=0.25)
