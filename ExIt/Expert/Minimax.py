@@ -50,46 +50,6 @@ class Minimax(BaseExpert):
             if not initial_search and timer is not None and not timer.has_time_left():
                 raise Exception("Stop Search")
 
-            def max_value(state, alpha, beta, depth):
-                v = float('-inf')
-                lm = state.get_legal_moves()
-                vi = [0 for _ in lm]
-                for i, a in enumerate(lm):
-                    c = state.copy()
-                    c.advance(a)
-                    v = max(
-                        v,
-                        alpha_beta_search(c, alpha, beta, depth - 1, initial_search=initial_search)
-                    )
-                    vi[i] = v
-                    if self.use_ab:
-                        if v >= beta:
-                            return v
-                        alpha = max(alpha, v)
-                if is_root:
-                    return vi, v
-                return v
-
-            def min_value(state, alpha, beta, depth):
-                v = float('inf')
-                lm = state.get_legal_moves()
-                vi = [0 for _ in lm]
-                for i, a in enumerate(lm):
-                    c = state.copy()
-                    c.advance(a)
-                    v = min(
-                        v,
-                        alpha_beta_search(c, alpha, beta, depth - 1, initial_search=initial_search)
-                    )
-                    vi[i] = v
-                    if self.use_ab:
-                        if v <= alpha:
-                            return v
-                        beta = min(beta, v)
-                if is_root:
-                    return vi, v
-                return v
-
             if depth == 0 and not state.is_game_over():
                 """ Disapproval of the contradiction.
                     Which means that a greater depth is needed. """
@@ -107,11 +67,46 @@ class Minimax(BaseExpert):
                     V[s] = v
                     return v
 
-            # The root node will always call max_value.
             if state.turn == original_turn:
-                return max_value(state, alpha, beta, depth)
+                # *** MAX VALUE ***
+                v = float('-inf')
+                lm = state.get_legal_moves()
+                vi = [0 for _ in lm]
+                for i, a in enumerate(lm):
+                    c = state.copy()
+                    c.advance(a)
+                    v = max(
+                        v,
+                        alpha_beta_search(c, alpha, beta, depth - 1, initial_search=initial_search)
+                    )
+                    vi[i] = v
+                    if self.use_ab:
+                        alpha = max(alpha, v)
+                        if alpha >= beta:
+                            break
+                if is_root:
+                    return vi, v
+                return v
             else:
-                return min_value(state, alpha, beta, depth)
+                # *** MIN VALUE ***
+                v = float('inf')
+                lm = state.get_legal_moves()
+                vi = [0 for _ in lm]
+                for i, a in enumerate(lm):
+                    c = state.copy()
+                    c.advance(a)
+                    v = min(
+                        v,
+                        alpha_beta_search(c, alpha, beta, depth - 1, initial_search=initial_search)
+                    )
+                    vi[i] = v
+                    if self.use_ab:
+                        beta = min(beta, v)
+                        if alpha >= beta:
+                            break
+                if is_root:
+                    return vi, v
+                return v
 
         """ ***** SEARCH CODE ***** """
 
