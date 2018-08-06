@@ -138,11 +138,11 @@ class ExpertIteration:
                     break
                 # Update progress bar.
                 progress_bar.set_postfix(
-                    memory_size='%d' % self.memory.get_size(),
-                    games_generated='%d' % self.games_generated,
+                    mem_size='%d' % self.memory.get_size(),
+                    num_games='%d' % self.games_generated,
                     pi_loss='%.2f' % pi_loss,
                     v_loss='%.2f' % v_loss,
-                    search_time='%.4f' % self.__search_time
+                    time='%.4f' % self.__search_time
                 )
             progress_bar.close()
         else:
