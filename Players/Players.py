@@ -74,25 +74,28 @@ class StaticMinimaxPlayer(BasePlayer):
 
 class NnMctsPlayer(BaseExItPlayer):
 
-    def __init__(self, policy=Policy.OFF, growing_search=False, memory="default"):
+    def __init__(self, policy=Policy.OFF, growing_search=False, soft_z=False, memory="default"):
         super().__init__(
             ex_it_algorithm=ExpertIteration(
                 apprentice=Nn(),
                 expert=Mcts(),
                 policy=policy,
                 growing_search=get_grow_search_val(growing_search),
+                soft_z=soft_z,
                 memory=memory
             )
         )
         self.policy = policy
         self.growing_search = growing_search
+        self.soft_z = soft_z
         self.memory = memory
         if growing_search:
             self.set_search_time(0.0)
 
     def new_player(self):
         return NnMctsPlayer(
-            policy=self.policy, growing_search=self.growing_search, memory=self.memory
+            policy=self.policy, growing_search=self.growing_search,
+            soft_z=self.soft_z, memory=self.memory
         )
 
 
