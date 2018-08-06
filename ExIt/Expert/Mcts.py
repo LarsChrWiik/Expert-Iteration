@@ -89,6 +89,6 @@ class Mcts(BaseExpert):
 
         a_best = exploit_action(ni, lm)
         if always_exploit:
-            return a_best, a_best, Q[0][a_best]
+            return a_best, a_best, Q[s][a_best]
         else:
-            return explore_proportional(ni, lm), a_best, Q[0][a_best]
+            return explore_proportional(ni, lm), a_best, Q[s][a_best]
