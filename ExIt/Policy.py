@@ -15,6 +15,10 @@ def exploit_action(values, lm):
     return lm[np.argmax(values)]
 
 
+def explore(lm):
+    return np.random.choice(lm)
+
+
 def explore_proportional(values, lm):
     """ EXPLORE.
         Assumes that 'values' has removed moves that are not legal.

@@ -6,7 +6,9 @@ from ExIt.Expert.Minimax import Minimax
 from ExIt.Expert.Mcts import Mcts
 from ExIt.ExpertIteration import ExpertIteration
 from Players.BasePlayers import BasePlayer, BaseExItPlayer
-from ExIt.Policy import Policy
+from ExIt.Policy import Policy, explore
+import random
+from Matchmaking.GameHandler import GameHandler
 
 
 GROWING_SEARCH_VALUE = 0.0001
@@ -51,15 +53,22 @@ class StaticMinimaxPlayer(BasePlayer):
         self.__name__ = type(self).__name__ + "_depth-" + str(depth)
 
     def move(self, state: BaseGame, randomness=False, verbose=False):
-        a, best_a, v = self.minimax.search(
+
+        _, best_a, v = self.minimax.search(
             state=state,
             predictor=self.predictor,
-            search_time=None,
+            search_time=None, # Because of fixed depth.
             always_exploit=True
         )
-        if randomness:
+
+        lm = state.get_legal_moves()
+        a = best_a
+        if randomness and len(lm) > 1 and random.uniform(0, 1) < self.rnd_e:
+            # Chose non-optimal move.
+            a = explore([x for x in lm if x != a])
             state.advance(a)
             return a
+
         state.advance(best_a)
         return best_a
 

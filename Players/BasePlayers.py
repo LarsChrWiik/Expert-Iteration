@@ -3,8 +3,9 @@ from Games.GameLogic import BaseGame
 from ExIt.ExpertIteration import ExpertIteration
 from random import choice as rnd_choice
 from ExIt.Evaluator import get_reward_for_action
-from ExIt.Policy import e_greedy, exploit_action
+from ExIt.Policy import e_greedy, exploit_action, explore
 import numpy as np
+import random
 
 
 def set_indexes(players: ["BasePlayer"]):
@@ -15,6 +16,8 @@ def set_indexes(players: ["BasePlayer"]):
 
 class BasePlayer:
     """ Base player that is able to move """
+
+    rnd_e = 0.1
 
     def __init__(self):
         # Unique index of the player.
@@ -60,21 +63,15 @@ class BaseExItPlayer(BasePlayer):
 
         # Remove PI values that are not legal moves.
         pi = [x for i, x in enumerate(pi_pred) if i in lm]
-
-        action_index = e_greedy(
-            xi=pi,
-            lm=lm
-        )
-        best_action = exploit_action(pi, lm)
-
-        a = action_index if randomness else best_action
-        state.advance(a)
         if verbose:
-            print("Move-info:")
-            print("pi_pred:", pi_pred)
-            print("pi:", pi)
-            print("best_action:", best_action)
-            print("a:", a)
+            print("pi =", pi)
+
+        a = exploit_action(pi, lm)
+        if randomness and len(lm) > 1 and random.uniform(0, 1) < self.rnd_e:
+            # Chose non-optimal move.
+            a = explore([x for x in lm if x != a])
+
+        state.advance(a)
         return a
 
     def move_with_search_time(self, state: BaseGame, search_time=None):
