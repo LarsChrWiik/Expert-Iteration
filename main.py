@@ -2,6 +2,8 @@
 
 from Games.TicTacToe import TicTacToe
 from Games.ConnectFour import ConnectFour
+from Games.ConnectSix import ConnectSix
+from Games.Othello import Othello
 from Players.Players import *
 from Matchmaking.EloTournament import start_elo_tournament
 from Misc.Training import self_play_and_store_versions
@@ -35,18 +37,15 @@ V[s]    = Predicted v value of state s.
 # ********** Run info START **********
 
 # Game.
-game_class = ConnectFour
+game_class = Othello
 
 # Players to compare.
 players = [
     NnMinimaxPlayer(use_ab=True),
-    NnMinimaxPlayer(use_ab=True, policy=Policy.ON),
-    #NnMinimaxPlayer(use_ab=True, policy=Policy.ON),
-    #NnMctsPlayer(),
-    #NnMctsPlayer(policy=Policy.ON),
-    RandomPlayer(),
-    StaticMinimaxPlayer(depth=1),
-    StaticMinimaxPlayer(depth=2)
+    NnMctsPlayer()
+    #RandomPlayer(),
+    #StaticMinimaxPlayer(depth=1),
+    #StaticMinimaxPlayer(depth=2)
 ]
 # Search time for each player.
 search_time = get_seconds(s=0.25)
@@ -77,14 +76,14 @@ def main():
 
 def pipeline():
     # Train.
-    #self_play_and_store_versions(game_class, players, search_time, training_timer)
+    self_play_and_store_versions(game_class, players, search_time, training_timer)
     # Tournament.
-    start_elo_tournament(game_class, players, num_versions, num_elo_matches, match_randomness)
+    #start_elo_tournament(game_class, players, num_versions, num_elo_matches, match_randomness)
 
 
 def plot_elo():
     from Misc.Plotter import plot_elo_ratings
-    plot_elo_ratings(ConnectFour, num_versions)
+    plot_elo_ratings(game_class, num_versions)
 
 
 
@@ -93,10 +92,10 @@ def plot_elo():
 
 def test_play():
     play_player(
-        game_class=ConnectFour,
-        player=NnMinimaxPlayer(use_ab=True, growing_depth=True),
+        game_class=game_class,
+        player=StaticMinimaxPlayer(),
         search_time=None,
-        version=20
+        version=None
     )
 
 
@@ -113,13 +112,13 @@ def train_and_store():
 def comparison_from_scratch():
     from Matchmaking.Comparison1v1 import compare_ex_it_from_scratch
     # Run Comparison with several iteration of self-play.
-    players = [NnMinimaxPlayer(use_ab=True), NnMinimaxPlayer()]
+    players = [NnMinimaxPlayer(use_ab=True, growing_depth=True), RandomPlayer()]
 
     compare_ex_it_from_scratch(
-        game_class=TicTacToe,
+        game_class=Othello,
         players=players,
         search_time=search_time,
-        num_matches=1000,
+        num_matches=100,
         training_timer=training_timer,
         randomness=True # <---------------------------------- Remember!
     )
