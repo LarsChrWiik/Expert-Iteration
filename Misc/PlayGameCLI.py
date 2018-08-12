@@ -68,6 +68,8 @@ def play_player(game_class, player, version=None, search_time=None, always_explo
         while not state.is_game_over():
             state.display()
 
+            print("legal actions = ", state.get_legal_moves())
+
             if state.turn == human_index:
                 print("(Player index to move is: " + str(state.turn) + ".")
                 a = input("Action: ")
