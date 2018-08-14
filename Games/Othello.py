@@ -20,13 +20,11 @@ class Othello(BaseGame):
         super().__init__()
         self.turn = 0
         self.board = np.zeros((Othello.num_squares,), dtype=int)
-        self.board[Othello.get_board_index(2, 2)] = 1
-        self.board[Othello.get_board_index(2, 3)] = 2
-        self.board[Othello.get_board_index(3, 2)] = 2
-        self.board[Othello.get_board_index(3, 3)] = 1
+
+        self.place_initial_pieces()
+
         self.fv_size = Othello.num_squares * 2
         self.num_actions = Othello.num_squares
-        self.in_a_row_to_win = 6
 
     def copy(self):
         board_copy = Othello()
@@ -35,7 +33,18 @@ class Othello(BaseGame):
         board_copy.turn = self.turn
         return board_copy
 
+    def place_initial_pieces(self):
+        r = int(Othello.rows / 2) - 1
+        c = int(Othello.columns / 2) - 1
+        self.board[Othello.get_board_index(r, c)] = 1
+        self.board[Othello.get_board_index(r, c+1)] = 2
+        self.board[Othello.get_board_index(r+1, c)] = 2
+        self.board[Othello.get_board_index(r+1, c+1)] = 1
+
     def get_legal_moves(self):
+        return self.get_legal_moves_2(self.turn)
+
+    def get_legal_moves_2(self, turn):
         """ Return a list of the possible action indexes """
         if self.is_game_over():
             return []
@@ -49,8 +58,8 @@ class Othello(BaseGame):
 
                 for d in Othello.directions:
                     # Check all directions.
-                    if self.piece_check_direction(i, j, d, turn=self.turn):
-                        legal_actions.append(i*Othello.columns + j)
+                    if self.piece_check_direction(i, j, d, turn=turn):
+                        legal_actions.append(i * Othello.columns + j)
         legal_actions = list(set(legal_actions))
         return np.array(legal_actions)
 
@@ -118,12 +127,28 @@ class Othello(BaseGame):
 
         self.next_turn()
 
-        # Is the game a draw.
         if self.is_draw():
             self.winner = -1
 
     def get_feature_vector(self):
         return bitboard(self.board)
+
+    def is_draw(self):
+        if self.winner == -1:
+            return True
+        if self.winner == 0 or self.winner == 1:
+            return False
+        # This must be reimplemented if a player can skip a move.
+        # This should then be tested for each player.
+        count_0 = len([x for x in self.board if x == 1])
+        count_1 = len([x for x in self.board if x == 2])
+        return len(self.get_legal_moves_2(self.turn)) == 0 and \
+               len(self.get_legal_moves_2(Othello.other_turn(self.turn))) == 0 and \
+               count_0 == count_1
+
+    @staticmethod
+    def other_turn(t):
+        return 0 if t == 1 else 1
 
     def next_turn(self):
         self.turn += 1
@@ -136,14 +161,17 @@ class Othello(BaseGame):
                 self.turn = 0
             if len(self.get_legal_moves()) == 0:
                 # GAME STOPS. Declare winner.
-                count_0 = len([x for x in self.board if x == 1])
-                count_1 = len([x for x in self.board if x == 2])
-                if count_0 == count_1:
-                    self.winner = -1
-                if count_0 > count_1:
-                    self.winner = self.board_value_to_player_index(1)
-                if count_1 > count_0:
-                    self.winner = self.board_value_to_player_index(2)
+                self.declare_winner()
+
+    def declare_winner(self):
+        count_0 = len([x for x in self.board if x == 1])
+        count_1 = len([x for x in self.board if x == 2])
+        if count_0 == count_1:
+            self.winner = -1
+        if count_0 > count_1:
+            self.winner = self.board_value_to_player_index(1)
+        if count_1 > count_0:
+            self.winner = self.board_value_to_player_index(2)
 
     def display(self):
         char_board = ""
