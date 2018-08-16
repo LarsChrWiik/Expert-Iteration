@@ -37,12 +37,13 @@ V[s]    = Predicted v value of state s.
 # ********** Run info START **********
 
 # Game.
-game_class = Othello
+game_class = ConnectFour
 
 # Players to compare.
 players = [
-    NnMinimaxPlayer(use_ab=True),
-    NnMctsPlayer()
+    NnMinimaxPlayer(use_ab=True, policy=Policy.ON, growing_depth=True, always_exploit=True, branch_prob=0.1),
+    NnMinimaxPlayer(use_ab=True)
+    #NnMctsPlayer()
     #RandomPlayer(),
     #StaticMinimaxPlayer(depth=1),
     #StaticMinimaxPlayer(depth=2)
@@ -67,8 +68,8 @@ match_randomness = True
 
 
 def main():
-    pipeline()
-    #plot_elo()
+    #pipeline()
+    plot_elo()
     #comparison_trained()
     #comparison_from_scratch()
     #test_play()
@@ -76,9 +77,9 @@ def main():
 
 def pipeline():
     # Train.
-    self_play_and_store_versions(game_class, players, search_time, training_timer)
+    #self_play_and_store_versions(game_class, players, search_time, training_timer)
     # Tournament.
-    #start_elo_tournament(game_class, players, num_versions, num_elo_matches, match_randomness)
+    start_elo_tournament(game_class, players, num_versions, num_elo_matches, match_randomness)
 
 
 def plot_elo():

@@ -84,7 +84,7 @@ class StaticMinimaxPlayer(BasePlayer):
 class NnMctsPlayer(BaseExItPlayer):
 
     def __init__(self, policy=Policy.OFF, growing_search=False, soft_z=False,
-                 memory="default", branch_prob=0.1, always_exploit=False):
+                 memory="default", branch_prob=0.0, always_exploit=False):
         super().__init__(
             ex_it_algorithm=ExpertIteration(
                 apprentice=Nn(),
