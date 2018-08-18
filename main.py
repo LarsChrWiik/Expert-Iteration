@@ -3,6 +3,7 @@
 from Games.TicTacToe import TicTacToe
 from Games.ConnectFour import ConnectFour
 from Games.ConnectSix import ConnectSix
+from Games.TicTacToe4x4 import TicTacToe4x4
 from Games.Othello import Othello
 from Players.Players import *
 from Matchmaking.EloTournament import start_elo_tournament
@@ -37,16 +38,15 @@ V[s]    = Predicted v value of state s.
 # ********** Run info START **********
 
 # Game.
-game_class = ConnectFour
+game_class = TicTacToe4x4
 
 # Players to compare.
 players = [
-    NnMinimaxPlayer(use_ab=True, policy=Policy.ON, growing_depth=True, always_exploit=True, branch_prob=0.1),
-    NnMinimaxPlayer(use_ab=True)
-    #NnMctsPlayer()
-    #RandomPlayer(),
-    #StaticMinimaxPlayer(depth=1),
-    #StaticMinimaxPlayer(depth=2)
+    NnMinimaxPlayer(use_ab=True),
+    NnMctsPlayer(),
+    RandomPlayer(),
+    StaticMinimaxPlayer(depth=1),
+    StaticMinimaxPlayer(depth=2)
 ]
 # Search time for each player.
 search_time = get_seconds(s=0.25)
@@ -68,8 +68,8 @@ match_randomness = True
 
 
 def main():
-    #pipeline()
-    plot_elo()
+    pipeline()
+    #plot_elo()
     #comparison_trained()
     #comparison_from_scratch()
     #test_play()
@@ -94,7 +94,7 @@ def plot_elo():
 def test_play():
     play_player(
         game_class=game_class,
-        player=StaticMinimaxPlayer(),
+        player=StaticMinimaxPlayer(depth=2),
         search_time=None,
         version=None
     )
@@ -128,9 +128,9 @@ def comparison_from_scratch():
 def comparison_trained():
     from Matchmaking.Comparison1v1 import compare_ex_it_trained
     players = [NnMinimaxPlayer(use_ab=True), StaticMinimaxPlayer()]
-    versions = [17, 18, 19]#range(20)
+    versions = [23]#range(20)
     compare_ex_it_trained(
-        game_class=ConnectFour,
+        game_class=game_class,
         raw_players=players,
         num_matches=100,
         randomness=True,  # <---------------------------------- Remember!
