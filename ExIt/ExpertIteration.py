@@ -11,6 +11,7 @@ import random
 
 
 DEFAULT_GROWING_SEARCH_VALUE = 0.0001
+DEFAULT_MIN_SEARCH_TIME = 0.05
 
 
 def get_grow_search_val(growing_search):
@@ -76,7 +77,7 @@ class ExpertIteration:
         self.games_generated = 0
         self.soft_z = self.kwargs.get("soft_z")
         self.growing_search = self.kwargs.get("growing_search")
-        self.__search_time = 0.0 if self.growing_search is not None else None
+        self.__search_time = DEFAULT_MIN_SEARCH_TIME if self.growing_search is not None else None
 
         # ***** Calculate an appropriate name for this expert iteration variant *****
         extra_name = ""
@@ -113,10 +114,10 @@ class ExpertIteration:
                         + "_" + str(self.kwargs.get("policy").value) + extra_name
 
     def set_game(self, game_class):
-        self.game_class = game_class
+        self.game_class = game_class.new()
         self.apprentice.init_model(
-            input_fv_size=game_class().fv_size,
-            pi_size=game_class().num_actions
+            input_fv_size=game_class.fv_size,
+            pi_size=game_class.num_actions
         )
 
     def set_search_time(self, search_time):
@@ -134,7 +135,7 @@ class ExpertIteration:
                     # This is used for Minimax variants only.
                     self.expert.fixed_depth += 1
             self.games_generated = 0
-            state = self.game_class()
+            state = self.game_class.new()
             s_array, p_array, v_array = self.ex_it_game(state, training_timer)
 
             # If the time is up, don't train since it will result in an unfair advantage.
