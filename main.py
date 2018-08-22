@@ -3,7 +3,6 @@
 from Games.TicTacToe import TicTacToe
 from Games.ConnectFour import ConnectFour
 from Games.ConnectSix import ConnectSix
-from Games.TicTacToe4x4 import TicTacToe4x4
 from Games.Othello import Othello
 from Players.Players import *
 from Matchmaking.EloTournament import start_elo_tournament
@@ -38,7 +37,7 @@ V[s]    = Predicted v value of state s.
 # ********** Run info START **********
 
 # Game.
-game_class = TicTacToe
+game_class = TicTacToe()
 
 # Players to compare.
 players = [
@@ -52,7 +51,7 @@ players = [
 search_time = get_seconds(s=0.25)
 
 # Total time for each player to self-train.
-time_limit = get_seconds(m=5)
+time_limit = get_seconds(h=4)
 # Number of versions to be trained.
 num_versions = 20
 # Timer. NB: Each version is trained for time_limit / num_versions time).
@@ -115,10 +114,10 @@ def train_and_store():
 def comparison_from_scratch():
     from Matchmaking.Comparison1v1 import compare_ex_it_from_scratch
     # Run Comparison with several iteration of self-play.
-    players = [NnMinimaxPlayer(use_ab=True), RandomPlayer()]
+    players = [NnMctsPlayer(growing_search=True), RandomPlayer()]
 
     compare_ex_it_from_scratch(
-        game_class=TicTacToe,
+        game_class=game_class,
         players=players,
         search_time=search_time,
         num_matches=100,
