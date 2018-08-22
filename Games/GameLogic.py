@@ -31,6 +31,9 @@ class BaseGame:
         # Indicates the winner of the game. (Index of the winning player). (-1 = draw)
         self.winner = None
 
+    def new(self):
+        raise NotImplementedError("Please Implement this method")
+
     def is_game_over(self):
         return self.winner is not None
 
