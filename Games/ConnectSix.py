@@ -6,21 +6,33 @@ from Games.GameLogic import bitboard
 
 class ConnectSix(BaseGame):
 
-    rows = 10
-    columns = 10
-    num_squares = columns * rows
+    kwargs = {
+        "rows": 10,
+        "columns": 10,
+        "in_a_row_to_win": 6
+    }
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         super().__init__()
-        self.num_players = 2
-        self.turn = 0
-        self.board = np.zeros((ConnectSix.num_squares,), dtype=int)
-        self.fv_size = ConnectSix.num_squares * 2
-        self.num_actions = ConnectSix.num_squares
-        self.in_a_row_to_win = 6
+        self.kwargs.update(kwargs)
+        self.rows = self.kwargs.get("rows")
+        self.columns = self.kwargs.get("columns")
+        self.in_a_row_to_win = self.kwargs.get("in_a_row_to_win")
+
+        self.num_squares = self.columns * self.rows
+        self.board = np.zeros((self.num_squares,), dtype=int)
+        self.fv_size = self.num_squares * 2
+        self.num_actions = self.num_squares
+
+        self.kwargs = kwargs
+
+        self.__name__ = "ConnectSix" + str(self.rows) + "x" + str(self.columns)
+
+    def new(self):
+        return ConnectSix(**self.kwargs)
 
     def copy(self):
-        board_copy = ConnectSix()
+        board_copy = ConnectSix(**self.kwargs)
         board_copy.board = self.board.copy()
         board_copy.winner = self.winner
         board_copy.turn = self.turn
@@ -87,7 +99,7 @@ class ConnectSix(BaseGame):
                 check_in_a_row(d)
 
         # Convert board to matrix.
-        board = np.reshape(self.board, (-1, ConnectSix.columns))
+        board = np.reshape(self.board, (-1, self.columns))
 
         # Horizontal "-"
         check_horizontal(board)
@@ -98,11 +110,11 @@ class ConnectSix(BaseGame):
 
         # NB: Board is still transposed, but this does not matter for the checks below.
         # Diagonal "\"
-        check_diagonal(board, column_count=ConnectSix.columns, row_count=ConnectSix.rows)
+        check_diagonal(board, column_count=self.columns, row_count=self.rows)
 
         # Diagonal "/"
         board = np.rot90(board)
-        check_diagonal(board, column_count=ConnectSix.rows, row_count=ConnectSix.columns)
+        check_diagonal(board, column_count=self.rows, row_count=self.columns)
 
         self.next_turn()
 
@@ -126,7 +138,7 @@ class ConnectSix(BaseGame):
             if x == 1: char_board += 'x'
             if x == 2: char_board += 'o'
         print("*** Print of " + str(type(self).__name__) + " game ***")
-        c = ConnectSix.columns
+        c = self.columns
         for r in range(c):
             print(char_board[r*c:r*c + c])
         print()

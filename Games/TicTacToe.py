@@ -1,4 +1,5 @@
 
+
 from Games.GameLogic import BaseGame
 import numpy as np
 from Games.GameLogic import bitboard
@@ -6,16 +7,33 @@ from Games.GameLogic import bitboard
 
 class TicTacToe(BaseGame):
 
-    num_squares = 9
+    kwargs = {
+        "rows": 3,
+        "columns": 3,
+        "in_a_row_to_win": 3
+    }
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         super().__init__()
-        self.board = np.zeros((TicTacToe.num_squares,), dtype=int)
-        self.fv_size = TicTacToe.num_squares * 2
-        self.num_actions = TicTacToe.num_squares
+        self.kwargs.update(kwargs)
+        self.rows = self.kwargs.get("rows")
+        self.columns = self.kwargs.get("columns")
+        self.in_a_row_to_win = self.kwargs.get("in_a_row_to_win")
+
+        self.num_squares = self.columns * self.rows
+        self.board = np.zeros((self.num_squares,), dtype=int)
+        self.fv_size = self.num_squares * 2
+        self.num_actions = self.num_squares
+
+        self.kwargs = kwargs
+
+        self.__name__ = "TicTacToe" + str(self.rows) + "x" + str(self.columns)
+
+    def new(self):
+        return TicTacToe(**self.kwargs)
 
     def copy(self):
-        board_copy = TicTacToe()
+        board_copy = TicTacToe(**self.kwargs)
         board_copy.board = self.board.copy()
         board_copy.winner = self.winner
         board_copy.turn = self.turn
@@ -25,7 +43,7 @@ class TicTacToe(BaseGame):
         """ Return a list of the possible action indexes """
         if self.is_game_over():
             return []
-        return np.where(self.board == 0, 1, 0).nonzero()[0]
+        return np.where(self.board[:self.num_actions] == 0, 1, 0).nonzero()[0]
 
     def advance(self, a):
         if self.winner is not None:
@@ -33,35 +51,72 @@ class TicTacToe(BaseGame):
         if a is None:
             raise Exception("action_index can not be None")
         if self.board[a] != 0:
-            raise Exception("Cannot place a piece on top of a piece")
+            raise Exception("This column is full")
         if a >= self.num_actions or a < 0:
             raise Exception("Action is not legal")
+
         board_value = self.player_index_to_board_value(player_index=self.turn)
         self.board[a] = board_value
         self.update_game_state()
 
     def update_game_state(self):
+
+        def check_in_a_row(r):
+            counter = 0
+            last = -1
+            for c in r:
+                if c == 0:
+                    # This field is not taken by any player.
+                    counter = 0
+                    last = -1
+                    continue
+                if c == last:
+                    # The same piece color as last time, check if this player has won.
+                    counter += 1
+                    if counter == self.in_a_row_to_win:
+                        # WINNER!
+                        self.winner = self.board_value_to_player_index(c)
+                        return
+                    continue
+                if c != last and c != 0:
+                    # A new piece color is found, restart the counter for this color.
+                    last = c
+                    counter = 1
+
+        def check_horizontal(board):
+            for r in board:
+                check_in_a_row(r)
+
+        def check_diagonal(board, column_count, row_count):
+            diagonals = [board.diagonal()]
+            """ -> """
+            for i in range(1, row_count - self.in_a_row_to_win + 1):
+                diagonals.append(board.diagonal(offset=i))
+            """ |
+                V """
+            for i in range(1, column_count - self.in_a_row_to_win + 1):
+                diagonals.append(board.diagonal(offset=-i))
+
+            for d in diagonals:
+                check_in_a_row(d)
+
+        # Convert board to matrix.
+        board = np.reshape(self.board, (-1, self.columns))
+
         # Horizontal "-"
-        if self.board[0] == self.board[1] == self.board[2] != 0:
-            self.winner = self.board_value_to_player_index(self.board[0])
-        if self.board[3] == self.board[4] == self.board[5] != 0:
-            self.winner = self.board_value_to_player_index(self.board[3])
-        if self.board[6] == self.board[7] == self.board[8] != 0:
-            self.winner = self.board_value_to_player_index(self.board[6])
+        check_horizontal(board)
 
         # Vertical "|"
-        if self.board[0] == self.board[3] == self.board[6] != 0:
-            self.winner = self.board_value_to_player_index(self.board[0])
-        if self.board[1] == self.board[4] == self.board[7] != 0:
-            self.winner = self.board_value_to_player_index(self.board[1])
-        if self.board[2] == self.board[5] == self.board[8] != 0:
-            self.winner = self.board_value_to_player_index(self.board[2])
+        board = np.transpose(board)
+        check_horizontal(board)
 
-        # Diagonal /
-        if self.board[0] == self.board[4] == self.board[8] != 0:
-            self.winner = self.board_value_to_player_index(self.board[0])
-        if self.board[2] == self.board[4] == self.board[6] != 0:
-            self.winner = self.board_value_to_player_index(self.board[2])
+        # NB: Board is still transposed, but this does not matter for the checks below.
+        # Diagonal "\"
+        check_diagonal(board, column_count=self.columns, row_count=self.rows)
+
+        # Diagonal "/"
+        board = np.rot90(board)
+        check_diagonal(board, column_count=self.rows, row_count=self.columns)
 
         self.next_turn()
 
@@ -85,7 +140,7 @@ class TicTacToe(BaseGame):
             if x == 1: char_board += 'x'
             if x == 2: char_board += 'o'
         print("*** Print of " + str(type(self).__name__) + " game ***")
-        print(char_board[:3])
-        print(char_board[3:6])
-        print(char_board[-3:])
+        c = self.columns
+        for r in range(c):
+            print(char_board[r*c:r*c + c])
         print()

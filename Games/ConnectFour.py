@@ -6,21 +6,34 @@ from Games.GameLogic import bitboard
 
 class ConnectFour(BaseGame):
 
-    rows = 6
-    columns = 7
-    num_squares = columns * rows
+    kwargs = {
+        "rows": 6,
+        "columns": 7,
+        "in_a_row_to_win": 4
+    }
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         super().__init__()
-        self.num_players = 2
-        self.turn = 0
-        self.board = np.zeros((ConnectFour.num_squares,), dtype=int)
-        self.fv_size = ConnectFour.num_squares * 2
-        self.num_actions = ConnectFour.columns
+        self.kwargs.update(kwargs)
+        self.rows = self.kwargs.get("rows")
+        self.columns = self.kwargs.get("columns")
+        self.in_a_row_to_win = self.kwargs.get("in_a_row_to_win")
+
+        self.num_squares = self.columns * self.rows
+        self.board = np.zeros((self.num_squares,), dtype=int)
+        self.fv_size = self.num_squares * 2
+        self.num_actions = self.columns
         self.in_a_row_to_win = 4
 
+        self.kwargs = kwargs
+
+        self.__name__ = "ConnectFour" + str(self.rows) + "x" + str(self.columns)
+
+    def new(self):
+        return ConnectFour(**self.kwargs)
+
     def copy(self):
-        board_copy = ConnectFour()
+        board_copy = ConnectFour(**self.kwargs)
         board_copy.board = self.board.copy()
         board_copy.winner = self.winner
         board_copy.turn = self.turn
@@ -30,7 +43,7 @@ class ConnectFour(BaseGame):
         """ Return a list of the possible action indexes """
         if self.is_game_over():
             return []
-        return np.where(self.board[:ConnectFour.columns] == 0, 1, 0).nonzero()[0]
+        return np.where(self.board[:self.columns] == 0, 1, 0).nonzero()[0]
 
     def advance(self, a):
         if self.winner is not None:
@@ -44,14 +57,14 @@ class ConnectFour(BaseGame):
 
         board_value = self.player_index_to_board_value(player_index=self.turn)
         # Start from the end because the piece falls down.
-        reversed_a = ConnectFour.columns - a
+        reversed_a = self.columns - a
         while True:
             if self.board[-reversed_a] == 0:
                 self.board[-reversed_a] = board_value
                 break
             else:
                 # This place is take, check the place above next time.
-                reversed_a += ConnectFour.columns
+                reversed_a += self.columns
         self.update_game_state()
 
     def update_game_state(self):
@@ -95,7 +108,7 @@ class ConnectFour(BaseGame):
                 check_in_a_row(d)
 
         # Convert board to matrix.
-        board = np.reshape(self.board, (-1, ConnectFour.columns))
+        board = np.reshape(self.board, (-1, self.columns))
 
         # Horizontal "-"
         check_horizontal(board)
@@ -106,11 +119,11 @@ class ConnectFour(BaseGame):
 
         # NB: Board is still transposed, but this does not matter for the checks below.
         # Diagonal "\"
-        check_diagonal(board, column_count=ConnectFour.columns, row_count=ConnectFour.rows)
+        check_diagonal(board, column_count=self.columns, row_count=self.rows)
 
         # Diagonal "/"
         board = np.rot90(board)
-        check_diagonal(board, column_count=ConnectFour.rows, row_count=ConnectFour.columns)
+        check_diagonal(board, column_count=self.rows, row_count=self.columns)
 
         self.next_turn()
 
@@ -134,7 +147,7 @@ class ConnectFour(BaseGame):
             if x == 1: char_board += 'x'
             if x == 2: char_board += 'o'
         print("*** Print of " + str(type(self).__name__) + " game ***")
-        c = ConnectFour.columns
+        c = self.columns
         for r in range(c):
             print(char_board[r*c:r*c + c])
         print()
