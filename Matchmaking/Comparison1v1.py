@@ -31,7 +31,7 @@ def compare_ex_it_trained(game_class, raw_players, num_matches, randomness, vers
 
 
 def compare_ex_it_from_scratch(game_class, players, search_time,
-                               num_matches, training_timer, randomness):
+                               num_matches, training_timer, randomness: float):
     """ Compare players through several iterations.
         Self play is enabled for ExIt players between iterations. """
 
@@ -65,7 +65,7 @@ def compare_ex_it_from_scratch(game_class, players, search_time,
         print(results_list)
 
 
-def start_matches(game_class, players, num_matches, randomness):
+def start_matches(game_class, players, num_matches, randomness: float):
     """ Play several games between the players """
     # 2D list: [win, lose, draw]. Position = player index.
     results = [GameResult.get_new_result_list() for _ in players]
