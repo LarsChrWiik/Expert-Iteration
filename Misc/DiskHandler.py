@@ -256,8 +256,10 @@ def create_comparison_folders():
     )
 
 
-def create_comparison_meta_file(base_path, players, num_matches, training_timer, search_time, versions=None):
+def create_comparison_meta_file(game_class, base_path, players, num_matches,
+                                training_timer, search_time, versions=None):
     with open(base_path + "/meta.txt", 'x') as file:
+        file.write("Game = " + str(game_class.__name__) + "\n")
         file.write("Date time = " + str(datetime.now().strftime('%Y-%m-%d___%H:%M:%S')) + "\n")
         file.write("Number of matches = " + str(num_matches) + "\n")
         if (training_timer, search_time) != (None, None):
