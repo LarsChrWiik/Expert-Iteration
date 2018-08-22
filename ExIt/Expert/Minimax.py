@@ -33,7 +33,7 @@ class Minimax(BaseExpert):
             else:
                 self.__name__ = "Minimax" + extra_name
 
-    def search(self, state: BaseGame, predictor: BaseApprentice, search_time, always_exploit):
+    def search(self, state: BaseGame, predictor: BaseApprentice, search_time=None, always_exploit=False):
         # Try with switching between Minimax and AB.
         if self.switch:
             self.use_ab = not self.use_ab
