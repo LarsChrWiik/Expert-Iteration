@@ -1,9 +1,10 @@
 
 from Players.Players import BasePlayer, BaseExItPlayer
 from Games.GameLogic import GameResult, BaseGame
+import random
 
 
-def match(game_class, players, randomness):
+def match(game_class, players: [BasePlayer], randomness: float):
     """ Starts a new game match between players and returns the result.
         Return a list of GameResult for each player according to Game Index. """
     game_handler = GameHandler(game_class, players, randomness)
@@ -14,7 +15,7 @@ def match(game_class, players, randomness):
 class GameHandler:
     """ Class to organize a game between players """
 
-    def __init__(self, game_class, players: [BasePlayer], randomness):
+    def __init__(self, game_class, players: [BasePlayer], randomness: float):
         """ The order of "players" correspond to the players turn.
             This means that players[0] will always start the game.
             Make sure to rearrange the order of the players when playing multiple games.
@@ -61,7 +62,10 @@ class GameHandler:
             if isinstance(player, BaseExItPlayer):
                 p = player.ex_it_algorithm.apprentice.pred_pi(state.get_feature_vector())
                 v = player.ex_it_algorithm.apprentice.pred_v(state.get_feature_vector())
-            a = self.players[state.turn].move(state, randomness=self.randomness, verbose=False)
+            if random.uniform(0, 1) < self.randomness:
+                a = self.players[state.turn].move_random(state)
+            else:
+                a = self.players[state.turn].move(state, verbose=False)
             self.update_movetext(a, turn, p, v)
             self.last_turn = turn
         self.update_movetext_result(state)
