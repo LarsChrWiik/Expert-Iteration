@@ -52,25 +52,14 @@ class StaticMinimaxPlayer(BasePlayer):
         self.predictor = RandomPredictor()
         self.__name__ = type(self).__name__ + "_depth-" + str(depth)
 
-    def move(self, state: BaseGame, randomness=False, verbose=False):
-
-        _, best_a, v = self.minimax.search(
+    def move(self, state: BaseGame, verbose=False):
+        _, a, v = self.minimax.search(
             state=state,
             predictor=self.predictor,
-            search_time=None, # Because of fixed depth.
             always_exploit=True
         )
-
-        lm = state.get_legal_moves()
-        a = best_a
-        if randomness and len(lm) > 1 and random.uniform(0, 1) < self.rnd_e:
-            # Chose non-optimal move.
-            a = explore([x for x in lm if x != a])
-            state.advance(a)
-            return a
-
-        state.advance(best_a)
-        return best_a
+        state.advance(a)
+        return a
 
     def new_player(self):
         return StaticMinimaxPlayer(depth=self.depth)
