@@ -1,7 +1,6 @@
 
 from Misc.DiskHandler import load_model
 from Players.BasePlayers import BaseExItPlayer
-import numpy as np
 
 
 def play(game_class):
@@ -10,7 +9,7 @@ def play(game_class):
         print("*** New game of " + game_class.__name__ + " ***")
         print("")
 
-        state = game_class()
+        state = game_class.new()
 
         while not state.is_game_over():
             state.display()
@@ -62,7 +61,7 @@ def play_player(game_class, player, version=None, search_time=None, always_explo
             print("ERROR: input not recognized! Input was: \'" + str(a) + "\' with type: " + str(type(a)))
             continue
 
-        state = game_class()
+        state = game_class.new()
         human_index = 0 if a == "y" else 1
 
         while not state.is_game_over():
@@ -89,9 +88,9 @@ def play_player(game_class, player, version=None, search_time=None, always_explo
                     if search_time is not None:
                         a = player.move_with_search_time(state, search_time)
                     else:
-                        a = player.move(state, randomness=False)
+                        a = player.move(state)
                 else:
-                    a = player.move(state, randomness=False)
+                    a = player.move(state)
 
             print("Action taken is: " + str(a))
             print("")
