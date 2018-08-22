@@ -88,6 +88,7 @@ class NnMctsPlayer(BaseExItPlayer):
     kwargs = {
         "policy": Policy.OFF,
         "growing_search": False,
+        "min_growing_time": None,
         "soft_z": False,
         "memory": "default",
         "branch_prob": 0.0,
@@ -121,10 +122,11 @@ class NnMinimaxPlayer(BaseExItPlayer):
     kwargs = {
         "use_ab": False,
         "policy": Policy.OFF,
-        "growing_search": False,
         "fixed_depth": None,
-        "soft_z": False,
+        "growing_search": False,
+        "min_growing_time": None,
         "growing_depth": False,
+        "soft_z": False,
         "memory": "default",
         "branch_prob": 0.0,
         "always_exploit": False
