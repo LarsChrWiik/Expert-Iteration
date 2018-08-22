@@ -77,6 +77,8 @@ class ExpertIteration:
         self.game_class = None
         self.games_generated = 0
         self.soft_z = self.kwargs.get("soft_z")
+        self.policy = self.kwargs.get("policy")
+        self.state_branch_degree = self.kwargs.get("branch_prob")
         self.growing_search = self.kwargs.get("growing_search")
         self.__search_time = DEFAULT_MIN_SEARCH_TIME if self.growing_search is not None else None
 
@@ -107,14 +109,14 @@ class ExpertIteration:
             min_time = DEFAULT_MIN_SEARCH_TIME if self.kwargs.get("min_growing_time") is None \
                 else self.kwargs.get("min_growing_time")
             extra_name += "_Grow-" + str(min_time) + "+" + str(self.growing_search)
-        if self.kwargs.get("branch_prob") > 0.0:
-            extra_name += "_Branch-" + str(self.kwargs.get("branch_prob"))
+        if self.state_branch_degree > 0.0:
+            extra_name += "_Branch-" + str(self.state_branch_degree)
         if self.kwargs.get("always_exploit"):
             extra_name += "_Exploit"
 
         # Set same of expert iteration variant.
         self.__name__ = "ExIt_" + str(type(self.apprentice).__name__) + "_" + str(self.expert.__name__) \
-                        + "_" + str(self.kwargs.get("policy").value) + extra_name
+                        + "_" + str(self.policy.value) + extra_name
 
     def set_game(self, game_class):
         self.game_class = game_class.new()
@@ -191,7 +193,7 @@ class ExpertIteration:
                 return None, None, None
             s, pi, v, t, a = self.ex_it_state(state)
 
-            if random.uniform(0, 1) < self.kwargs.get("branch_prob"):
+            if random.uniform(0, 1) < self.state_branch_degree:
                 # Make branch from the main line.
                 state_copies = add_different_advance(
                     state=state,
@@ -225,7 +227,7 @@ class ExpertIteration:
         a, a_best, v = self.expert.search(
             state, self.apprentice, self.__search_time, self.kwargs.get("always_exploit")
         )
-        if self.kwargs.get("policy") == Policy.OFF:
+        if self.policy == Policy.OFF:
             # Store best action.
             s, pi, t = generate_sample(state, a_best)
         else:
