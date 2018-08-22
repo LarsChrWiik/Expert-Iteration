@@ -7,7 +7,7 @@ from tqdm import tqdm, trange
 import random
 
 
-def start_elo_tournament(game_class, raw_players, num_versions, num_matches, randomness=True):
+def start_elo_tournament(game_class, raw_players, num_versions, num_matches, randomness: float):
     """ Match players in a tournament and writes matches to PGN files """
 
     base_path = create_elo_folders(game_class)
