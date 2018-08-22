@@ -56,12 +56,13 @@ class ExpertIteration:
 
     kwargs = {
         "policy": Policy.OFF,
+        "growing_search": None,
+        "growing_depth": False,
+        "min_growing_time": None,
+        "soft_z": False,
         "always_exploit": False,
         "memory": "default",
-        "branch_prob": 0.0,
-        "soft_z": False,
-        "growing_search": None,
-        "growing_depth": False
+        "branch_prob": 0.0
     }
 
     def __init__(self, apprentice: BaseApprentice, expert: BaseExpert, **kwargs):
@@ -103,7 +104,9 @@ class ExpertIteration:
         if self.apprentice.use_custom_loss:
             extra_name += "_Custom-loss"
         if self.growing_search is not None:
-            extra_name += "_Grow-" + str(self.growing_search)
+            min_time = DEFAULT_MIN_SEARCH_TIME if self.kwargs.get("min_growing_time") is None \
+                else self.kwargs.get("min_growing_time")
+            extra_name += "_Grow-" + str(min_time) + "+" + str(self.growing_search)
         if self.kwargs.get("branch_prob") > 0.0:
             extra_name += "_Branch-" + str(self.kwargs.get("branch_prob"))
         if self.kwargs.get("always_exploit"):
