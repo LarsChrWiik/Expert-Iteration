@@ -39,7 +39,7 @@ def compare_ex_it_from_scratch(game_class, players, search_time,
 
     # Create necessary folders and files and get base path.
     base_path = create_comparison_folders()
-    create_comparison_meta_file(base_path, players, num_matches, training_timer, search_time)
+    create_comparison_meta_file(game_class, base_path, players, num_matches, training_timer, search_time)
     create_comparison_files(base_path, players)
 
     # Let the players know which game they are playing and what search time to use.
