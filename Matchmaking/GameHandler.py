@@ -21,7 +21,7 @@ class GameHandler:
             Make sure to rearrange the order of the players when playing multiple games.
             The resulted results are calculated according to the players index,
             NOT the order of the players. """
-        self.game_class = game_class
+        self.game_class = game_class.new()
         self.players = players
         self.randomness = randomness
         self.game = None
@@ -54,7 +54,7 @@ class GameHandler:
         self.result_text = ""
         self.last_turn = None
         self.move_switch_counter = 1
-        state = self.game_class()
+        state = self.game_class.new()
         while not state.is_game_over():
             turn = state.turn
             player = self.players[state.turn]
