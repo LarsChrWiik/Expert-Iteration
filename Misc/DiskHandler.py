@@ -42,7 +42,7 @@ def load_trained_models(game_class, raw_players, versions):
         if isinstance(p, BaseExItPlayer):
             for v in versions:
                 version = v+1
-                new_player = p.new_player()
+                new_player = p.new()
                 new_player.__name__ = new_player.__name__ + "_" + str(version)
                 trained_model = load_model(
                     game_name=game_class.__name__,
@@ -53,7 +53,7 @@ def load_trained_models(game_class, raw_players, versions):
                 players.append(new_player)
                 progress_bar.update(1)
         else:
-            players.append(p.new_player())
+            players.append(p)
     progress_bar.close()
     return players
 

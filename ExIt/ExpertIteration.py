@@ -10,6 +10,15 @@ from random import choice as rnd_element
 import random
 
 
+DEFAULT_GROWING_SEARCH_VALUE = 0.0001
+
+
+def get_grow_search_val(growing_search):
+    if isinstance(growing_search, bool):
+        return DEFAULT_GROWING_SEARCH_VALUE if growing_search else None
+    return growing_search
+
+
 def update_v_values_to_game_outcome(final_state: BaseGame, turn_array, v_array):
     """ Set all v values to the outcome of the game for each player.
         This approach may lead to overfitting. """
@@ -35,40 +44,57 @@ def add_different_advance(state, best_action, state_copies):
     return state_copies
 
 
+def update_existing(main_kwargs, kwargs):
+    for key, value in kwargs.items():
+        if key in main_kwargs:
+            main_kwargs[key] = value
+    return main_kwargs
+
+
 class ExpertIteration:
 
-    def __init__(self, apprentice: BaseApprentice, expert: BaseExpert, policy=Policy.OFF,
-                 always_exploit=False, memory="default", branch_prob=0.0, growing_search=None,
-                 soft_z=False, growing_depth=False):
+    kwargs = {
+        "policy": Policy.OFF,
+        "always_exploit": False,
+        "memory": "default",
+        "branch_prob": 0.0,
+        "soft_z": False,
+        "growing_search": None,
+        "growing_depth": False
+    }
+
+    def __init__(self, apprentice: BaseApprentice, expert: BaseExpert, **kwargs):
+        self.kwargs = update_existing(self.kwargs, kwargs)
+        # Convert potential bool to default float.
+        self.kwargs["growing_search"] = get_grow_search_val(self.kwargs.get("growing_search"))
+
         self.apprentice = apprentice
         self.expert = expert
-        self.__search_time = None
+
+        # ***** Init parameters *****
         self.game_class = None
         self.games_generated = 0
-        self.state_branch_degree = branch_prob
-        self.policy = policy
-        self.always_exploit = always_exploit
-        self.growing_search = growing_search
-        self.soft_z = soft_z
-        self.growing_depth = growing_depth
+        self.soft_z = self.kwargs.get("soft_z")
+        self.growing_search = self.kwargs.get("growing_search")
+        self.__search_time = 0.0 if self.growing_search is not None else None
 
-        # Set name.
+        # ***** Calculate an appropriate name for this expert iteration variant *****
         extra_name = ""
-        if memory is None or memory == "default" or memory == "MemoryList":
+        if self.kwargs.get("memory") in [None, "default", "MemoryList"]:
             self.memory = MemoryList()
-        elif memory == "MemorySet":
+        elif self.kwargs.get("memory") == "MemorySet":
             self.memory = MemorySet()
             extra_name += "_MemSet"
-        elif memory == "MemorySetAvg":
+        elif self.kwargs.get("memory") == "MemorySetAvg":
             self.memory = MemorySetAvg()
             extra_name += "_MemSetAvg"
-        elif memory == "MemoryListGrowing":
+        elif self.kwargs.get("memory") == "MemoryListGrowing":
             self.memory = MemoryListGrowing()
             extra_name += "_MemGrow"
         else:
             raise Exception("Unknown Memory object!")
 
-        if self.growing_depth:
+        if self.kwargs.get("growing_depth"):
             extra_name += "_Grow-depth"
             self.expert.fixed_depth = 1
         if self.soft_z:
@@ -76,13 +102,15 @@ class ExpertIteration:
         if self.apprentice.use_custom_loss:
             extra_name += "_Custom-loss"
         if self.growing_search is not None:
-            extra_name += "_Grow-" + str(growing_search)
-        if branch_prob > 0.0:
-            extra_name += "_Branch-" + str(branch_prob)
-        if always_exploit:
+            extra_name += "_Grow-" + str(self.growing_search)
+        if self.kwargs.get("branch_prob") > 0.0:
+            extra_name += "_Branch-" + str(self.kwargs.get("branch_prob"))
+        if self.kwargs.get("always_exploit"):
             extra_name += "_Exploit"
+
+        # Set same of expert iteration variant.
         self.__name__ = "ExIt_" + str(type(self.apprentice).__name__) + "_" + str(self.expert.__name__) \
-                        + "_" + str(self.policy.value) + extra_name
+                        + "_" + str(self.kwargs.get("policy").value) + extra_name
 
     def set_game(self, game_class):
         self.game_class = game_class
@@ -101,7 +129,7 @@ class ExpertIteration:
         def self_play():
             if self.growing_search is not None:
                 self.__search_time += self.growing_search
-            if self.growing_depth:
+            if self.kwargs.get("growing_depth"):
                 if self.memory.should_increment():
                     # This is used for Minimax variants only.
                     self.expert.fixed_depth += 1
@@ -159,7 +187,7 @@ class ExpertIteration:
                 return None, None, None
             s, pi, v, t, a = self.ex_it_state(state)
 
-            if random.uniform(0, 1) < self.state_branch_degree:
+            if random.uniform(0, 1) < self.kwargs.get("branch_prob"):
                 # Make branch from the main line.
                 state_copies = add_different_advance(
                     state=state,
@@ -191,9 +219,9 @@ class ExpertIteration:
     def ex_it_state(self, state: BaseGame):
         """ Expert Iteration for a given state """
         a, a_best, v = self.expert.search(
-            state, self.apprentice, self.__search_time, self.always_exploit
+            state, self.apprentice, self.__search_time, self.kwargs.get("always_exploit")
         )
-        if self.policy == Policy.OFF:
+        if self.kwargs.get("policy") == Policy.OFF:
             # Store best action.
             s, pi, t = generate_sample(state, a_best)
         else:

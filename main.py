@@ -45,14 +45,14 @@ players = [
     NnMctsPlayer(),
     NnMinimaxPlayer(use_ab=True),
     RandomPlayer(),
-    StaticMinimaxPlayer(depth=1),
-    StaticMinimaxPlayer(depth=2)
+    BruteForcePlayer(depth=1),
+    BruteForcePlayer(depth=2)
 ]
 # Search time for each player.
 search_time = get_seconds(s=0.25)
 
 # Total time for each player to self-train.
-time_limit = get_seconds(h=4)
+time_limit = get_seconds(m=5)
 # Number of versions to be trained.
 num_versions = 20
 # Timer. NB: Each version is trained for time_limit / num_versions time).
@@ -65,6 +65,8 @@ num_elo_matches = 10000
 match_randomness = 0.1
 
 # ********** Run info END **********
+
+
 
 
 def main():
@@ -94,7 +96,7 @@ def plot_elo():
 def test_play():
     play_player(
         game_class=game_class,
-        player=StaticMinimaxPlayer(depth=2),
+        player=BruteForcePlayer(depth=2),
         search_time=None,
         version=None
     )
@@ -127,7 +129,7 @@ def comparison_from_scratch():
 
 def comparison_trained():
     from Matchmaking.Comparison1v1 import compare_ex_it_trained
-    players = [NnMinimaxPlayer(use_ab=True), StaticMinimaxPlayer()]
+    players = [NnMinimaxPlayer(use_ab=True), BruteForcePlayer(depth=2)]
     versions = [23]#range(20)
     compare_ex_it_trained(
         game_class=game_class,

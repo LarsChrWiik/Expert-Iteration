@@ -6,20 +6,39 @@ from ExIt.Expert.Minimax import Minimax
 from ExIt.Expert.Mcts import Mcts
 from ExIt.ExpertIteration import ExpertIteration
 from Players.BasePlayers import BasePlayer, BaseExItPlayer
-from ExIt.Policy import Policy, explore
-import random
-from Matchmaking.GameHandler import GameHandler
+from ExIt.Policy import Policy
 
 
-GROWING_SEARCH_VALUE = 0.0001
+def assert_kwargs(main_kwargs, kwargs):
+    for key, value in kwargs.items():
+        if key not in main_kwargs:
+            raise Exception("Unknown keyword:", key, "with value", kwargs.get(key))
 
 
-def get_grow_search_val(growing_search):
-    return GROWING_SEARCH_VALUE if growing_search else None
+def assert_new_kwargs(kwargs):
+    fixed_depth = kwargs.get("fixed_depth")
+    growing_search = kwargs.get("growing_search")
+    growing_depth = kwargs.get("growing_depth")
+
+    # Check if fixed depth is bool.
+    if isinstance(fixed_depth, bool) and fixed_depth is not None:
+        raise Exception("fixed_depth much to be an integer")
+
+    # growing_search + growing_depth
+    if growing_search and growing_depth:
+        raise Exception("Cannot have a fixed search depth and growing depth.")
+
+    # growing_search + fixed_depth
+    if growing_search and fixed_depth:
+        raise Exception("Cannot have a growing search time and fixed depth.")
+
+    # growing_depth + fixed_depth
+    if growing_depth and fixed_depth:
+        raise Exception("Cannot have a growing depth and fixed depth.")
 
 
 """ ****************************************
-        Random
+        Random Player
     **************************************** """
 
 
@@ -33,19 +52,16 @@ class RandomPlayer(BasePlayer):
     def move(self, state: BaseGame, randomness=False, verbose=False):
         return self.move_random(state), None, None
 
-    def new_player(self):
-        return RandomPlayer()
-
 
 """ ****************************************
-        Static players
+        Brute-force player
     **************************************** """
 
 
-class StaticMinimaxPlayer(BasePlayer):
+class BruteForcePlayer(BasePlayer):
     """ Static Minimax Player with a fixed depth """
 
-    def __init__(self, depth=2):
+    def __init__(self, depth):
         super().__init__()
         self.depth = depth
         self.minimax = Minimax(fixed_depth=depth)
@@ -61,88 +77,74 @@ class StaticMinimaxPlayer(BasePlayer):
         state.advance(a)
         return a
 
-    def new_player(self):
-        return StaticMinimaxPlayer(depth=self.depth)
-
 
 """ ****************************************
-        MCTS
+        MCTS Player
     **************************************** """
 
 
 class NnMctsPlayer(BaseExItPlayer):
 
-    def __init__(self, policy=Policy.OFF, growing_search=False, soft_z=False,
-                 memory="default", branch_prob=0.0, always_exploit=False):
+    kwargs = {
+        "policy": Policy.OFF,
+        "growing_search": False,
+        "soft_z": False,
+        "memory": "default",
+        "branch_prob": 0.0,
+        "always_exploit": False
+    }
+
+    def __init__(self, **kwargs):
+        assert_kwargs(self.kwargs, kwargs)
+        self.kwargs.update(kwargs)
+        assert_new_kwargs(self.kwargs)
+
         super().__init__(
             ex_it_algorithm=ExpertIteration(
                 apprentice=Nn(),
                 expert=Mcts(),
-                policy=policy,
-                growing_search=get_grow_search_val(growing_search),
-                soft_z=soft_z,
-                memory=memory,
-                branch_prob=branch_prob,
-                always_exploit=always_exploit
+                **self.kwargs
             )
         )
-        self.policy = policy
-        self.growing_search = growing_search
-        self.soft_z = soft_z
-        self.memory = memory
-        self.branch_prob = branch_prob
-        self.always_exploit = always_exploit
-        if growing_search:
-            self.set_search_time(0.0)
 
-    def new_player(self):
-        return NnMctsPlayer(
-            policy=self.policy, growing_search=self.growing_search, soft_z=self.soft_z,
-            memory=self.memory, branch_prob=self.branch_prob, always_exploit=self.always_exploit
-        )
+    def new(self):
+        return NnMctsPlayer(**self.kwargs)
 
 
 """ ****************************************
-        Minimax and Alpha Beta
+        Minimax / Alpha Beta Player
     **************************************** """
 
 
 class NnMinimaxPlayer(BaseExItPlayer):
 
-    def __init__(self, use_ab=False, fixed_depth=None, policy=Policy.OFF, growing_search=False,
-                 soft_z=False, growing_depth=False, memory="default", branch_prob=0.0,
-                 always_exploit=False):
-        if fixed_depth is not None and growing_search:
-            raise Exception("Cannot have a fixed search depth and growing search timer!")
+    kwargs = {
+        "use_ab": False,
+        "policy": Policy.OFF,
+        "growing_search": False,
+        "fixed_depth": None,
+        "soft_z": False,
+        "growing_depth": False,
+        "memory": "default",
+        "branch_prob": 0.0,
+        "always_exploit": False
+    }
+
+    def __init__(self, **kwargs):
+        assert_kwargs(self.kwargs, kwargs)
+        self.kwargs.update(kwargs)
+        assert_new_kwargs(self.kwargs)
+
         super().__init__(
             ex_it_algorithm=ExpertIteration(
                 apprentice=Nn(),
-                expert=Minimax(fixed_depth=fixed_depth, use_ab=use_ab),
-                policy=policy,
-                growing_search=get_grow_search_val(growing_search),
-                soft_z=soft_z,
-                growing_depth=growing_depth,
-                memory=memory,
-                branch_prob=branch_prob,
-                always_exploit=always_exploit
+                expert=Minimax(
+                    fixed_depth=self.kwargs.get("fixed_depth"),
+                    use_ab=self.kwargs.get("use_ab")
+                ),
+                **self.kwargs
             )
         )
-        self.use_ab = use_ab
-        self.fixed_depth = fixed_depth
-        self.policy = policy
-        self.growing_search = growing_search
-        self.soft_z = soft_z
-        self.memory = memory
-        self.growing_depth = growing_depth
-        self.branch_prob = branch_prob
-        self.always_exploit = always_exploit
-        if growing_search:
-            self.set_search_time(0.0)
 
-    def new_player(self):
-        return NnMinimaxPlayer(
-            use_ab=self.use_ab, fixed_depth=self.fixed_depth, policy=self.policy,
-            growing_search=self.growing_search, soft_z=self.soft_z,
-            growing_depth=self.growing_depth, memory=self.memory, branch_prob=self.branch_prob,
-            always_exploit=self.always_exploit
-        )
+    def new(self):
+        return NnMinimaxPlayer(**self.kwargs)
