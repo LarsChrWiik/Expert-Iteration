@@ -17,13 +17,11 @@ def set_indexes(players: ["BasePlayer"]):
 class BasePlayer:
     """ Base player that is able to move """
 
-    rnd_e = 0.1
-
     def __init__(self):
         # Unique index of the player.
         self.index = None
 
-    def move(self, state: BaseGame, randomness=False, verbose=False):
+    def move(self, state: BaseGame, verbose=False):
         raise NotImplementedError("Please Implement this method")
 
     def new_player(self):
@@ -55,7 +53,7 @@ class BaseExItPlayer(BasePlayer):
     def new_player(self):
         raise NotImplementedError("Please Implement this method")
 
-    def move(self, state: BaseGame, randomness=False, verbose=True):
+    def move(self, state: BaseGame, verbose=True):
         """ Move according to the apprentice (No expert) """
         fv = state.get_feature_vector()
         pi_pred = self.ex_it_algorithm.apprentice.pred_pi(fv)
@@ -67,10 +65,6 @@ class BaseExItPlayer(BasePlayer):
             print("pi =", pi)
 
         a = exploit_action(pi, lm)
-        if randomness and len(lm) > 1 and random.uniform(0, 1) < self.rnd_e:
-            # Chose non-optimal move.
-            a = explore([x for x in lm if x != a])
-
         state.advance(a)
         return a
 
