@@ -38,12 +38,12 @@ V[s]    = Predicted v value of state s.
 # ********** Run info START **********
 
 # Game.
-game_class = TicTacToe4x4
+game_class = TicTacToe
 
 # Players to compare.
 players = [
-    NnMinimaxPlayer(use_ab=True),
     NnMctsPlayer(),
+    NnMinimaxPlayer(use_ab=True),
     RandomPlayer(),
     StaticMinimaxPlayer(depth=1),
     StaticMinimaxPlayer(depth=2)
@@ -61,8 +61,8 @@ training_timer = TrainingTimer(time_limit, num_versions)
 # Number of matches to compare the players. This is used to calculate Elo.
 # More matches = more certain of elo scores.
 num_elo_matches = 10000
-# Should some random moves be added in the tournament to generate new states.
-match_randomness = True
+# Chance of random action when advancing.
+match_randomness = 0.1
 
 # ********** Run info END **********
 
@@ -113,15 +113,15 @@ def train_and_store():
 def comparison_from_scratch():
     from Matchmaking.Comparison1v1 import compare_ex_it_from_scratch
     # Run Comparison with several iteration of self-play.
-    players = [NnMinimaxPlayer(use_ab=True, growing_depth=True), RandomPlayer()]
+    players = [NnMinimaxPlayer(use_ab=True), RandomPlayer()]
 
     compare_ex_it_from_scratch(
-        game_class=Othello,
+        game_class=TicTacToe,
         players=players,
         search_time=search_time,
         num_matches=100,
         training_timer=training_timer,
-        randomness=True # <---------------------------------- Remember!
+        randomness=match_randomness # <---------------------------------- Remember!
     )
 
 
@@ -133,33 +133,9 @@ def comparison_trained():
         game_class=game_class,
         raw_players=players,
         num_matches=100,
-        randomness=True,  # <---------------------------------- Remember!
+        randomness=match_randomness,  # <---------------------------------- Remember!
         versions=versions
     )
-
-
-def elo_tournament():
-    players = [NnMinimaxPlayer(use_ab=True), RandomPlayer()]
-    start_elo_tournament(
-        game_class=TicTacToe,
-        raw_players=players,
-        num_versions=num_versions,
-        num_matches=num_elo_matches,
-        randomness=True # <---------------------------------- Remember!
-    )
-
-
-def normal_exit_test():
-    from Misc.Debugger import debug_display_win_moves
-    # Run One iteration of self.play
-    player = NnMctsPlayer()
-    player.set_game(game_class=TicTacToe)
-    if player.ex_it_algorithm.growing_search is None:
-        player.set_search_time(search_time)
-    player.start_ex_it(training_timer)
-
-    # Display the agents calculations in predefined scenarios.
-    debug_display_win_moves(player)
 
 
 if __name__ == "__main__":
