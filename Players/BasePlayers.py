@@ -2,10 +2,7 @@
 from Games.GameLogic import BaseGame
 from ExIt.ExpertIteration import ExpertIteration
 from random import choice as rnd_choice
-from ExIt.Evaluator import get_reward_for_action
 from ExIt.Policy import e_greedy, exploit_action, explore
-import numpy as np
-import random
 
 
 def set_indexes(players: ["BasePlayer"]):
