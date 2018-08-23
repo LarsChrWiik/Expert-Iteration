@@ -16,3 +16,9 @@ class RandomPredictor(BaseApprentice):
         pi = [random.uniform(0, 1) for _ in range(len(X))]
         s = sum(pi)
         return [p / s for p in pi]
+
+    def train(self, X, Y_pi, Y_r):
+        raise NotImplementedError("The Random Predictor does not have this functionality. ")
+
+    def set_model(self, trained_model):
+        raise NotImplementedError("The Random Predictor does not have this functionality. ")
