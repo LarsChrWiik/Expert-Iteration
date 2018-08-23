@@ -14,7 +14,7 @@ DEFAULT_GROWING_SEARCH_VALUE = 0.0001
 DEFAULT_MIN_SEARCH_TIME = 0.05
 
 
-def get_grow_search_val(growing_search):
+def get_growing_search_val(growing_search):
     if isinstance(growing_search, bool):
         return DEFAULT_GROWING_SEARCH_VALUE if growing_search else None
     return growing_search
@@ -56,7 +56,7 @@ class ExpertIteration:
 
     kwargs = {
         "policy": Policy.OFF,
-        "growing_search": None,
+        "growing_search": False,
         "growing_depth": False,
         "min_growing_time": None,
         "soft_z": False,
@@ -67,8 +67,6 @@ class ExpertIteration:
 
     def __init__(self, apprentice: BaseApprentice, expert: BaseExpert, **kwargs):
         self.kwargs = update_existing(self.kwargs, kwargs)
-        # Convert potential bool to default float.
-        self.kwargs["growing_search"] = get_grow_search_val(self.kwargs.get("growing_search"))
 
         self.apprentice = apprentice
         self.expert = expert
@@ -79,8 +77,9 @@ class ExpertIteration:
         self.soft_z = self.kwargs.get("soft_z")
         self.policy = self.kwargs.get("policy")
         self.state_branch_degree = self.kwargs.get("branch_prob")
-        self.growing_search = self.kwargs.get("growing_search")
-        self.__search_time = DEFAULT_MIN_SEARCH_TIME if self.growing_search is not None else None
+        self.use_growing_search_time = self.kwargs.get("growing_search")
+        self.growing_search_val = get_growing_search_val(self.kwargs.get("growing_search"))
+        self.__search_time = DEFAULT_MIN_SEARCH_TIME if self.growing_search_val is not None else None
 
         # ***** Calculate an appropriate name for this expert iteration variant *****
         extra_name = ""
@@ -105,10 +104,10 @@ class ExpertIteration:
             extra_name += "_Soft-Z"
         if self.apprentice.use_custom_loss:
             extra_name += "_Custom-loss"
-        if self.growing_search is not None:
+        if self.use_growing_search_time:
             min_time = DEFAULT_MIN_SEARCH_TIME if self.kwargs.get("min_growing_time") is None \
                 else self.kwargs.get("min_growing_time")
-            extra_name += "_Grow-" + str(min_time) + "+" + str(self.growing_search)
+            extra_name += "_Grow-" + str(min_time) + "+" + str(self.growing_search_val)
         if self.state_branch_degree > 0.0:
             extra_name += "_Branch-" + str(self.state_branch_degree)
         if self.kwargs.get("always_exploit"):
@@ -133,8 +132,8 @@ class ExpertIteration:
             This process is time consuming. """
 
         def self_play():
-            if self.growing_search is not None:
-                self.__search_time += self.growing_search
+            if self.use_growing_search_time:
+                self.__search_time += self.growing_search_val
             if self.kwargs.get("growing_depth"):
                 if self.memory.should_increment():
                     # This is used for Minimax variants only.

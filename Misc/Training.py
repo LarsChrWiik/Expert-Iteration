@@ -12,7 +12,7 @@ def self_play_and_store_versions(game_class, players, search_time, training_time
         if not isinstance(p, BaseExItPlayer):
             continue
         p.set_game(game_class)
-        if p.ex_it_algorithm.growing_search is None:
+        if not p.ex_it_algorithm.use_growing_search_time:
             p.set_search_time(search_time)
         base_path = create_training_folders(game_class, p)
         create_training_meta_file(base_path, p, search_time, training_timer)

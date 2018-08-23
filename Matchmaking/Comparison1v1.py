@@ -47,7 +47,7 @@ def compare_ex_it_from_scratch(game_class, players, search_time,
         if isinstance(p, BaseExItPlayer):
             if p.ex_it_algorithm.apprentice.model is None:
                 p.set_game(game_class)
-                if p.ex_it_algorithm.growing_search is None:
+                if not p.ex_it_algorithm.use_growing_search_time:
                     p.set_search_time(search_time)
 
     """ Compare players through several iterations of self-play.

@@ -37,12 +37,12 @@ V[s]    = Predicted v value of state s.
 # ********** Run info START **********
 
 # Game.
-game_class = TicTacToe()
+game_class = ConnectFour()
 
 # Players to compare.
 players = [
     NnMctsPlayer(),
-    NnMinimaxPlayer(use_ab=True),
+    NnMctsPlayer(growing_search=True),
     RandomPlayer(),
     BruteForcePlayer(depth=1),
     BruteForcePlayer(depth=2)
@@ -69,10 +69,10 @@ match_randomness = 0.1
 
 
 def main():
-    pipeline()
+    #pipeline()
     #plot_elo()
     #comparison_trained()
-    #comparison_from_scratch()
+    comparison_from_scratch()
     #test_play()
 
 
@@ -114,8 +114,7 @@ def train_and_store():
 def comparison_from_scratch():
     from Matchmaking.Comparison1v1 import compare_ex_it_from_scratch
     # Run Comparison with several iteration of self-play.
-    players = [NnMctsPlayer(growing_search=True), RandomPlayer()]
-
+    players = [NnMctsPlayer(), RandomPlayer()]
     compare_ex_it_from_scratch(
         game_class=game_class,
         players=players,
