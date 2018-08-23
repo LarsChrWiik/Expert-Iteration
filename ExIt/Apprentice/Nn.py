@@ -29,11 +29,11 @@ class Nn(BaseApprentice):
     dropout_rate = None
     v_size = 1
     regularisation_strength = 0.01
-    optimizer = Adam()
 
     def __init__(self, use_custom_loss=False):
+        self.optimizer = Adam()
         self.model = None
-        self.optimizer = Nn.optimizer
+        self.optimizer = self.optimizer
         self.use_custom_loss = use_custom_loss
         self.policy_network = None
         self.value_network = None
