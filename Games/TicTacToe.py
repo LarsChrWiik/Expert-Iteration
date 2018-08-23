@@ -7,7 +7,7 @@ from Games.GameLogic import bitboard
 
 class TicTacToe(BaseGame):
 
-    kwargs = {
+    default_kwargs = {
         "rows": 3,
         "columns": 3,
         "in_a_row_to_win": 3
@@ -15,6 +15,7 @@ class TicTacToe(BaseGame):
 
     def __init__(self, **kwargs):
         super().__init__()
+        self.kwargs = self.default_kwargs.copy()
         self.kwargs.update(kwargs)
         self.rows = self.kwargs.get("rows")
         self.columns = self.kwargs.get("columns")
