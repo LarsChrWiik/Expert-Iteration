@@ -14,10 +14,10 @@ DEFAULT_GROWING_SEARCH_VALUE = 0.0001
 DEFAULT_MIN_SEARCH_TIME = 0.05
 
 
-def get_growing_search_val(growing_search):
-    if isinstance(growing_search, bool):
-        return DEFAULT_GROWING_SEARCH_VALUE if growing_search else None
-    return growing_search
+def get_growing_search_val(growing_search_time):
+    if isinstance(growing_search_time, bool):
+        return DEFAULT_GROWING_SEARCH_VALUE if growing_search_time else None
+    return growing_search_time
 
 
 def update_v_values_to_game_outcome(final_state: BaseGame, turn_array, v_array):
@@ -54,9 +54,9 @@ def update_existing(main_kwargs, kwargs):
 
 class ExpertIteration:
 
-    kwargs = {
+    default_kwargs = {
         "policy": Policy.OFF,
-        "growing_search": False,
+        "growing_search_time": False,
         "growing_depth": False,
         "min_growing_time": None,
         "soft_z": False,
@@ -66,6 +66,7 @@ class ExpertIteration:
     }
 
     def __init__(self, apprentice: BaseApprentice, expert: BaseExpert, **kwargs):
+        self.kwargs = self.default_kwargs.copy()
         self.kwargs = update_existing(self.kwargs, kwargs)
 
         self.apprentice = apprentice
@@ -77,8 +78,8 @@ class ExpertIteration:
         self.soft_z = self.kwargs.get("soft_z")
         self.policy = self.kwargs.get("policy")
         self.state_branch_degree = self.kwargs.get("branch_prob")
-        self.use_growing_search_time = self.kwargs.get("growing_search")
-        self.growing_search_val = get_growing_search_val(self.kwargs.get("growing_search"))
+        self.use_growing_search_time = self.kwargs.get("growing_search_time")
+        self.growing_search_val = get_growing_search_val(self.kwargs.get("growing_search_time"))
         self.__search_time = DEFAULT_MIN_SEARCH_TIME if self.growing_search_val is not None else None
 
         # ***** Calculate an appropriate name for this expert iteration variant *****
