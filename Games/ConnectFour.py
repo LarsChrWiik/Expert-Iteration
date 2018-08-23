@@ -6,7 +6,7 @@ from Games.GameLogic import bitboard
 
 class ConnectFour(BaseGame):
 
-    kwargs = {
+    default_kwargs = {
         "rows": 6,
         "columns": 7,
         "in_a_row_to_win": 4
@@ -14,6 +14,7 @@ class ConnectFour(BaseGame):
 
     def __init__(self, **kwargs):
         super().__init__()
+        self.kwargs = self.default_kwargs.copy()
         self.kwargs.update(kwargs)
         self.rows = self.kwargs.get("rows")
         self.columns = self.kwargs.get("columns")
