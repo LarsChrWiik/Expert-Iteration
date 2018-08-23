@@ -10,7 +10,7 @@ def get_seconds(d=0, h=0, m=0, s=0, ms=0):
     :param h: Hours.
     :param m: Minutes.
     :param s: Seconds.
-    :param ms: Milli seconds.
+    :param ms: Milliseconds.
 
     :return: float representing seconds.
     """
