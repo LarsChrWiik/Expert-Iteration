@@ -18,8 +18,8 @@ def self_play_and_store_versions(game_class, players, search_time, training_time
         create_training_meta_file(base_path, p, search_time, training_timer)
         player_and_path.append((p, base_path))
 
-    for i in range(training_timer.num_versions):
-        for p, path in player_and_path:
+    for p, path in player_and_path:
+        for i in range(training_timer.num_versions):
             # Self-train.
             p.start_ex_it(training_timer, verbose=True)
             # Save model.
