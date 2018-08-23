@@ -6,7 +6,7 @@ from Games.GameLogic import bitboard
 
 class Othello(BaseGame):
 
-    kwargs = {
+    default_kwargs = {
         "rows": 8,
         "columns": 8
     }
@@ -20,6 +20,7 @@ class Othello(BaseGame):
 
     def __init__(self, **kwargs):
         super().__init__()
+        self.kwargs = self.default_kwargs.copy()
         self.kwargs.update(kwargs)
         self.rows = self.kwargs.get("rows")
         self.columns = self.kwargs.get("columns")
