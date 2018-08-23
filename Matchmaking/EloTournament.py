@@ -1,5 +1,4 @@
 
-from Players.BasePlayers import BasePlayer, BaseExItPlayer
 from Matchmaking.GameHandler import GameHandler
 from Misc.DiskHandler import create_elo_folders, save_game_to_pgn, \
     load_trained_models, create_elo_meta_file, load_train_version_time
