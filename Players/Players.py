@@ -17,19 +17,19 @@ def assert_kwargs(main_kwargs, kwargs):
 
 def assert_new_kwargs(kwargs):
     fixed_depth = kwargs.get("fixed_depth")
-    growing_search = kwargs.get("growing_search")
+    growing_search_time = kwargs.get("growing_search_time")
     growing_depth = kwargs.get("growing_depth")
 
     # Check if fixed depth is bool.
     if isinstance(fixed_depth, bool) and fixed_depth is not None:
         raise Exception("fixed_depth much to be an integer")
 
-    # growing_search + growing_depth
-    if growing_search and growing_depth:
+    # growing_search_time + growing_depth
+    if growing_search_time and growing_depth:
         raise Exception("Cannot have a fixed search depth and growing depth.")
 
-    # growing_search + fixed_depth
-    if growing_search and fixed_depth:
+    # growing_search_time + fixed_depth
+    if growing_search_time and fixed_depth:
         raise Exception("Cannot have a growing search time and fixed depth.")
 
     # growing_depth + fixed_depth
@@ -85,9 +85,9 @@ class BruteForcePlayer(BasePlayer):
 
 class NnMctsPlayer(BaseExItPlayer):
 
-    kwargs = {
+    default_kwargs = {
         "policy": Policy.OFF,
-        "growing_search": False,
+        "growing_search_time": False,
         "min_growing_time": None,
         "soft_z": False,
         "memory": "default",
@@ -96,6 +96,7 @@ class NnMctsPlayer(BaseExItPlayer):
     }
 
     def __init__(self, **kwargs):
+        self.kwargs = self.default_kwargs.copy()
         assert_kwargs(self.kwargs, kwargs)
         self.kwargs.update(kwargs)
         assert_new_kwargs(self.kwargs)
@@ -119,11 +120,11 @@ class NnMctsPlayer(BaseExItPlayer):
 
 class NnMinimaxPlayer(BaseExItPlayer):
 
-    kwargs = {
+    default_kwargs = {
         "use_ab": False,
         "policy": Policy.OFF,
         "fixed_depth": None,
-        "growing_search": False,
+        "growing_search_time": False,
         "min_growing_time": None,
         "growing_depth": False,
         "soft_z": False,
@@ -133,6 +134,7 @@ class NnMinimaxPlayer(BaseExItPlayer):
     }
 
     def __init__(self, **kwargs):
+        self.kwargs = self.default_kwargs.copy()
         assert_kwargs(self.kwargs, kwargs)
         self.kwargs.update(kwargs)
         assert_new_kwargs(self.kwargs)
