@@ -12,7 +12,8 @@ from ExIt.Policy import Policy
 def assert_kwargs(main_kwargs, kwargs):
     for key, value in kwargs.items():
         if key not in main_kwargs:
-            raise Exception("Unknown keyword:", key, "with value", kwargs.get(key))
+            raise Exception("Unknown keyword: \"" + str(key) + "\" with value \""
+                            + str(kwargs.get(key)) + "\"")
 
 
 def assert_new_kwargs(kwargs):
