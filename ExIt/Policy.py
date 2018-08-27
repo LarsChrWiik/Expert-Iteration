@@ -39,6 +39,7 @@ def e_greedy(xi, lm, e=None):
 
 
 def e_greedy_action(a, a_best, e=None):
+    """ Return 1 out of 2 actions based on e-greedy probability """
     if e is None:
         e = exploration_degree
     if random.uniform(0, 1) < e:
@@ -64,14 +65,6 @@ def vi_proportional(vi, lm):
     else:
         vi2 = [x / s for x in vi]
     return explore_proportional(vi2, lm)
-
-
-# TODO: Not used.
-def argmax(array):
-    """ Argmax implementation that chooses randomly
-        when multiple indexes contain the highest value. """
-    array = np.array(array)
-    return np.random.choice(np.flatnonzero(array == array.max()))
 
 
 class Policy(Enum):
