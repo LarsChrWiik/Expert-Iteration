@@ -15,6 +15,7 @@ DEFAULT_MIN_SEARCH_TIME = 0.05
 
 
 def get_growing_search_val(growing_search_time):
+    """ Return the growing search time value given kwargs bool """
     if isinstance(growing_search_time, bool):
         return DEFAULT_GROWING_SEARCH_VALUE if growing_search_time else None
     return growing_search_time
@@ -28,10 +29,11 @@ def update_v_values_to_game_outcome(final_state: BaseGame, turn_array, v_array):
     return v_array
 
 
-def generate_sample(state: BaseGame, a):
+def generate_pi(state: BaseGame, a):
+    """ Generate action probability pi given an action index """
     p_new = np.zeros(state.num_actions, dtype=float)
     p_new[a] = 1
-    return state.get_feature_vector(), p_new, state.turn
+    return p_new
 
 
 def add_different_advance(state, best_action, state_copies):
@@ -228,9 +230,11 @@ class ExpertIteration:
             state, self.apprentice, self.__search_time, self.kwargs.get("always_exploit")
         )
         if self.policy == Policy.OFF:
-            # Store best action.
-            s, pi, t = generate_sample(state, a_best)
+            # Uses the optimal action to generate pi target.
+            pi = generate_pi(state, a_best)
         else:
-            # Store action that was made in the game.
-            s, pi, t = generate_sample(state, a)
+            # Uses the exploration action to generate pi target.
+            pi = generate_pi(state, a)
+        s = state.get_feature_vector()
+        t = state.turn
         return s, pi, v, t, a
