@@ -15,7 +15,7 @@ np.set_printoptions(suppress=True)
 
 
 # Game.
-game_class = ConnectFour()
+game_class = TicTacToe()
 
 # Players to compare.
 players = [
@@ -26,18 +26,18 @@ players = [
     BruteForcePlayer(depth=2)
 ]
 # Search time for each player.
-search_time = get_seconds(s=0.25)
+search_time = get_seconds(s=0.1)
 
 # Total time for each player to self-train.
-time_limit = get_seconds(h=4)
+time_limit = get_seconds(m=5)
 # Number of versions to be trained.
-num_versions = 20
+num_versions = 5
 # Timer. NB: Each version is trained for time_limit / num_versions time).
 training_timer = TrainingTimer(time_limit, num_versions)
 
 # Number of matches to compare the players. This is used to calculate Elo.
 # More matches = more certain of elo scores.
-num_elo_matches = 10000
+num_elo_matches = 1000
 # Chance of random action when advancing.
 match_randomness = 0.1
 
