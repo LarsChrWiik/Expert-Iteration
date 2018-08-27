@@ -1,4 +1,4 @@
-# Expert Iteration (α-β vs. MCTS)
+# Expert Iteration (α-β search vs. MCTS)
 
 ### α-β search vs. Monte Carlo tree search (TicTacToe)
 
