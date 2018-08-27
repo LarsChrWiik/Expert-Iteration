@@ -4,15 +4,12 @@ from ExIt.Apprentice import BaseApprentice
 from Games.GameLogic import BaseGame
 from Misc.TrainingTimer import TrainingTimer
 from ExIt.Evaluator import zero_sum_2v2_evaluation
-from ExIt.Policy import explore_proportional, explore_proportional_with_guidance, exploit_action, e_greedy, vi_proportional
+from ExIt.Policy import explore_proportional_with_guidance, exploit_action, e_greedy, vi_proportional
 
 
 class Minimax(BaseExpert):
-    """ Minimax and Alpha Beta implementation.
-        Set use_alpha_beta=True to use Alpha-Beta search instead of Minimax search.
-
-        This implementation is designed for Zero-sum,
-        two-player deterministic markov games """
+    """ Minimax / Alpha Beta Expert.
+        Set use_alpha_beta=True to use Alpha-Beta search instead of Minimax search. """
 
     def __init__(self, fixed_depth=None, use_ab=False, switch=False):
         super().__init__()
