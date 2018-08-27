@@ -187,6 +187,7 @@ class ExpertIteration:
                 self_play()
 
     def ex_it_game(self, state, training_timer=None):
+        """ Self-play a game until it finishes """
         s_array, pi_array, v_array, turn_array = [], [], [], []
         state_copies = []
 
