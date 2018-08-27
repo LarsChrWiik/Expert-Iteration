@@ -4,6 +4,7 @@ import random
 
 
 class RandomPredictor(BaseApprentice):
+    """ This class is used for making random predictions """
 
     def init_model(self, input_fv_size, pi_size):
         self.input_fv_size = input_fv_size
