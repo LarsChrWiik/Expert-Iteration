@@ -6,8 +6,8 @@
 
 ### α-β search vs. Monte Carlo tree search (Connect4)
 
-![logo](./Diagrams/2.png?raw=true)
+![logo](./diagrams/2.png?raw=true)
 
 ### α-β search vs. α-β search with growing search depth (Connect4)
 
-![logo](./Diagrams/3.png?raw=true)
+![logo](./diagrams/3.png?raw=true)
