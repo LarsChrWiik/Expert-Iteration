@@ -36,15 +36,15 @@ def generate_pi(state: BaseGame, a):
     return p_new
 
 
-def add_different_advance(state, best_action, state_copies):
+def get_branch_state(state, best_action):
+    """ Return a branch state """
     c = state.copy()
     lm = c.get_legal_moves()
     if len(lm) <= 1:
-        return state_copies
+        return None
     lm = [x for x in lm if x != best_action]
     c.advance(rnd_element(lm))
-    state_copies.append(c)
-    return state_copies
+    return c
 
 
 def update_existing(main_kwargs, kwargs):
@@ -198,11 +198,9 @@ class ExpertIteration:
 
             if random.uniform(0, 1) < self.state_branch_degree:
                 # Make branch from the main line.
-                state_copies = add_different_advance(
-                    state=state,
-                    best_action=a,
-                    state_copies=state_copies
-                )
+                c_branch = get_branch_state(state=state, best_action=a)
+                if c_branch is not None:
+                    state_copies.append(c_branch)
 
             state.advance(a)
             # Store info.
