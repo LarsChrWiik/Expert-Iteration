@@ -4,12 +4,13 @@ from ExIt.Apprentice import BaseApprentice
 from Games.GameLogic import BaseGame
 from Misc.TrainingTimer import TrainingTimer
 from ExIt.Evaluator import zero_sum_2v2_evaluation
-from ExIt.Policy import explore_proportional, exploit_action, explore_proportional_with_guidance
+from ExIt.Policy import explore_proportional, exploit_action
 from math import sqrt
 from random import shuffle
 
 
 class Mcts(BaseExpert):
+    """ Monte Carlo Tree Search expert """
 
     def __init__(self, c=sqrt(2)):
         super().__init__()
