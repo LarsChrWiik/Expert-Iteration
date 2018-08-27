@@ -11,12 +11,14 @@ from keras.losses import mean_squared_error, categorical_crossentropy
 from keras.regularizers import l2
 
 
+# This function is used for experimentation only.
 def entropy(y):
     # Clip to avoid Zeros.
     y = K.clip(y, 1e-20, 1.0)
     return -K.sum(y * K.log(y))
 
 
+# This function is used for experimentation only.
 def custom_loss(y_true, y_pred, beta=0.001):
     return categorical_crossentropy(y_true, y_pred) - beta * entropy(y_pred)
 
