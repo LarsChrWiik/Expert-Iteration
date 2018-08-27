@@ -1,7 +1,6 @@
 .idea/
 __pycache__
 .DS_Store
-OldCode.py
 Comparison1v1/
 Trained_Models/
 Elo/
