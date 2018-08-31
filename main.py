@@ -11,7 +11,10 @@ from Misc.TrainingTimer import TrainingTimer
 from ExIt.Policy import Policy
 from Misc.PlayGameCLI import play, play_player
 import numpy as np
+import os
 np.set_printoptions(suppress=True)
+# Use CPU instead of GPU.
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
 
 # Game.
