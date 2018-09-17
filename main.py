@@ -18,23 +18,22 @@ os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
 
 # Game.
-game_class = TicTacToe()
+game_class = Othello(rows=6, columns=6)
 
 # Players to compare.
 players = [
     NnMinimaxPlayer(use_ab=True),
-    NnMctsPlayer(),
     RandomPlayer(),
     BruteForcePlayer(depth=1),
     BruteForcePlayer(depth=2)
 ]
 # Search time for each player.
-search_time = get_seconds(s=0.1)
+search_time = get_seconds(s=0.05)
 
 # Total time for each player to self-train.
-time_limit = get_seconds(m=5)
+time_limit = get_seconds(m=2)
 # Number of versions to be trained.
-num_versions = 5
+num_versions = 24
 # Timer. NB: Each version is trained for time_limit / num_versions time).
 training_timer = TrainingTimer(time_limit, num_versions)
 
@@ -47,11 +46,14 @@ match_randomness = 0.1
 
 def main():
     # This will store trained versions of players in the Trained_models folder.
-    self_play_and_store_versions(game_class, players, search_time, training_timer)
+    #self_play_and_store_versions(game_class, players, search_time, training_timer)
+
     # This will generate a PGN file in Elo folder.
-    start_elo_tournament(game_class, players, num_versions, num_elo_matches, match_randomness)
+    #start_elo_tournament(game_class, players, num_versions, num_elo_matches, match_randomness)
+
     # Plot elo scores from rating.txt file in Elo folder after using Bayesian Elo.
-    #plot_elo(game_class, num_versions)
+    plot_elo(game_class, num_versions)
+
     # Play against a player (either static or ExIt player with specified version).
     #play_player(game_class, BruteForcePlayer(depth=2), search_time=None, version=None)
 
