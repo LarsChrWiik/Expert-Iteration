@@ -3,12 +3,14 @@ from enum import Enum
 import numpy as np
 
 
-def bitboard(board):
+def bitboard(board, player_index):
     """ Generate the board feature vector from an np.array.
         This function assumes that the game contains exactly
         one type of piece and exactly two players. """
-    player = 1
-    opponent = 2
+    player = player_index
+    opponent = player_index + 1
+    if opponent > 2:
+        opponent = 1
     player_board = np.where(board == player, 1, 0)
     opponent_board = np.where(board == opponent, 1, 0)
     return np.concatenate((player_board, opponent_board))
