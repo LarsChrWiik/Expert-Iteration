@@ -5,6 +5,7 @@ from Games.ConnectSix import ConnectSix
 from Games.Othello import Othello
 from Players.Players import *
 from Matchmaking.EloTournament import start_elo_tournament
+from Matchmaking.Comparison1v1 import compare_ex_it_from_scratch
 from Misc.Training import self_play_and_store_versions
 from Misc.TrainingTimer import get_seconds
 from Misc.TrainingTimer import TrainingTimer
@@ -15,7 +16,7 @@ np.set_printoptions(suppress=True)
 
 
 # Game.
-game_class = TicTacToe()
+game_class = Othello(rows=6, columns=6)
 
 # Players to compare.
 players = [
@@ -26,12 +27,12 @@ players = [
     BruteForcePlayer(depth=2)
 ]
 # Search time for each player.
-search_time = get_seconds(s=0.1)
+search_time = get_seconds(s=0.5)
 
 # Total time for each player to self-train.
-time_limit = get_seconds(m=5)
+time_limit = get_seconds(h=4)
 # Number of versions to be trained.
-num_versions = 5
+num_versions = 20
 # Timer. NB: Each version is trained for time_limit / num_versions time).
 training_timer = TrainingTimer(time_limit, num_versions)
 
@@ -45,6 +46,9 @@ match_randomness = 0.1
 def main():
     # This will store trained versions of players in the Trained_models folder.
     self_play_and_store_versions(game_class, players, search_time, training_timer)
+
+    #compare_ex_it_from_scratch(game_class, players, search_time, 100, training_timer, randomness=0.1)
+
     # This will generate a PGN file in Elo folder.
     start_elo_tournament(game_class, players, num_versions, num_elo_matches, match_randomness)
     # Plot elo scores from rating.txt file in Elo folder after using Bayesian Elo.
