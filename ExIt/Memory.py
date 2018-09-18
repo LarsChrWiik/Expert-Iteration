@@ -4,8 +4,8 @@ import numpy as np
 import random
 
 
-global_batch_size = 1024
-global_max_memory_size = 50000
+global_batch_size = 10000
+global_max_memory_size = 500000
 
 
 class MemoryList:
