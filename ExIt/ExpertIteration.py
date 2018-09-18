@@ -3,7 +3,7 @@ from ExIt.Apprentice import BaseApprentice
 from ExIt.Expert import BaseExpert
 from Games.GameLogic import BaseGame
 from ExIt.Memory import MemoryList, MemorySet, MemoryListGrowing, MemorySetAvg
-from ExIt.Policy import Policy
+from ExIt.Policy import Policy, explore_proportional
 from tqdm import tqdm
 import numpy as np
 from random import choice as rnd_element
@@ -134,6 +134,49 @@ class ExpertIteration:
         """ Start Expert Iteration to master the given game.
             This process is time consuming. """
 
+        # TODO: Make parameter.
+        NUMBER_OF_STATE_SAMPLES = 1000
+
+        state = self.game_class.new()
+        print(state.get_feature_vector())
+        state.advance(0)
+        print(state.get_feature_vector())
+        state.advance(1)
+        print(state.get_feature_vector())
+        state.advance(3)
+        print(state.get_feature_vector())
+        print("DDDD")
+
+        # 1. Generate state samples.
+        """
+        S = []
+        #for i in range(NUMBER_OF_STATE_SAMPLES):
+        fvs, turn_array = self.generate_game_sample()
+        for i in range(len(fvs)):
+            print(turn_array[i], fvs[i])
+        S.append(None)
+        print("***DONE***")
+        """
+
+        """
+        # 2. Generate Expert Moves.
+        D = []
+        for s, z in S:
+            a = self.expert.search(s)
+            D.append((s, a, z))
+
+        # 3. Training the Apprentice.
+        # TODO: fix.
+        self.apprentice.fit(D)
+        """
+
+
+
+
+
+
+
+        """
         def self_play():
             if self.use_growing_search_time:
                 self.__search_time += self.growing_search_val
@@ -185,6 +228,7 @@ class ExpertIteration:
             training_timer.start_new_lap()
             while training_timer.has_time_left():
                 self_play()
+        """
 
     def ex_it_game(self, state, training_timer=None):
         """ Self-play a game until it finishes """
@@ -237,3 +281,22 @@ class ExpertIteration:
         s = state.get_feature_vector()
         t = state.turn
         return s, pi, v, t, a
+
+    def generate_game_sample(self):
+        state = self.game_class.new()
+        turn_array, fvs = [], []
+        while not state.is_game_over():
+            fv = state.get_feature_vector()
+            pi = self.apprentice.pred_pi(fv)
+
+            # Save state and turn.
+            fvs.append(fv)
+            turn_array.append(state.turn)
+
+            # Advance the game.
+            legal_moves = state.get_legal_moves()
+            pi = [x for i, x in enumerate(pi) if i in legal_moves]
+            a_explore = explore_proportional(pi, legal_moves)
+            state.advance(a_explore)
+
+        return fvs, turn_array
