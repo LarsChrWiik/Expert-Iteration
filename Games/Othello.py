@@ -142,7 +142,7 @@ class Othello(BaseGame):
             self.winner = -1
 
     def get_feature_vector(self):
-        return bitboard(self.board)
+        return bitboard(self.board, self.player_index_to_board_value(self.turn))
 
     def is_draw(self):
         if self.winner == -1:

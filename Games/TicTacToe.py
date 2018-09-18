@@ -126,7 +126,7 @@ class TicTacToe(BaseGame):
             self.winner = -1
 
     def get_feature_vector(self):
-        return bitboard(self.board)
+        return bitboard(self.board, self.player_index_to_board_value(self.turn))
 
     def next_turn(self):
         """ Next turn is always the other player in this game """
