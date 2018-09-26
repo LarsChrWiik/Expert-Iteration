@@ -11,7 +11,7 @@ import random
 
 
 DEFAULT_GROWING_SEARCH_VALUE = 0.0001
-DEFAULT_MIN_SEARCH_TIME = 0.05
+DEFAULT_MIN_SEARCH_TIME = 0.1
 
 
 def get_growing_search_val(growing_search_time):
