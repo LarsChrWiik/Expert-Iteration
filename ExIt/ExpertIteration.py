@@ -117,8 +117,8 @@ class ExpertIteration:
             extra_name += "_Exploit"
 
         # Set same of expert iteration variant.
-        self.__name__ = "ExIt_" + str(type(self.apprentice).__name__) + "_" + str(self.expert.__name__) \
-                        + "_" + str(self.policy.value) + extra_name
+        self.__name__ = "ExIt_" + str(type(self.apprentice).__name__) + "_" \
+                        + str(self.expert.__name__) + "_" + str(self.policy.value) + extra_name
 
     def set_game(self, game_class):
         self.game_class = game_class.new()
@@ -175,7 +175,6 @@ class ExpertIteration:
                 # Update progress bar.
                 progress_bar.set_postfix(
                     mem_size='%d' % self.memory.get_size(),
-                    num_games='%d' % self.games_generated,
                     pi_loss='%.2f' % pi_loss,
                     v_loss='%.2f' % v_loss,
                     time='%.4f' % self.__search_time
@@ -221,6 +220,7 @@ class ExpertIteration:
 
         self.games_generated += 1
 
+        s_array, pi_array, v_array = state.add_augmentations(s_array, pi_array, v_array)
         return s_array, pi_array, v_array
 
     def ex_it_state(self, state: BaseGame):
