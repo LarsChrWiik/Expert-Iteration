@@ -13,24 +13,25 @@ from ExIt.Policy import Policy
 from Misc.PlayGameCLI import play, play_player
 import numpy as np
 np.set_printoptions(suppress=True)
+# os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
 
 # Game.
-game_class = Othello(rows=6, columns=6)
+game_class = Othello()
 
 # Players to compare.
 players = [
-    NnMinimaxPlayer(use_ab=True),
-    NnMctsPlayer(),
+    NnMinimaxPlayer(use_ab=True, growing_search_time=True),
+    #NnMctsPlayer(),
     RandomPlayer(),
     BruteForcePlayer(depth=1),
     BruteForcePlayer(depth=2)
 ]
 # Search time for each player.
-search_time = get_seconds(s=0.5)
+search_time = get_seconds(s=0.1)
 
 # Total time for each player to self-train.
-time_limit = get_seconds(h=4)
+time_limit = get_seconds(h=8)
 # Number of versions to be trained.
 num_versions = 20
 # Timer. NB: Each version is trained for time_limit / num_versions time).
@@ -38,7 +39,7 @@ training_timer = TrainingTimer(time_limit, num_versions)
 
 # Number of matches to compare the players. This is used to calculate Elo.
 # More matches = more certain of elo scores.
-num_elo_matches = 1000
+num_elo_matches = 10000
 # Chance of random action when advancing.
 match_randomness = 0.1
 
