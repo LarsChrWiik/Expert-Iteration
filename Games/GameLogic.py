@@ -92,6 +92,100 @@ class BaseGame:
             return 2
         return 0
 
+    def add_augmentations(self, s_array, pi_array, v_array):
+        return s_array, pi_array, v_array
+
+
+class BaseGameSquareBoard(BaseGame):
+
+    directions = [
+        (-1, -1), (-1, 0), (-1, 1),
+        (0, -1), (0, 1),
+        (1, -1), (1, 0), (1, 1)
+    ]
+
+    def __init__(self):
+        super().__init__()
+        self.rows = None
+        self.columns = None
+
+    def convert_1d_to_2d_board(self, array):
+        board_2d = []
+        for r in range(self.rows):
+            row = []
+            for c in range(self.columns):
+                row.append(array[r*self.columns+c])
+            board_2d.append(row)
+        return board_2d
+
+    def convert_2d_to_1d_board(self, array):
+        board_1d = []
+        for r in range(self.rows):
+            for c in range(self.columns):
+                board_1d.append(array[r][c])
+        return board_1d
+
+    @staticmethod
+    def rotate_clockwise_2D(array_2d):
+        return list(list(x)[::-1] for x in zip(*array_2d))
+
+    def rotate_clockwise_1D(self, x):
+        x = self.convert_1d_to_2d_board(x)
+        x = self.rotate_clockwise_2D(x)
+        return self.convert_2d_to_1d_board(x)
+
+    def rotate_fv_clockwise(self, s_array):
+        p1 = self.rotate_clockwise_1D(s_array[:len(self.board)])
+        p2 = self.rotate_clockwise_1D(s_array[len(self.board):])
+        return p1 + p2
+
+    def is_inside_board(self, i, j):
+        return 0 <= i < self.rows and 0 <= j < self.columns
+
+    def get_board_square(self, i, j):
+        return self.board[self.get_board_index(i, j)]
+
+    def get_board_index(self, i, j):
+        return i * self.columns + j
+
+    @staticmethod
+    def transpose_2D(matrix):
+        return list(map(list, zip(*matrix)))
+
+    def transpose_1D(self, x):
+        x = self.convert_1d_to_2d_board(x)
+        x = self.transpose_2D(x)
+        return self.convert_2d_to_1d_board(x)
+
+    def transpose_fv(self, fv):
+        p1 = self.transpose_1D(fv[:len(self.board)])
+        p2 = self.transpose_1D(fv[len(self.board):])
+        return p1 + p2
+
+    def new(self):
+        super().new()
+
+    def next_turn(self):
+        super().next_turn()
+
+    def copy(self):
+        super().copy()
+
+    def get_legal_moves(self):
+        super().get_legal_moves()
+
+    def advance(self, a):
+        super().advance(a)
+
+    def update_game_state(self):
+        super().update_game_state()
+
+    def get_feature_vector(self):
+        super().get_feature_vector()
+
+    def display(self):
+        super().display()
+
 
 class GameResult(Enum):
     WIN = 1

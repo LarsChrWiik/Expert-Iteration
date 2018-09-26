@@ -1,22 +1,16 @@
 
-from Games.GameLogic import BaseGame
+from Games.GameLogic import BaseGameSquareBoard
 import numpy as np
 from Games.GameLogic import bitboard
+from copy import deepcopy
 
 
-class Othello(BaseGame):
+class Othello(BaseGameSquareBoard):
 
     default_kwargs = {
         "rows": 8,
         "columns": 8
     }
-
-    num_players = 2
-    directions = [
-        (-1, -1), (-1, 0), (-1, 1),
-        ( 0, -1),          ( 0, 1),
-        ( 1, -1), ( 1, 0), ( 1, 1)
-    ]
 
     def __init__(self, **kwargs):
         super().__init__()
@@ -69,7 +63,7 @@ class Othello(BaseGame):
                 if self.get_board_square(i, j) != 0:
                     continue
 
-                for d in Othello.directions:
+                for d in self.directions:
                     # Check all directions.
                     if self.piece_check_direction(i, j, d, turn=turn):
                         legal_actions.append(i * self.columns + j)
@@ -114,21 +108,12 @@ class Othello(BaseGame):
         self.board[a] = board_value
         self.update_game_state(a)
 
-    def is_inside_board(self, i, j):
-        return 0 <= i < self.rows and 0 <= j < self.columns
-
-    def get_board_square(self, i, j):
-        return self.board[self.get_board_index(i, j)]
-
-    def get_board_index(self, i, j):
-        return i * self.columns + j
-
     def update_game_state(self, a):
         i = int(a / self.columns)
         j = a % self.columns
         color = self.get_board_square(i, j)
 
-        for d in Othello.directions:
+        for d in self.directions:
             r, c = d
             i_new, j_new = i + r, j + c
             if self.piece_check_direction(i, j, d, turn=self.turn):
@@ -140,6 +125,30 @@ class Othello(BaseGame):
 
         if self.is_draw():
             self.winner = -1
+
+    def add_augmentations(self, s_array, pi_array, v_array):
+        s_array_new, pi_array_new, v_array_new = [], [], []
+
+        for i in range(len(s_array)):
+            current_s = deepcopy(s_array[i])
+            current_pi = deepcopy(pi_array[i])
+            s_array_new.append(current_s)
+            pi_array_new.append(current_pi)
+            v_array_new.append(v_array[i])
+            for j in range(6):
+                current_s = self.rotate_fv_clockwise(current_s)
+                current_pi = self.rotate_clockwise_1D(current_pi)
+                s_array_new.append(current_s)
+                pi_array_new.append(current_pi)
+                v_array_new.append(v_array[i])
+                if j == 2:
+                    current_s = self.transpose_fv(current_s)
+                    current_pi = self.transpose_1D(current_pi)
+                    s_array_new.append(current_s)
+                    pi_array_new.append(current_pi)
+                    v_array_new.append(v_array[i])
+
+        return s_array_new, pi_array_new, v_array_new
 
     def get_feature_vector(self):
         return bitboard(self.board, self.player_index_to_board_value(self.turn))
@@ -163,12 +172,12 @@ class Othello(BaseGame):
 
     def next_turn(self):
         self.turn += 1
-        if self.turn >= Othello.num_players:
+        if self.turn >= self.num_players:
             self.turn = 0
 
         if len(self.get_legal_moves()) == 0:
             self.turn += 1
-            if self.turn >= Othello.num_players:
+            if self.turn >= self.num_players:
                 self.turn = 0
             if len(self.get_legal_moves()) == 0:
                 # GAME STOPS. Declare winner.
@@ -194,4 +203,19 @@ class Othello(BaseGame):
         c = self.columns
         for r in range(c):
             print(char_board[r*c:r*c + c])
+        print()
+
+    def display_fv(self, fv):
+        char_board = ""
+        size = int(len(fv)/2)
+        for i in range(size):
+            x = fv[i]
+            x2 = fv[i+size]
+            if x == 0 and x2 == 0: char_board += '-'
+            if x == 1: char_board += 'a'
+            if x2 == 1: char_board += 'b'
+        print("*** Print of " + str(type(self).__name__) + " game ***")
+        c = self.columns
+        for r in range(c):
+            print(char_board[r * c:r * c + c])
         print()
