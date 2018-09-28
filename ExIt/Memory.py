@@ -5,7 +5,7 @@ import random
 
 
 global_batch_size = 10000
-global_max_memory_size = 500000
+global_max_memory_size = 1000000
 
 
 class MemoryList:
