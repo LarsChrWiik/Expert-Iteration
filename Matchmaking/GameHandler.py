@@ -45,7 +45,8 @@ class GameHandler:
         else:
             p_text = "None"
             v_text = "None"
-        self.move_text += "   a" + str(a) + " | p=" + p_text + ", v=" + v_text + "\n"
+        #self.move_text += "   a" + str(a) + " | p=" + p_text + ", v=" + v_text + "\n"
+        self.move_text += "   a" + str(a) + "\n"
 
     def play_game_until_finish(self):
         """ Starts the game and let the players play until the game has finished.
