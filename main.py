@@ -21,8 +21,8 @@ game_class = Othello()
 
 # Players to compare.
 players = [
-    NnMinimaxPlayer(use_ab=True, growing_search_time=True),
-    #NnMctsPlayer(),
+    NnMinimaxPlayer(use_ab=True),
+    #NnMctsPlayer(growing_search_time=True),
     RandomPlayer(),
     BruteForcePlayer(depth=1),
     BruteForcePlayer(depth=2)
@@ -31,9 +31,9 @@ players = [
 search_time = get_seconds(s=0.1)
 
 # Total time for each player to self-train.
-time_limit = get_seconds(h=8)
+time_limit = get_seconds(d=1)
 # Number of versions to be trained.
-num_versions = 20
+num_versions = 24
 # Timer. NB: Each version is trained for time_limit / num_versions time).
 training_timer = TrainingTimer(time_limit, num_versions)
 
@@ -55,7 +55,7 @@ def main():
     # Plot elo scores from rating.txt file in Elo folder after using Bayesian Elo.
     #plot_elo(game_class, num_versions)
     # Play against a player (either static or ExIt player with specified version).
-    #play_player(game_class, BruteForcePlayer(depth=2), search_time=None, version=None)
+    #play_player(game_class, NnMinimaxPlayer(use_ab=True, growing_search_time=True), search_time=1.0, version=20)
 
 
 def plot_elo(game_class, num_versions):
