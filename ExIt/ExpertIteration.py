@@ -10,7 +10,7 @@ from random import choice as rnd_element
 import random
 
 
-DEFAULT_GROWING_SEARCH_VALUE = 0.0001
+DEFAULT_GROWING_SEARCH_VALUE = 0.0005
 DEFAULT_MIN_SEARCH_TIME = 0.1
 
 
