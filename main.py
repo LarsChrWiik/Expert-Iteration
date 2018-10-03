@@ -28,7 +28,7 @@ players = [
     BruteForcePlayer(depth=2)
 ]
 # Search time for each player.
-search_time = get_seconds(s=0.1)
+search_time = get_seconds(s=1.0)
 
 # Total time for each player to self-train.
 time_limit = get_seconds(d=1)
