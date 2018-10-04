@@ -48,7 +48,7 @@ def main():
     # This will store trained versions of players in the Trained_models folder.
     self_play_and_store_versions(game_class, players, search_time, training_timer)
 
-    #compare_ex_it_from_scratch(game_class, players, search_time, 100, training_timer, randomness=0.1)
+    #compare_ex_it_from_scratch(game_class, players, search_time, 100, training_timer, randomness=match_randomness)
 
     # This will generate a PGN file in Elo folder.
     start_elo_tournament(game_class, players, num_versions, num_elo_matches, match_randomness)
