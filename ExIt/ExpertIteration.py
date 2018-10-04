@@ -220,7 +220,7 @@ class ExpertIteration:
 
         self.games_generated += 1
 
-        s_array, pi_array, v_array = state.add_augmentations(s_array, pi_array, v_array)
+        s_array, pi_array, v_array = state.get_augmentations(s_array, pi_array, v_array)
         return s_array, pi_array, v_array
 
     def ex_it_state(self, state: BaseGame):

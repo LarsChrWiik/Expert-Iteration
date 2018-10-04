@@ -1,11 +1,11 @@
 
 
-from Games.GameLogic import BaseGame
+from Games.GameLogic import InARowGameSquareBoard
 import numpy as np
 from Games.GameLogic import bitboard
 
 
-class TicTacToe(BaseGame):
+class TicTacToe(InARowGameSquareBoard):
 
     default_kwargs = {
         "rows": 3,
@@ -61,69 +61,14 @@ class TicTacToe(BaseGame):
         self.update_game_state()
 
     def update_game_state(self):
-
-        def check_in_a_row(r):
-            counter = 0
-            last = -1
-            for c in r:
-                if c == 0:
-                    # This field is not taken by any player.
-                    counter = 0
-                    last = -1
-                    continue
-                if c == last:
-                    # The same piece color as last time, check if this player has won.
-                    counter += 1
-                    if counter == self.in_a_row_to_win:
-                        # WINNER!
-                        self.winner = self.board_value_to_player_index(c)
-                        return
-                    continue
-                if c != last and c != 0:
-                    # A new piece color is found, restart the counter for this color.
-                    last = c
-                    counter = 1
-
-        def check_horizontal(board):
-            for r in board:
-                check_in_a_row(r)
-
-        def check_diagonal(board, column_count, row_count):
-            diagonals = [board.diagonal()]
-            """ -> """
-            for i in range(1, row_count - self.in_a_row_to_win + 1):
-                diagonals.append(board.diagonal(offset=i))
-            """ |
-                V """
-            for i in range(1, column_count - self.in_a_row_to_win + 1):
-                diagonals.append(board.diagonal(offset=-i))
-
-            for d in diagonals:
-                check_in_a_row(d)
-
-        # Convert board to matrix.
-        board = np.reshape(self.board, (-1, self.columns))
-
-        # Horizontal "-"
-        check_horizontal(board)
-
-        # Vertical "|"
-        board = np.transpose(board)
-        check_horizontal(board)
-
-        # NB: Board is still transposed, but this does not matter for the checks below.
-        # Diagonal "\"
-        check_diagonal(board, column_count=self.columns, row_count=self.rows)
-
-        # Diagonal "/"
-        board = np.rot90(board)
-        check_diagonal(board, column_count=self.rows, row_count=self.columns)
-
+        self.update_in_a_row_game()
         self.next_turn()
-
         # Is the game a draw.
         if self.is_draw():
             self.winner = -1
+
+    def get_augmentations(self, s_array, pi_array, v_array):
+        return self.get_all_augmentations(s_array, pi_array, v_array)
 
     def get_feature_vector(self):
         return bitboard(self.board, self.player_index_to_board_value(self.turn))

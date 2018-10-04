@@ -126,29 +126,8 @@ class Othello(BaseGameSquareBoard):
         if self.is_draw():
             self.winner = -1
 
-    def add_augmentations(self, s_array, pi_array, v_array):
-        s_array_new, pi_array_new, v_array_new = [], [], []
-
-        for i in range(len(s_array)):
-            current_s = deepcopy(s_array[i])
-            current_pi = deepcopy(pi_array[i])
-            s_array_new.append(current_s)
-            pi_array_new.append(current_pi)
-            v_array_new.append(v_array[i])
-            for j in range(6):
-                current_s = self.rotate_fv_clockwise(current_s)
-                current_pi = self.rotate_clockwise_1D(current_pi)
-                s_array_new.append(current_s)
-                pi_array_new.append(current_pi)
-                v_array_new.append(v_array[i])
-                if j == 2:
-                    current_s = self.transpose_fv(current_s)
-                    current_pi = self.transpose_1D(current_pi)
-                    s_array_new.append(current_s)
-                    pi_array_new.append(current_pi)
-                    v_array_new.append(v_array[i])
-
-        return s_array_new, pi_array_new, v_array_new
+    def get_augmentations(self, s_array, pi_array, v_array):
+        return self.get_all_augmentations(s_array, pi_array, v_array)
 
     def get_feature_vector(self):
         return bitboard(self.board, self.player_index_to_board_value(self.turn))
