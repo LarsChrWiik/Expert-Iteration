@@ -1,6 +1,7 @@
 
 from enum import Enum
 import numpy as np
+from copy import deepcopy
 
 
 def bitboard(board, player_index):
@@ -92,7 +93,7 @@ class BaseGame:
             return 2
         return 0
 
-    def add_augmentations(self, s_array, pi_array, v_array):
+    def get_augmentations(self, s_array, pi_array, v_array):
         return s_array, pi_array, v_array
 
 
@@ -109,36 +110,6 @@ class BaseGameSquareBoard(BaseGame):
         self.rows = None
         self.columns = None
 
-    def convert_1d_to_2d_board(self, array):
-        board_2d = []
-        for r in range(self.rows):
-            row = []
-            for c in range(self.columns):
-                row.append(array[r*self.columns+c])
-            board_2d.append(row)
-        return board_2d
-
-    def convert_2d_to_1d_board(self, array):
-        board_1d = []
-        for r in range(self.rows):
-            for c in range(self.columns):
-                board_1d.append(array[r][c])
-        return board_1d
-
-    @staticmethod
-    def rotate_clockwise_2D(array_2d):
-        return list(list(x)[::-1] for x in zip(*array_2d))
-
-    def rotate_clockwise_1D(self, x):
-        x = self.convert_1d_to_2d_board(x)
-        x = self.rotate_clockwise_2D(x)
-        return self.convert_2d_to_1d_board(x)
-
-    def rotate_fv_clockwise(self, s_array):
-        p1 = self.rotate_clockwise_1D(s_array[:len(self.board)])
-        p2 = self.rotate_clockwise_1D(s_array[len(self.board):])
-        return p1 + p2
-
     def is_inside_board(self, i, j):
         return 0 <= i < self.rows and 0 <= j < self.columns
 
@@ -148,43 +119,165 @@ class BaseGameSquareBoard(BaseGame):
     def get_board_index(self, i, j):
         return i * self.columns + j
 
+    def matrix(self, array):
+        return array.reshape(self.rows, self.columns)
+
+    # Augmentations.
+
+    def rotate_90(self, array, k=1):
+        return np.rot90(self.matrix(array), k).flatten()
+
+    def transpose_array(self, array):
+        return np.transpose(self.matrix(array)).flatten()
+
+    def transpose_s(self, s):
+        return self.__s_function(s, self.transpose_array)
+
     @staticmethod
-    def transpose_2D(matrix):
-        return list(map(list, zip(*matrix)))
+    def map_add(arrays, *functions):
+        array_new = []
+        for f in functions:
+            array_new += list(map(f, arrays))
+        return array_new
 
-    def transpose_1D(self, x):
-        x = self.convert_1d_to_2d_board(x)
-        x = self.transpose_2D(x)
-        return self.convert_2d_to_1d_board(x)
+    def __s_function(self, s, function=None, *arg):
+        p1 = function(s[:len(self.board)], *arg)
+        p2 = function(s[len(self.board):], *arg)
+        return np.concatenate([p1, p2])
 
-    def transpose_fv(self, fv):
-        p1 = self.transpose_1D(fv[:len(self.board)])
-        p2 = self.transpose_1D(fv[len(self.board):])
-        return p1 + p2
+    def aug_rotate_90(self, array):
+        return np.rot90(self.matrix(array)).flatten()
 
-    def new(self):
-        super().new()
+    def aug_rotate_180(self, array):
+        return np.rot90(self.matrix(array), 2).flatten()
 
-    def next_turn(self):
-        super().next_turn()
+    def aug_rotate_270(self, array):
+        return np.rot90(self.matrix(array), 3).flatten()
 
-    def copy(self):
-        super().copy()
+    def aug_flip_vertical(self, array):
+        return np.flip(self.matrix(array), 1).flatten()
 
-    def get_legal_moves(self):
-        super().get_legal_moves()
+    def aug_flip_horizontal(self, array):
+        return np.flip(self.matrix(array), 0).flatten()
 
-    def advance(self, a):
-        super().advance(a)
+    def aug_rotate_90_s(self, s):
+        return self.__s_function(s, self.rotate_90, 1)
 
-    def update_game_state(self):
-        super().update_game_state()
+    def aug_rotate_180_s(self, s):
+        return self.__s_function(s, self.rotate_90, 2)
 
-    def get_feature_vector(self):
-        super().get_feature_vector()
+    def aug_rotate_270_s(self, s):
+        return self.__s_function(s, self.rotate_90, 3)
 
-    def display(self):
-        super().display()
+    def aug_flip_horizontal_s(self, s):
+        return self.__s_function(s, self.aug_flip_horizontal)
+
+    def aug_flip_vertical_s(self, s):
+        return self.__s_function(s, self.aug_flip_vertical)
+
+    def get_all_augmentations(self, s_array, pi_array, v_array):
+        s_array_new, pi_array_new, v_array_new = [], [], []
+
+        # S
+        s_array_new += list(map(lambda x : x, s_array))
+        s_array_new += self.map_add(
+            s_array,
+            self.aug_rotate_90_s,
+            self.aug_rotate_180_s,
+            self.aug_rotate_270_s
+        )
+        s_array_transposed = list(map(self.transpose_s, s_array))
+        s_array_new += s_array_transposed.copy()
+        s_array_new += self.map_add(
+            s_array_transposed,
+            self.aug_rotate_90_s,
+            self.aug_rotate_180_s,
+            self.aug_rotate_270_s
+        )
+
+        # PI
+        pi_array_new += list(map(lambda x : x, pi_array))
+        pi_array_new += self.map_add(
+            pi_array,
+            self.aug_rotate_90,
+            self.aug_rotate_180,
+            self.aug_rotate_270
+        )
+        pi_array_transposed = list(map(self.transpose_array, pi_array))
+        pi_array_new += pi_array_new.copy()
+        pi_array_new += self.map_add(
+            pi_array_transposed,
+            self.aug_rotate_90,
+            self.aug_rotate_180,
+            self.aug_rotate_270
+        )
+
+        # V
+        for _ in range(8):
+            v_array_new += v_array
+
+        return s_array_new, pi_array_new, v_array_new
+
+
+class InARowGameSquareBoard(BaseGameSquareBoard):
+
+    def __init__(self):
+        super().__init__()
+        self.in_a_row_to_win = None
+
+    def check_in_a_row(self, r):
+        counter = 0
+        last = -1
+        for c in r:
+            if c == 0:
+                # This field is not taken by any player.
+                counter = 0
+                last = -1
+                continue
+            if c == last:
+                # The same piece color as last time, check if this player has won.
+                counter += 1
+                if counter == self.in_a_row_to_win:
+                    # WINNER!
+                    self.winner = self.board_value_to_player_index(c)
+                    return
+                continue
+            if c != last and c != 0:
+                # A new piece color is found, restart the counter for this color.
+                last = c
+                counter = 1
+
+    def check_horizontal(self, board):
+        for r in board:
+            self.check_in_a_row(r)
+
+    def check_diagonal(self, board, column_count, row_count):
+        diagonals = [board.diagonal()]
+        """ -> """
+        for i in range(1, row_count - self.in_a_row_to_win + 1):
+            diagonals.append(board.diagonal(offset=i))
+        """ |
+            V """
+        for i in range(1, column_count - self.in_a_row_to_win + 1):
+            diagonals.append(board.diagonal(offset=-i))
+
+        for d in diagonals:
+            self.check_in_a_row(d)
+
+    def update_in_a_row_game(self):
+        # Convert board to matrix.
+        board = np.reshape(self.board, (-1, self.columns))
+        # Horizontal "-"
+        self.check_horizontal(board)
+        # Vertical "|"
+        board = np.transpose(board)
+        self.check_horizontal(board)
+        # NB: Board is still transposed, but this does not matter for the checks below.
+        # Diagonal "\"
+        self.check_diagonal(board, column_count=self.columns, row_count=self.rows)
+        # Diagonal "/"
+        board = np.rot90(board)
+        self.check_diagonal(board, column_count=self.rows, row_count=self.columns)
 
 
 class GameResult(Enum):
