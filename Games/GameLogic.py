@@ -176,6 +176,7 @@ class BaseGameSquareBoard(BaseGame):
         return self.__s_function(s, self.aug_flip_vertical)
 
     def get_all_augmentations(self, s_array, pi_array, v_array):
+
         s_array_new, pi_array_new, v_array_new = [], [], []
 
         # S
@@ -204,7 +205,7 @@ class BaseGameSquareBoard(BaseGame):
             self.aug_rotate_270
         )
         pi_array_transposed = list(map(self.transpose_array, pi_array))
-        pi_array_new += pi_array_new.copy()
+        pi_array_new += pi_array_transposed.copy()
         pi_array_new += self.map_add(
             pi_array_transposed,
             self.aug_rotate_90,
