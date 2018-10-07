@@ -22,7 +22,7 @@ game_class = Othello()
 # Players to compare.
 players = [
     NnMinimaxPlayer(use_ab=True),
-    #NnMctsPlayer(growing_search_time=True),
+    #NnMctsPlayer(),
     RandomPlayer(),
     BruteForcePlayer(depth=1),
     BruteForcePlayer(depth=2)
@@ -45,6 +45,7 @@ match_randomness = 0.1
 
 
 def main():
+
     # This will store trained versions of players in the Trained_models folder.
     self_play_and_store_versions(game_class, players, search_time, training_timer)
 
