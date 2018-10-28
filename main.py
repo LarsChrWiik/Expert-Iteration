@@ -1,7 +1,6 @@
 
-from Games.TicTacToe import TicTacToe
 from Games.ConnectFour import ConnectFour
-from Games.ConnectSix import ConnectSix
+from Games.MnkInARow import MnkInARow
 from Games.Othello import Othello
 from Players.Players import *
 from Matchmaking.EloTournament import start_elo_tournament
@@ -17,12 +16,12 @@ np.set_printoptions(suppress=True)
 
 
 # Game.
-game_class = Othello()
+game_class = MnkInARow(rows=5, columns=5, in_a_row_to_win=4)
 
 # Players to compare.
 players = [
     NnMinimaxPlayer(use_ab=True),
-    #NnMctsPlayer(),
+    NnMctsPlayer(),
     RandomPlayer(),
     BruteForcePlayer(depth=1),
     BruteForcePlayer(depth=2)
@@ -45,11 +44,10 @@ match_randomness = 0.1
 
 
 def main():
-
     # This will store trained versions of players in the Trained_models folder.
     self_play_and_store_versions(game_class, players, search_time, training_timer)
 
-    #compare_ex_it_from_scratch(game_class, players, search_time, 100, training_timer, randomness=match_randomness)
+    #compare_ex_it_from_scratch(game_class, players, search_time, 1000, training_timer, randomness=match_randomness)
 
     # This will generate a PGN file in Elo folder.
     start_elo_tournament(game_class, players, num_versions, num_elo_matches, match_randomness)
